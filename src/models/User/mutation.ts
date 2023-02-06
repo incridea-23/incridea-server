@@ -1,6 +1,6 @@
 import { builder } from "../../builder";
 import bcrypt from "bcryptjs";
-import { sign } from "jsonwebtoken";
+import { sign, verify } from "jsonwebtoken";
 import { AUTH_SECRET } from "../../utils/auth";
 
 const UserCreateInput = builder.inputType("UserCreateInput", {
@@ -84,6 +84,9 @@ const UserLoginPayload = builder.objectType(Token, {
 builder.mutationField("login", (t) =>
   t.field({
     type: UserLoginPayload,
+    errors: {
+      types: [Error],
+    },
     args: {
       data: t.arg({
         type: UserLoginInput,
@@ -122,6 +125,45 @@ builder.mutationField("login", (t) =>
     },
   })
 );
-function signIn(arg0: { userId: number }) {
-  throw new Error("Function not implemented.");
-}
+
+builder.mutationField("refreshToken", (t) =>
+  t.field({
+    type: UserLoginPayload,
+    errors: {
+      types: [Error],
+    },
+    args: {
+      token: t.arg({
+        type: "String",
+        required: true,
+      }),
+    },
+    resolve: async (root, args, ctx) => {
+      const userId = verify(args.token, AUTH_SECRET) as string;
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          id: Number(userId),
+        },
+      });
+      if (!user) {
+        throw new Error("No user found");
+      }
+
+      const accessToken = sign(
+        { userId: user.id },
+        user.access_token as string,
+        { expiresIn: "15min" }
+      );
+      const refreshToken = sign(
+        { userId: user.id },
+        user.refresh_token as string,
+        { expiresIn: "1d" }
+      );
+
+      return {
+        accessToken,
+        refreshToken,
+      };
+    },
+  })
+);
