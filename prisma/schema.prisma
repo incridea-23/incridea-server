@@ -16,10 +16,18 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String
-  createdAt DateTime  @default(now())
-  messages  Message[]
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  role          Role     @default(USER)
+  isVerified    Boolean  @default(false)
+  password      String   @db.Text
+  refresh_token String?  @db.Text
+  access_token  String?  @db.Text
+  expires_at    Int?
+  createdAt     DateTime @default(now())
+
+  messages Message[]
 }
 
 model Message {
@@ -30,4 +38,14 @@ model Message {
   user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
+}
+
+enum Role {
+  USER
+  PARTICIPANT
+  ADMIN
+  BRANCH_REP
+  ORGANIZER
+  JUDGE
+  JURY
 }
