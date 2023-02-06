@@ -1,10 +1,10 @@
 import { Http2ServerRequest } from "http2";
 
 const jwt = require("jsonwebtoken");
-const APP_SECRET = process.env.APP_SECRET;
+export const AUTH_SECRET = process.env.AUTH_SECRET as string;
 
 function getTokenPayload(token: string) {
-  return jwt.verify(token, APP_SECRET);
+  return jwt.verify(token, AUTH_SECRET);
 }
 
 function getUserId(req: Http2ServerRequest, authToken: string) {
@@ -26,7 +26,12 @@ function getUserId(req: Http2ServerRequest, authToken: string) {
   throw new Error("Not authenticated");
 }
 
+function signIn(userId: number) {
+  return jwt.sign({ userId }, AUTH_SECRET);
+}
+
 module.exports = {
-  APP_SECRET,
+  AUTH_SECRET,
   getUserId,
+  signIn,
 };

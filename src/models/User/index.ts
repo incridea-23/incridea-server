@@ -7,5 +7,7 @@ builder.prismaObject("User", {
     id: t.exposeID("id"),
     name: t.exposeString("name"),
     message: t.relation("messages"),
+    role: t.exposeString("role"),
+    isVerified: t.exposeBoolean("isVerified"),
   }),
 });

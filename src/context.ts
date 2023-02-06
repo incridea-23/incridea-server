@@ -9,5 +9,6 @@ export const context = ({ request: req }: YogaInitialContext) => {
     ...initContextCache(),
     prisma,
     user: null,
+    req,
   };
 };
