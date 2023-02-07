@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../utils/db/prisma";
 
-function findUserByEmail(email: string) {
+export function findUserByEmail(email: string) {
   return prisma.user.findUnique({
     where: {
       email,
@@ -9,7 +9,7 @@ function findUserByEmail(email: string) {
   });
 }
 
-function createUserByEmailAndPassword(user: {
+export function createUserByEmailAndPassword(user: {
   name: string;
   email: string;
   password: string;
@@ -20,16 +20,10 @@ function createUserByEmailAndPassword(user: {
   });
 }
 
-function findUserById(id: number) {
+export function findUserById(id: number) {
   return prisma.user.findUnique({
     where: {
       id,
     },
   });
 }
-
-module.exports = {
-  findUserByEmail,
-  findUserById,
-  createUserByEmailAndPassword,
-};

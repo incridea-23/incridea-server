@@ -4,7 +4,7 @@ import PrismaPlugin from "@pothos/plugin-prisma";
 import type PrismaTypes from "@pothos/plugin-prisma/generated";
 import ErrorsPlugin from "@pothos/plugin-errors";
 
-import { prisma } from "./context";
+import { prisma } from "./utils/db/prisma";
 import { context } from "./context";
 export const builder = new SchemaBuilder<{
   Scalars: {

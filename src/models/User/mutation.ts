@@ -1,4 +1,19 @@
 import { builder } from "../../builder";
+import { v4 as uuidv4 } from "uuid";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import {
+  findUserByEmail,
+  createUserByEmailAndPassword,
+  findUserById,
+} from "../../services/user.services";
+import { generateTokens } from "../../utils/auth/jwt";
+import {
+  addRefreshTokenToWhitelist,
+  deleteRefreshToken,
+  findRefreshTokenById,
+} from "../../services/auth.service";
+import { hashToken } from "../../utils/auth/hashToken";
 
 const UserCreateInput = builder.inputType("UserCreateInput", {
   fields: (t) => ({
@@ -22,22 +37,15 @@ builder.mutationField("signUp", (t) =>
     },
     resolve: async (query, root, args, ctx, info) => {
       // if user already exists throw error
-      const user = await ctx.prisma.user.findUnique({
-        where: {
-          email: args.data.email,
-        },
-      });
-      if (user) {
+      const existingUser = await findUserByEmail(args.data.email);
+      if (existingUser) {
         throw new Error("User already exists please login");
       }
-      const hashedPassword = bcrypt.hashSync(args.data.password, 10);
-      return await ctx.prisma.user.create({
-        data: {
-          name: args.data.name,
-          email: args.data.email,
-          password: hashedPassword,
-        },
-      });
+      const user = await createUserByEmailAndPassword(args.data);
+      // const jti = uuidv4();
+      // const { accessToken, refreshToken } = generateTokens(user, jti);
+      // await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
+      return user;
     },
   })
 );
@@ -81,29 +89,24 @@ builder.mutationField("login", (t) =>
       }),
     },
     resolve: async (root, args, ctx) => {
-      const user = await ctx.prisma.user.findUnique({
-        where: {
-          email: args.data.email,
-        },
-      });
-      if (!user) {
+      const existingUser = await findUserByEmail(args.data.email);
+      if (!existingUser) {
         throw new Error("No user found");
       }
-      const valid = await bcrypt.compare(args.data.password, user.password);
-      if (!valid) {
+      const validPassword = await bcrypt.compare(
+        args.data.password,
+        existingUser.password
+      );
+      if (!validPassword) {
         throw new Error("Invalid password");
       }
-
-      const accessToken = sign(
-        { userId: user.id },
-        user.access_token as string,
-        { expiresIn: "15min" }
-      );
-      const refreshToken = sign(
-        { userId: user.id },
-        user.refresh_token as string,
-        { expiresIn: "1d" }
-      );
+      const jti = uuidv4();
+      const { accessToken, refreshToken } = generateTokens(existingUser, jti);
+      await addRefreshTokenToWhitelist({
+        jti,
+        refreshToken,
+        userId: existingUser.id,
+      });
 
       return {
         accessToken,
@@ -120,36 +123,45 @@ builder.mutationField("refreshToken", (t) =>
       types: [Error],
     },
     args: {
-      token: t.arg({
+      refreshToken: t.arg({
         type: "String",
         required: true,
       }),
     },
     resolve: async (root, args, ctx) => {
-      const userId = verify(args.token, AUTH_SECRET) as string;
-      const user = await ctx.prisma.user.findUnique({
-        where: {
-          id: Number(userId),
-        },
-      });
-      if (!user) {
-        throw new Error("No user found");
+      const payload = jwt.verify(
+        args.refreshToken,
+        process.env.JWT_REFRESH_SECRET as string
+      ) as any;
+      const savedRefreshToken = await findRefreshTokenById(
+        payload?.jti as string
+      );
+      if (!savedRefreshToken || savedRefreshToken.revoked === true) {
+        throw new Error("Unauthorized");
       }
-
-      const accessToken = sign(
-        { userId: user.id },
-        user.access_token as string,
-        { expiresIn: "15min" }
+      const hashedToken = hashToken(args.refreshToken);
+      if (hashedToken !== savedRefreshToken.hashedToken) {
+        throw new Error("Unauthorized");
+      }
+      const user = await findUserById(payload.userId);
+      if (!user) {
+        throw new Error("Unauthorized");
+      }
+      await deleteRefreshToken(savedRefreshToken.id);
+      const jti = uuidv4();
+      const { accessToken, refreshToken: newRefreshToken } = generateTokens(
+        user,
+        jti
       );
-      const refreshToken = sign(
-        { userId: user.id },
-        user.refresh_token as string,
-        { expiresIn: "1d" }
-      );
+      await addRefreshTokenToWhitelist({
+        jti,
+        refreshToken: newRefreshToken,
+        userId: user.id,
+      });
 
       return {
         accessToken,
-        refreshToken,
+        refreshToken: newRefreshToken,
       };
     },
   })

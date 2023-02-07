@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 
-function generateAccessToken(user: { id: any }) {
+export function generateAccessToken(user: { id: any }) {
   return jwt.sign(
     { userId: user.id },
     process.env.JWT_ACCESS_SECRET as string,
@@ -11,7 +10,7 @@ function generateAccessToken(user: { id: any }) {
   );
 }
 
-function generateRefreshToken(user: { id: any }, jti: any) {
+export function generateRefreshToken(user: { id: any }, jti: any) {
   return jwt.sign(
     {
       userId: user.id,
@@ -24,7 +23,7 @@ function generateRefreshToken(user: { id: any }, jti: any) {
   );
 }
 
-function generateTokens(user: { id: any }, jti: any) {
+export function generateTokens(user: { id: any }, jti: any) {
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user, jti);
 
@@ -33,9 +32,3 @@ function generateTokens(user: { id: any }, jti: any) {
     refreshToken,
   };
 }
-
-module.exports = {
-  generateAccessToken,
-  generateRefreshToken,
-  generateTokens,
-};

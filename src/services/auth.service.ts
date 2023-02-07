@@ -1,7 +1,7 @@
 import { hashToken } from "../utils/auth/hashToken";
 import { prisma } from "../utils/db/prisma";
 // used when we create a refresh token.
-function addRefreshTokenToWhitelist({
+export function addRefreshTokenToWhitelist({
   jti,
   refreshToken,
   userId,
@@ -20,7 +20,7 @@ function addRefreshTokenToWhitelist({
 }
 
 // used to check if the token sent by the client is in the database.
-function findRefreshTokenById(id: string) {
+export function findRefreshTokenById(id: string) {
   return prisma.refreshToken.findUnique({
     where: {
       id,
@@ -29,7 +29,7 @@ function findRefreshTokenById(id: string) {
 }
 
 // soft delete tokens after usage.
-function deleteRefreshToken(id: string) {
+export function deleteRefreshToken(id: string) {
   return prisma.refreshToken.update({
     where: {
       id,
@@ -40,7 +40,7 @@ function deleteRefreshToken(id: string) {
   });
 }
 
-function revokeTokens(userId: number) {
+export function revokeTokens(userId: number) {
   return prisma.refreshToken.updateMany({
     where: {
       userId,
@@ -50,10 +50,3 @@ function revokeTokens(userId: number) {
     },
   });
 }
-
-module.exports = {
-  addRefreshTokenToWhitelist,
-  findRefreshTokenById,
-  deleteRefreshToken,
-  revokeTokens,
-};
