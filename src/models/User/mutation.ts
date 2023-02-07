@@ -23,6 +23,7 @@ const UserCreateInput = builder.inputType("UserCreateInput", {
   }),
 });
 
+// register user
 builder.mutationField("signUp", (t) =>
   t.prismaField({
     type: "User",
@@ -116,6 +117,7 @@ builder.mutationField("login", (t) =>
   })
 );
 
+// refresh token
 builder.mutationField("refreshToken", (t) =>
   t.field({
     type: UserLoginPayload,
