@@ -1,7 +1,4 @@
 import { builder } from "../../builder";
-import bcrypt from "bcryptjs";
-import { sign, verify } from "jsonwebtoken";
-import { AUTH_SECRET } from "../../utils/auth";
 
 const UserCreateInput = builder.inputType("UserCreateInput", {
   fields: (t) => ({
@@ -24,14 +21,6 @@ builder.mutationField("signUp", (t) =>
       types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
-      const hashedPassword = bcrypt.hashSync(args.data.password, 10);
-      const accessToken = sign({ email: args.data.email }, AUTH_SECRET, {
-        expiresIn: "1h",
-      });
-      const refreshToke = sign({ email: args.data.email }, AUTH_SECRET, {
-        expiresIn: "7d",
-      });
-
       // if user already exists throw error
       const user = await ctx.prisma.user.findUnique({
         where: {
@@ -41,14 +30,12 @@ builder.mutationField("signUp", (t) =>
       if (user) {
         throw new Error("User already exists please login");
       }
-
+      const hashedPassword = bcrypt.hashSync(args.data.password, 10);
       return await ctx.prisma.user.create({
         data: {
           name: args.data.name,
           email: args.data.email,
           password: hashedPassword,
-          access_token: accessToken,
-          refresh_token: refreshToke,
         },
       });
     },

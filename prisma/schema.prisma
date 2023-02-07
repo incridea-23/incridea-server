@@ -16,18 +16,29 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  name          String
-  email         String   @unique
-  role          Role     @default(USER)
-  isVerified    Boolean  @default(false)
-  password      String   @db.Text
-  refresh_token String?  @db.Text
-  access_token  String?  @db.Text
-  expires_at    Int?
-  createdAt     DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  name       String
+  email      String   @unique
+  role       Role     @default(USER)
+  isVerified Boolean  @default(false)
+  password   String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  messages Message[]
+  RefreshTokens RefreshToken[]
+  messages      Message[]
+}
+
+model RefreshToken {
+  id          String   @id @unique @default(uuid())
+  hashedToken String
+  userId      Int
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Message {
