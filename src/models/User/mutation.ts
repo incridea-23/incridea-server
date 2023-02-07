@@ -15,6 +15,7 @@ import {
 } from "../../services/auth.service";
 import { hashToken } from "../../utils/auth/hashToken";
 
+// register user
 const UserCreateInput = builder.inputType("UserCreateInput", {
   fields: (t) => ({
     name: t.string({ required: true }),
@@ -23,7 +24,6 @@ const UserCreateInput = builder.inputType("UserCreateInput", {
   }),
 });
 
-// register user
 builder.mutationField("signUp", (t) =>
   t.prismaField({
     type: "User",

@@ -25,8 +25,9 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  RefreshTokens RefreshToken[]
-  messages      Message[]
+  VerificationToken VerificationToken?
+  RefreshTokens     RefreshToken[]
+  messages          Message[]
 }
 
 model RefreshToken {
@@ -37,6 +38,17 @@ model RefreshToken {
   revoked     Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  id        String   @id @unique @default(uuid())
+  token     String   @unique
+  userId    Int      @unique
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
 }
