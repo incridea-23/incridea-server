@@ -1,6 +1,7 @@
 import { YogaInitialContext } from "@graphql-yoga/node";
 import { type PrismaClient } from "@prisma/client";
 import { JwtPayload, verify } from "jsonwebtoken";
+import { secrets } from "./jwt";
 
 export async function authenticateUser(
   prisma: PrismaClient,
@@ -12,7 +13,7 @@ export async function authenticateUser(
       const token = header.split(" ")[1];
       const tokenPayload = verify(
         token,
-        process.env.JWT_ACCESS_SECRET as string
+        secrets.JWT_ACCESS_SECRET as string
       ) as JwtPayload;
 
       const userId = tokenPayload.userId;

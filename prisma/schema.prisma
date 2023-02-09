@@ -25,14 +25,14 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  VerificationToken VerificationToken?
+  VerificationToken VerificationToken[]
   RefreshTokens     RefreshToken[]
   messages          Message[]
 }
 
 model RefreshToken {
   id          String   @id @unique @default(uuid())
-  hashedToken String
+  hashedToken String   @db.Text
   userId      Int
   User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   revoked     Boolean  @default(false)
@@ -43,12 +43,11 @@ model RefreshToken {
 }
 
 model VerificationToken {
-  id        String   @id @unique @default(uuid())
-  token     String   @unique
-  userId    Int      @unique
+  id        String   @id @unique @default(cuid())
+  userId    Int
   User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@index([userId])
 }

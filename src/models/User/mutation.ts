@@ -7,13 +7,21 @@ import {
   createUserByEmailAndPassword,
   findUserById,
 } from "../../services/user.services";
-import { generateTokens } from "../../utils/auth/jwt";
 import {
+  generateTokens,
+  generateVerificationToken,
+  secrets,
+} from "../../utils/auth/jwt";
+import {
+  addVerificationTokenToWhitelist,
   addRefreshTokenToWhitelist,
   deleteRefreshToken,
   findRefreshTokenById,
+  findVerificationTokenByID,
+  deleteVerificationToken,
 } from "../../services/auth.service";
 import { hashToken } from "../../utils/auth/hashToken";
+import { sendEmail } from "../../utils/email";
 
 // register user
 const UserCreateInput = builder.inputType("UserCreateInput", {
@@ -133,7 +141,7 @@ builder.mutationField("refreshToken", (t) =>
     resolve: async (root, args, ctx) => {
       const payload = jwt.verify(
         args.refreshToken,
-        process.env.JWT_REFRESH_SECRET as string
+        secrets.JWT_REFRESH_SECRET as string
       ) as any;
       const savedRefreshToken = await findRefreshTokenById(
         payload?.jti as string
@@ -165,6 +173,72 @@ builder.mutationField("refreshToken", (t) =>
         accessToken,
         refreshToken: newRefreshToken,
       };
+    },
+  })
+);
+
+builder.mutationField("sendEmailVerification", (t) =>
+  t.field({
+    type: "String",
+    errors: {
+      types: [Error],
+    },
+    args: {
+      email: t.arg({
+        type: "String",
+        required: true,
+      }),
+    },
+    resolve: async (root, args, ctx) => {
+      const existingUser = await findUserByEmail(args.email);
+      if (!existingUser) {
+        throw new Error("No user found");
+      }
+      const { id: token } = await addVerificationTokenToWhitelist({
+        userId: existingUser.id,
+      });
+      const verificationToken = generateVerificationToken(existingUser, token);
+      const url = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
+      await sendEmail(existingUser.email, `Verify Email ${url}`);
+      return "Email sent";
+    },
+  })
+);
+
+builder.mutationField("verifyEmail", (t) =>
+  t.field({
+    type: "String",
+    errors: {
+      types: [Error],
+    },
+    args: {
+      token: t.arg({
+        type: "String",
+        required: true,
+      }),
+    },
+    resolve: async (root, args, ctx) => {
+      const payload = jwt.verify(
+        args.token,
+        secrets.JWT_VERIFICATION_SECRET as string
+      ) as any;
+      const savedToken = await findVerificationTokenByID(
+        payload?.jti as string
+      );
+      if (!savedToken || savedToken.revoked === true) {
+        throw new Error("Invalid token");
+      }
+      const user = await findUserById(payload.userId);
+      if (!user) {
+        throw new Error("Invalid token");
+      }
+      await ctx.prisma.user.update({
+        where: { id: user.id },
+        data: { isVerified: true },
+      });
+      await deleteVerificationToken(savedToken.id);
+
+      return "Email verified";
     },
   })
 );

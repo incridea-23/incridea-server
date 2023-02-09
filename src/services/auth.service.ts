@@ -50,3 +50,34 @@ export function revokeTokens(userId: number) {
     },
   });
 }
+
+export function addVerificationTokenToWhitelist({
+  userId,
+}: {
+  userId: number;
+}) {
+  return prisma.verificationToken.create({
+    data: {
+      userId,
+    },
+  });
+}
+
+export function findVerificationTokenByID(id: string) {
+  return prisma.verificationToken.findUnique({
+    where: {
+      id,
+    },
+  });
+}
+
+export function deleteVerificationToken(id: string) {
+  return prisma.verificationToken.update({
+    where: {
+      id,
+    },
+    data: {
+      revoked: true,
+    },
+  });
+}
