@@ -109,6 +109,10 @@ builder.mutationField("login", (t) =>
       if (!validPassword) {
         throw new Error("Invalid password");
       }
+      if (!existingUser.isVerified) {
+        throw new Error("Please verify your email");
+      }
+
       const jti = uuidv4();
       const { accessToken, refreshToken } = generateTokens(existingUser, jti);
       await addRefreshTokenToWhitelist({
@@ -206,18 +210,15 @@ builder.mutationField("sendEmailVerification", (t) =>
 );
 
 builder.mutationField("verifyEmail", (t) =>
-  t.field({
-    type: "String",
+  t.prismaField({
+    type: "User",
     errors: {
       types: [Error],
     },
     args: {
-      token: t.arg({
-        type: "String",
-        required: true,
-      }),
+      token: t.arg.string({ required: true }),
     },
-    resolve: async (root, args, ctx) => {
+    resolve: async (query, root, args, ctx, info) => {
       const payload = jwt.verify(
         args.token,
         secrets.JWT_VERIFICATION_SECRET as string
@@ -232,13 +233,13 @@ builder.mutationField("verifyEmail", (t) =>
       if (!user) {
         throw new Error("Invalid token");
       }
-      await ctx.prisma.user.update({
+      const verified_user = await ctx.prisma.user.update({
         where: { id: user.id },
         data: { isVerified: true },
       });
       await deleteVerificationToken(savedToken.id);
 
-      return "Email verified";
+      return verified_user;
     },
   })
 );
