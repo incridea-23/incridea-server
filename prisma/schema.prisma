@@ -43,11 +43,12 @@ model RefreshToken {
 }
 
 model VerificationToken {
-  id        String   @id @unique @default(cuid())
+  id        String           @id @unique @default(cuid())
   userId    Int
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  revoked   Boolean  @default(false)
-  createdAt DateTime @default(now())
+  User      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked   Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  type      VerificationType @default(EMAIL_VERIFICATION)
 
   @@index([userId])
 }
@@ -70,4 +71,9 @@ enum Role {
   ORGANIZER
   JUDGE
   JURY
+}
+
+enum VerificationType {
+  RESET_PASSWORD
+  EMAIL_VERIFICATION
 }

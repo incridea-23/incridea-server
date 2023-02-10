@@ -8,6 +8,7 @@ import {
   findUserById,
 } from "../../services/user.services";
 import {
+  generatePasswordResetToken,
   generateTokens,
   generateVerificationToken,
   secrets,
@@ -19,6 +20,9 @@ import {
   findRefreshTokenById,
   findVerificationTokenByID,
   deleteVerificationToken,
+  addPasswordResetTokenToWhitelist,
+  deletePasswordResetToken,
+  findPasswordResetTokenByID,
 } from "../../services/auth.service";
 import { hashToken } from "../../utils/auth/hashToken";
 import { sendEmail } from "../../utils/email";
@@ -240,6 +244,76 @@ builder.mutationField("verifyEmail", (t) =>
       await deleteVerificationToken(savedToken.id);
 
       return verified_user;
+    },
+  })
+);
+
+// send password reset email
+builder.mutationField("sendPasswordResetEmail", (t) =>
+  t.field({
+    type: "String",
+    errors: {
+      types: [Error],
+    },
+    args: {
+      email: t.arg({
+        type: "String",
+        required: true,
+      }),
+    },
+    resolve: async (root, args, ctx) => {
+      const existingUser = await findUserByEmail(args.email);
+      if (!existingUser) {
+        throw new Error("No user found");
+      }
+      const { id: token } = await addPasswordResetTokenToWhitelist({
+        userId: existingUser.id,
+      });
+      const passwordResetToken = generatePasswordResetToken(
+        existingUser,
+        token
+      );
+      const url = `${process.env.FRONTEND_URL}/reset-password/${passwordResetToken}`;
+      await sendEmail(existingUser.email, `Reset Password ${url}`);
+      return "Email sent";
+    },
+  })
+);
+
+// reset password
+builder.mutationField("resetPassword", (t) =>
+  t.prismaField({
+    type: "User",
+    errors: {
+      types: [Error],
+    },
+    args: {
+      token: t.arg.string({ required: true }),
+      password: t.arg.string({ required: true }),
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const payload = jwt.verify(
+        args.token,
+        secrets.JWT_PASSWORD_RESET_SECRET as string
+      ) as any;
+      const savedToken = await findPasswordResetTokenByID(
+        payload?.jti as string
+      );
+      if (!savedToken || savedToken.revoked === true) {
+        throw new Error("Invalid token");
+      }
+      const user = await findUserById(payload.userId);
+      if (!user) {
+        throw new Error("Invalid token");
+      }
+      const hashedPassword = await bcrypt.hash(args.password, 12);
+      const updated_user = await ctx.prisma.user.update({
+        where: { id: user.id },
+        data: { password: hashedPassword },
+      });
+      await deletePasswordResetToken(savedToken.id);
+
+      return updated_user;
     },
   })
 );

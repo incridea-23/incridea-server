@@ -81,3 +81,35 @@ export function deleteVerificationToken(id: string) {
     },
   });
 }
+
+export function addPasswordResetTokenToWhitelist({
+  userId,
+}: {
+  userId: number;
+}) {
+  return prisma.verificationToken.create({
+    data: {
+      userId,
+      type: "RESET_PASSWORD",
+    },
+  });
+}
+
+export function findPasswordResetTokenByID(id: string) {
+  return prisma.verificationToken.findUnique({
+    where: {
+      id,
+    },
+  });
+}
+
+export function deletePasswordResetToken(id: string) {
+  return prisma.verificationToken.update({
+    where: {
+      id,
+    },
+    data: {
+      revoked: true,
+    },
+  });
+}

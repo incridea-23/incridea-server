@@ -5,6 +5,7 @@ export const secrets = {
   JWT_ACCESS_SECRET: AUTH_SECRET + "access",
   JWT_REFRESH_SECRET: AUTH_SECRET + "refresh",
   JWT_VERIFICATION_SECRET: AUTH_SECRET + "verification",
+  JWT_PASSWORD_RESET_SECRET: AUTH_SECRET + "password-reset",
 };
 
 export function generateAccessToken(user: { id: any }) {
@@ -37,6 +38,19 @@ export function generateTokens(user: { id: any }, jti: any) {
 }
 
 export function generateVerificationToken(user: { id: any }, jti: any) {
+  return jwt.sign(
+    {
+      userId: user.id,
+      jti,
+    },
+    secrets.JWT_VERIFICATION_SECRET as string,
+    {
+      expiresIn: "1d",
+    }
+  ) as string;
+}
+
+export function generatePasswordResetToken(user: { id: any }, jti: any) {
   return jwt.sign(
     {
       userId: user.id,
