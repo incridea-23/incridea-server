@@ -56,7 +56,7 @@ export function generatePasswordResetToken(user: { id: any }, jti: any) {
       userId: user.id,
       jti,
     },
-    secrets.JWT_VERIFICATION_SECRET as string,
+    secrets.JWT_PASSWORD_RESET_SECRET as string,
     {
       expiresIn: "1d",
     }
