@@ -216,6 +216,7 @@ builder.mutationField("sendEmailVerification", (t) =>
 builder.mutationField("verifyEmail", (t) =>
   t.prismaField({
     type: "User",
+
     errors: {
       types: [Error],
     },

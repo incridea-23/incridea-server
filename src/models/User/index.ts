@@ -10,5 +10,6 @@ builder.prismaObject("User", {
     message: t.relation("messages"),
     role: t.exposeString("role"),
     isVerified: t.exposeBoolean("isVerified"),
+    createdAt: t.expose("createdAt", { type: "Date" }),
   }),
 });

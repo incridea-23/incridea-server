@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only --exit-child --watch src src/index.ts",
     "start": "node dist/index.js",
-    "build": "npm i && npx prisma generate && tsc "
+    "build": "npm i && npx prisma generate && tsc ",
+    "type": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
