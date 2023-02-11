@@ -52,7 +52,7 @@ model User {
 
   VerificationToken VerificationToken[]
   RefreshTokens     RefreshToken[]
-  PaymentInfo       PaymentInfo[]
+  PaymentOrder      PaymentOrder[]
 
   @@index([collegeId])
 }
@@ -63,14 +63,14 @@ model College {
   details   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  User      User[]
+  Users     User[]
 }
 
-model PaymentInfo {
+model PaymentOrder {
   id          String      @id @default(cuid())
   orderId     String
-  status      String
-  amount      Decimal     @default(250)
+  status      Status      @default(PENDING)
+  amount      Int         @default(250)
   paymentData Json?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -94,6 +94,12 @@ enum Role {
   ORGANIZER
   JUDGE
   JURY
+}
+
+enum Status {
+  PENDING
+  SUCCESS
+  FAILED
 }
 
 enum VerificationType {
