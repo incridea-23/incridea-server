@@ -1,4 +1,4 @@
 import "./Event";
 import "./User";
-import "./Message";
+import "./Event";
 import "./PaymentOrder";

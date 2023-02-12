@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../utils/db/prisma";
 
-export async function handler({ req, res }: { req: Request; res: Response }) {
+export async function handler(req: Request, res: Response) {
   if (req.method !== "POST") {
     return res.status(405).send({ message: "Only POST requests allowed" });
   }

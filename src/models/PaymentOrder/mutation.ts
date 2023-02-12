@@ -2,10 +2,14 @@ import { builder } from "../../builder";
 import Razorpay from "razorpay";
 import { v4 as uuidv4 } from "uuid";
 
-enum OrderType {
+enum OrderTypeEnum {
   FEST_REGISTRATION = "FEST_REGISTRATION",
   EVENT_REGISTRATION = "EVENT_REGISTRATION",
 }
+
+const OrderType = builder.enumType(OrderTypeEnum, {
+  name: "OrderType",
+});
 
 builder.mutationField("createPaymentOrder", (t) =>
   t.prismaField({
@@ -20,6 +24,9 @@ builder.mutationField("createPaymentOrder", (t) =>
         required: false,
       }),
     },
+    errors: {
+      types: [Error],
+    },
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;
       if (!user) {
@@ -29,7 +36,7 @@ builder.mutationField("createPaymentOrder", (t) =>
         key_id: process.env.RAZORPAY_KEY,
         key_secret: process.env.RAZORPAY_SECRET,
       });
-      if (args.type === OrderType.EVENT_REGISTRATION) {
+      if (args.type === OrderTypeEnum.EVENT_REGISTRATION) {
         // EVENT_REGISTRATION
         if (!args.eventId) {
           throw new Error("Event Id not provided");
@@ -78,6 +85,7 @@ builder.mutationField("createPaymentOrder", (t) =>
       };
       const response = await razorpay.orders.create(options);
       return ctx.prisma.paymentOrder.create({
+        ...query,
         data: {
           amount: response.amount,
           status: "PENDING",

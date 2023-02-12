@@ -5,7 +5,6 @@ import { schema } from "./schema";
 import { handler as razorpayHandler } from "./webhook/capture";
 const port = Number(process.env.API_PORT) || 4000;
 const yoga = createYoga({
-  graphqlEndpoint: "/graphql",
   context,
   schema,
 });
