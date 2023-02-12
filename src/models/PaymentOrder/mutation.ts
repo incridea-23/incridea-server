@@ -81,7 +81,6 @@ builder.mutationField("createPaymentOrder", (t) =>
         amount: (amount * 100).toString(),
         currency,
         payment_capture,
-        recept: uuidv4(),
       };
       const response = await razorpay.orders.create(options);
       return ctx.prisma.paymentOrder.create({

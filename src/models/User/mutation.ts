@@ -136,6 +136,7 @@ builder.mutationField("login", (t) =>
 // refresh token
 builder.mutationField("refreshToken", (t) =>
   t.field({
+    description: "Refreshes the access token",
     type: UserLoginPayload,
     errors: {
       types: [Error],
@@ -309,6 +310,7 @@ builder.mutationField("resetPassword", (t) =>
       }
       const hashedPassword = await bcrypt.hash(args.password, 12);
       const updated_user = await ctx.prisma.user.update({
+        ...query,
         where: { id: user.id },
         data: { password: hashedPassword },
       });
