@@ -66,9 +66,18 @@ model College {
   Users     User[]
 }
 
+model Event {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  fees        Int      @default(0)
+}
+
 model PaymentOrder {
   id          String      @id @default(cuid())
-  orderId     String
+  orderId     String      @unique
   status      Status      @default(PENDING)
   amount      Int         @default(250)
   paymentData Json?
