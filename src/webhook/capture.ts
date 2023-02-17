@@ -6,30 +6,42 @@ export async function handler(req: Request, res: Response) {
     return res.status(405).send({ message: "Only POST requests allowed" });
   }
   try {
-    if (req.body.payload.payment.entity.status !== "captured") {
-      return res.status(400).send({ message: "Payment not captured" });
-    }
     const order_id = req.body?.payload?.payment?.entity?.order_id as string;
-    const paymentOrder = await prisma.paymentOrder.update({
-      where: {
-        orderId: order_id,
-      },
-      data: {
-        status: "SUCCESS",
-        paymentData: JSON.stringify(req.body.payload.payment.entity),
-      },
-    });
-
-    if (paymentOrder.type === "FEST_REGISTRATION") {
-      await prisma.user.update({
+    const status = req.body?.payload?.payment?.entity?.status as string;
+    if (!order_id || !status) {
+      return res.status(400).send({ message: "Invalid request" });
+    }
+    console.log(req.body.payload.payment.entity);
+    if (status === "captured") {
+      const paymentOrder = await prisma.paymentOrder.update({
         where: {
-          id: paymentOrder.userId,
+          orderId: order_id,
         },
         data: {
-          role: "PARTICIPANT",
+          status: "SUCCESS",
         },
       });
-      return res.status(200).json({ status: "OK" });
+      if (paymentOrder.type === "FEST_REGISTRATION") {
+        await prisma.user.update({
+          where: {
+            id: paymentOrder.userId,
+          },
+          data: {
+            role: "PARTICIPANT",
+          },
+        });
+        return res.status(200).json({ status: "OK" });
+      }
+    } else {
+      await prisma.paymentOrder.update({
+        where: {
+          orderId: order_id,
+        },
+        data: {
+          status: "FAILED",
+          paymentData: req.body.payload.payment.entity.paymentData,
+        },
+      });
     }
   } catch (err) {
     console.log(err);
