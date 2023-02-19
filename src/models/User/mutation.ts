@@ -208,7 +208,11 @@ builder.mutationField("sendEmailVerification", (t) =>
       });
       const verificationToken = generateVerificationToken(existingUser, token);
       const url = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
-      await sendEmail(existingUser.email, `Verify Email ${url}`);
+      await sendEmail(
+        existingUser.email,
+        `Verify Email <a href="${url}">Click Here to verifiy Email</a>`,
+        "Incridea Verify Email"
+      );
       return "Email sent";
     },
   })
@@ -276,7 +280,11 @@ builder.mutationField("sendPasswordResetEmail", (t) =>
         token
       );
       const url = `${process.env.FRONTEND_URL}/reset-password/${passwordResetToken}`;
-      await sendEmail(existingUser.email, `Reset Password ${url}`);
+      await sendEmail(
+        existingUser.email,
+        `Reset Password <a href="${url}" > Click here to reset password </a>`,
+        "Incridea Rest password"
+      );
       return "Email sent";
     },
   })
