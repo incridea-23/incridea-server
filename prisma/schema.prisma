@@ -53,6 +53,8 @@ model User {
   VerificationToken VerificationToken[]
   RefreshTokens     RefreshToken[]
   PaymentOrder      PaymentOrder[]
+  BranchRep         BranchRep?
+  Organizer         Organizer?
 
   @@index([collegeId])
 }
@@ -66,13 +68,29 @@ model College {
   Users     User[]
 }
 
+model Branch {
+  id         Int         @id @default(autoincrement())
+  name       String
+  details    String?
+  BranchReps BranchRep[]
+  Event      Event[]
+}
+
 model Event {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  fees        Int      @default(0)
+  description String    @db.Text
+  image       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  fees        Int       @default(0)
+  eventDate   DateTime?
+
+  Organizer Organizer[]
+  branchId  Int
+  Branch    Branch      @relation(fields: [branchId], references: [id])
+
+  @@index([branchId])
 }
 
 model PaymentOrder {
@@ -90,6 +108,27 @@ model PaymentOrder {
   @@index([userId])
 }
 
+// n-n relations
+
+model BranchRep {
+  userId   Int    @unique
+  Users    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branchId Int
+  Branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@index([branchId, userId])
+}
+
+model Organizer {
+  userId  Int   @unique
+  Users   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId Int
+  Event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, userId])
+}
+
+// Enums
 enum PaymentType {
   FEST_REGISTRATION
   EVENT_REGISTRATION
