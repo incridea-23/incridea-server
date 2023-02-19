@@ -77,18 +77,18 @@ model Branch {
 }
 
 model Event {
-  id          Int       @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
-  description String    @db.Text
+  description String?     @db.Text
   image       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  fees        Int       @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  fees        Int         @default(0)
   eventDate   DateTime?
-
-  Organizer Organizer[]
-  branchId  Int
-  Branch    Branch      @relation(fields: [branchId], references: [id])
+  Organizer   Organizer[]
+  venue       String?
+  branchId    Int
+  Branch      Branch      @relation(fields: [branchId], references: [id])
 
   @@index([branchId])
 }

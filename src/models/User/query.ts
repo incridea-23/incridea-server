@@ -1,10 +1,30 @@
 import { builder } from "../../builder";
 
 builder.queryField("users", (t) =>
-  t.prismaField({
-    type: ["User"],
+  t.prismaConnection({
+    type: "User",
+    cursor: "id",
+    args: {
+      contains: t.arg({
+        type: "String",
+        required: false,
+      }),
+    },
     resolve: (query, root, args, ctx, info) => {
+      const filter = args.contains || "";
       return ctx.prisma.user.findMany({
+        where: {
+          OR: [
+            {
+              name: {
+                contains: filter,
+              },
+              email: {
+                contains: filter,
+              },
+            },
+          ],
+        },
         ...query,
       });
     },

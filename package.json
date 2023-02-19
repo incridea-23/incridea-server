@@ -36,6 +36,7 @@
     "@pothos/core": "^3.24.1",
     "@pothos/plugin-errors": "^3.10.1",
     "@pothos/plugin-prisma": "^3.40.2",
+    "@pothos/plugin-relay": "^3.35.0",
     "@types/nodemailer": "^6.4.7",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.1",

@@ -5,3 +5,4 @@ import "./PaymentOrder";
 import "./College";
 import "./Branch";
 import "./Organizer";
+import "./BranchRep";
