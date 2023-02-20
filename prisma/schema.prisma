@@ -48,13 +48,13 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   collegeId  Int?
-  College    College? @relation(fields: [collegeId], references: [id])
+  College    College? @relation(fields: [collegeId], references: [id], onDelete: SetNull)
 
   VerificationToken VerificationToken[]
   RefreshTokens     RefreshToken[]
   PaymentOrder      PaymentOrder[]
   BranchRep         BranchRep?
-  Organizer         Organizer?
+  Organizer         Organizer[]
 
   @@index([collegeId])
 }
@@ -88,7 +88,7 @@ model Event {
   Organizer   Organizer[]
   venue       String?
   branchId    Int
-  Branch      Branch      @relation(fields: [branchId], references: [id])
+  Branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
 
   @@index([branchId])
 }
@@ -102,7 +102,7 @@ model PaymentOrder {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   type        PaymentType @default(FEST_REGISTRATION)
-  User        User        @relation(fields: [userId], references: [id])
+  User        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int
 
   @@index([userId])
@@ -120,11 +120,12 @@ model BranchRep {
 }
 
 model Organizer {
-  userId  Int   @unique
+  userId  Int
   User    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   eventId Int
   Event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, eventId])
   @@index([eventId, userId])
 }
 

@@ -207,7 +207,7 @@ builder.mutationField("sendEmailVerification", (t) =>
         userId: existingUser.id,
       });
       const verificationToken = generateVerificationToken(existingUser, token);
-      const url = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
+      const url = `${process.env.FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
       await sendEmail(
         existingUser.email,
         `Verify Email <a href="${url}">Click Here to verifiy Email</a>`,
@@ -270,7 +270,7 @@ builder.mutationField("sendPasswordResetEmail", (t) =>
     resolve: async (root, args, ctx) => {
       const existingUser = await findUserByEmail(args.email);
       if (!existingUser) {
-        throw new Error("No user found");
+        throw new Error("You do not have an account here. Please sign Up");
       }
       const { id: token } = await addPasswordResetTokenToWhitelist({
         userId: existingUser.id,
@@ -279,7 +279,7 @@ builder.mutationField("sendPasswordResetEmail", (t) =>
         existingUser,
         token
       );
-      const url = `${process.env.FRONTEND_URL}/reset-password/${passwordResetToken}`;
+      const url = `${process.env.FRONTEND_URL}/auth/reset-password?token=${passwordResetToken}`;
       await sendEmail(
         existingUser.email,
         `Reset Password <a href="${url}" > Click here to reset password </a>`,

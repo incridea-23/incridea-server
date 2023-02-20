@@ -4,6 +4,6 @@ import "./query";
 builder.prismaObject("Organizer", {
   fields: (t) => ({
     eventId: t.exposeID("eventId"),
-    userId: t.exposeID("userId"),
+    user: t.relation("User"),
   }),
 });
