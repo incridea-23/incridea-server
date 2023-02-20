@@ -112,7 +112,7 @@ model PaymentOrder {
 
 model BranchRep {
   userId   Int    @unique
-  Users    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   branchId Int
   Branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
@@ -121,7 +121,7 @@ model BranchRep {
 
 model Organizer {
   userId  Int   @unique
-  Users   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   eventId Int
   Event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 

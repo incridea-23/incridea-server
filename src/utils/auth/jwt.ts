@@ -10,7 +10,7 @@ export const secrets = {
 
 export function generateAccessToken(user: { id: any }) {
   return jwt.sign({ userId: user.id }, secrets.JWT_ACCESS_SECRET as string, {
-    expiresIn: "15m",
+    expiresIn: "2h",
   });
 }
 

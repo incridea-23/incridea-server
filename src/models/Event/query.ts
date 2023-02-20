@@ -15,19 +15,21 @@ builder.queryField("events", (t) =>
     resolve: (query, root, args, ctx, info) => {
       const filter = args.contains || "";
       return ctx.prisma.event.findMany({
-        ...query,
         where: {
           OR: [
             {
               name: {
                 contains: filter,
               },
+            },
+            {
               description: {
                 contains: filter,
               },
             },
           ],
         },
+        ...query,
       });
     },
   })

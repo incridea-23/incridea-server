@@ -16,10 +16,12 @@ builder.queryField("users", (t) =>
         where: {
           OR: [
             {
-              name: {
+              email: {
                 contains: filter,
               },
-              email: {
+            },
+            {
+              name: {
                 contains: filter,
               },
             },
