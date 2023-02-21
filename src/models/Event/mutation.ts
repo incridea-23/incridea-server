@@ -38,6 +38,7 @@ builder.mutationField("createEvent", (t) =>
     },
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;
+      console.log(user);
       if (!user) throw new Error("Not authenticated");
       if (user.role !== "BRANCH_REP") throw new Error("No Permission");
       const branch = await ctx.prisma.branchRep.findUnique({

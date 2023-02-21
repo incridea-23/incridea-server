@@ -22,7 +22,7 @@ builder.mutationField("addBranchRep", (t) =>
       if (user.role !== "ADMIN") throw new Error("No Permission");
       const branch = await ctx.prisma.branch.findUnique({
         where: {
-          id: args.branchId as number,
+          id: Number(args.branchId),
         },
       });
       if (!branch) throw new Error(`No Branch with id ${args.branchId}`);
@@ -30,12 +30,12 @@ builder.mutationField("addBranchRep", (t) =>
         data: {
           Branch: {
             connect: {
-              id: args.branchId as number,
+              id: Number(args.branchId),
             },
           },
           User: {
             connect: {
-              id: args.userId as number,
+              id: Number(args.userId),
             },
           },
         },
