@@ -18,7 +18,6 @@ export async function authenticateUser(
 
       const userId = tokenPayload.userId;
 
-      console.log("hii");
       return await prisma.user.findUnique({ where: { id: userId } });
     } catch (error) {
       return null;
