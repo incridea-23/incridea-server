@@ -88,6 +88,7 @@ model Event {
   Organizer   Organizer[]
   venue       String?
   branchId    Int
+  published   Boolean     @default(false)
   Branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
 
   @@index([branchId])

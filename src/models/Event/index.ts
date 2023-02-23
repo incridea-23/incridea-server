@@ -20,6 +20,7 @@ builder.prismaObject("Event", {
       nullable: true,
     }),
     branch: t.relation("Branch"),
+    published: t.exposeBoolean("published"),
     organizer: t.relation("Organizer"),
     eventDate: t.expose("eventDate", {
       type: "Date",
