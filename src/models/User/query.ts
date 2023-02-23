@@ -49,11 +49,11 @@ builder.queryField("me", (t) =>
   })
 );
 
-builder.queryField("getUserById", (t) =>
+builder.queryField("userById", (t) =>
   t.prismaField({
     type: "User",
     args: {
-      id: t.arg({ type: "Int", required: true }),
+      id: t.arg({ type: "ID", required: true }),
     },
     errors: {
       types: [Error],
@@ -61,9 +61,9 @@ builder.queryField("getUserById", (t) =>
     resolve: async (query, root, args, ctx, info) => {
       return ctx.prisma.user.findUniqueOrThrow({
         where: {
-          id: args.id,
+          id: Number(args.id),
         },
       });
-  }
-})
+    },
+  })
 );

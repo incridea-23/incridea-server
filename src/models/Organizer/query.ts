@@ -1,26 +1,19 @@
 import { builder } from "../../builder";
 
-builder.queryField("getOrganizers", (t) =>
+builder.queryField("eventByOrganizer", (t) =>
   t.prismaField({
-    type: "Organizer",
+    type: ["Event"],
     args: {
-        eventId: t.arg({
-            type: "ID",
-            required: true,
-          }),
-          userId: t.arg({
-            type: "ID",
-            required: true,
-          }),
+      organizerId: t.arg({
+        type: "ID",
+        required: true,
+      }),
     },
     resolve: (query, root, args, ctx, info) => {
-      return ctx.prisma.organizer.findUniqueOrThrow({
+      return ctx.prisma.event.findMany({
         where: {
-            userId_eventId: {
-              userId: Number(args.userId),
-              eventId: Number(args.eventId),
-            },
-          },
+          id: Number(args.organizerId),
+        },
       });
     },
   })
