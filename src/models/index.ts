@@ -6,3 +6,5 @@ import "./College";
 import "./Branch";
 import "./Organizer";
 import "./BranchRep";
+import "./Round";
+import "./Team";

@@ -1,6 +1,13 @@
-import { type } from "os";
 import { builder } from "../../builder";
-
+enum EventTypeEnum {
+  INDIVIDUAL = "INDIVIDUAL",
+  TEAM = "TEAM",
+  INDIVIDUAL_MULTIPLE_ENTRY = "INDIVIDUAL_MULTIPLE_ENTRY",
+  TEAM_MULTIPLE_ENTRY = "TEAM_MULTIPLE_ENTRY",
+}
+const EventType = builder.enumType(EventTypeEnum, {
+  name: "EventType",
+});
 const EventCreateInput = builder.inputType("EventCreateInput", {
   fields: (t) => ({
     name: t.string({ required: true }),
@@ -8,6 +15,10 @@ const EventCreateInput = builder.inputType("EventCreateInput", {
     eventDate: t.field({
       type: "Date",
       required: false,
+    }),
+    eventType: t.field({
+      type: EventType,
+      required: true,
     }),
     venue: t.string({ required: false }),
   }),
@@ -19,6 +30,10 @@ const EventUpdateInput = builder.inputType("EventUpdateInput", {
     eventDate: t.field({
       type: "Date",
       required: false,
+    }),
+    eventType: t.field({
+      type: EventType,
+      required: true,
     }),
     venue: t.string({ required: false }),
   }),
@@ -55,6 +70,7 @@ builder.mutationField("createEvent", (t) =>
             },
           },
         },
+        ...query,
       });
     },
   })

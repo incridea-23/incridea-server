@@ -52,10 +52,10 @@ model User {
 
   VerificationToken VerificationToken[]
   RefreshTokens     RefreshToken[]
-  PaymentOrder      PaymentOrder[]
+  PaymentOrders     PaymentOrder[]
   BranchRep         BranchRep?
-  Organizer         Organizer[]
-  Teams             Team[]
+  Organizers        Organizer[]
+  TeamMembers       TeamMember[]
 
   @@index([collegeId])
 }
@@ -86,9 +86,13 @@ model Event {
   updatedAt   DateTime    @updatedAt
   fees        Int         @default(0)
   eventDate   DateTime?
-  Organizer   Organizer[]
+  Organizers  Organizer[]
+  eventType   EventType   @default(INDIVIDUAL)
   venue       String?
   branchId    Int
+  minTeamSize Int         @default(1)
+  maxTeamSize Int         @default(1)
+  maxSize     Int?
   published   Boolean     @default(false)
   Branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
   Team        Team[]
@@ -99,27 +103,30 @@ model Event {
 
 model Team {
   id   Int    @id @default(autoincrement())
-  name String
+  name String @unique
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  eventId     Int
-  Event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  roundNo     Int
-  Round       Round    @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
-  TeamMembers User[]
-  confirmed   Boolean  @default(false)
-  attended    Boolean  @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  eventId      Int
+  Event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  roundNo      Int          @default(1)
+  confirmed    Boolean      @default(false)
+  attended     Boolean      @default(false)
+  TeamMembers  TeamMember[]
+  roundEventId Int?
+  roundRoundNo Int?
+  Round        Round?       @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
 
   @@index([eventId, roundNo])
+  @@index([roundEventId, roundRoundNo])
 }
 
 model Round {
-  eventId     Int
-  roundNo     Int     @default(1)
-  Event       Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  isCompleted Boolean @default(false)
-  Team        Team[]
+  eventId   Int
+  roundNo   Int     @default(1)
+  Event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  completed Boolean @default(false)
+  Teams     Team[]
 
   @@unique([eventId, roundNo])
 }
@@ -160,6 +167,16 @@ model Organizer {
   @@index([eventId, userId])
 }
 
+model TeamMember {
+  userId Int
+  User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamId Int
+  Team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+  @@index([teamId, userId])
+}
+
 // Enums
 enum PaymentType {
   FEST_REGISTRATION
@@ -185,4 +202,11 @@ enum Status {
 enum VerificationType {
   RESET_PASSWORD
   EMAIL_VERIFICATION
+}
+
+enum EventType {
+  INDIVIDUAL
+  TEAM
+  INDIVIDUAL_MULTIPLE_ENTRY
+  TEAM_MULTIPLE_ENTRY
 }

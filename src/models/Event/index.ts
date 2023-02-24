@@ -21,10 +21,13 @@ builder.prismaObject("Event", {
     }),
     branch: t.relation("Branch"),
     published: t.exposeBoolean("published"),
-    organizer: t.relation("Organizer"),
+    organizers: t.relation("Organizers"),
     eventDate: t.expose("eventDate", {
       type: "Date",
       nullable: true,
     }),
+    eventType: t.exposeString("eventType"),
+    teams: t.relation("Team"),
+    rounds: t.relation("Round"),
   }),
 });
