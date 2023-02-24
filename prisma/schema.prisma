@@ -95,8 +95,8 @@ model Event {
   maxSize     Int?
   published   Boolean     @default(false)
   Branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
-  Team        Team[]
-  Round       Round[]
+  Teams       Team[]
+  Rounds      Round[]
 
   @@index([branchId])
 }
