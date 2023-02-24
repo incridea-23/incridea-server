@@ -115,6 +115,7 @@ model Team {
   TeamMembers  TeamMember[]
   roundEventId Int?
   roundRoundNo Int?
+  leaderId     Int?
   Round        Round?       @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
 
   @@index([eventId, roundNo])
