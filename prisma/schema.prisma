@@ -55,6 +55,7 @@ model User {
   PaymentOrder      PaymentOrder[]
   BranchRep         BranchRep?
   Organizer         Organizer[]
+  Teams             Team[]
 
   @@index([collegeId])
 }
@@ -90,8 +91,37 @@ model Event {
   branchId    Int
   published   Boolean     @default(false)
   Branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  Team        Team[]
+  Round       Round[]
 
   @@index([branchId])
+}
+
+model Team {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  eventId     Int
+  Event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  roundNo     Int
+  Round       Round    @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
+  TeamMembers User[]
+  confirmed   Boolean  @default(false)
+  attended    Boolean  @default(false)
+
+  @@index([eventId, roundNo])
+}
+
+model Round {
+  eventId     Int
+  roundNo     Int     @default(1)
+  Event       Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  isCompleted Boolean @default(false)
+  Team        Team[]
+
+  @@unique([eventId, roundNo])
 }
 
 model PaymentOrder {
