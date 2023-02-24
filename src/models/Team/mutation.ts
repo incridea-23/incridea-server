@@ -413,3 +413,221 @@ builder.mutationField("registerSoloEvent", (t) =>
     },
   })
 );
+
+// organizer
+// organizers can createTeam and add members to team and confirm team and delete team and delete team members
+
+// mutations for organizer
+// createTeam
+// addTeamMember
+// deleteTeam
+// deleteTeamMember
+
+builder.mutationField("organizerCreateTeam", (t) =>
+  t.prismaField({
+    type: "Team",
+    args: {
+      eventId: t.arg.id({ required: true }),
+      name: t.arg.string({ required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (user.role !== "ORGANIZER") {
+        throw new Error("Not authorized");
+      }
+      const event = await ctx.prisma.event.findUnique({
+        where: {
+          id: Number(args.eventId),
+        },
+        include: {
+          Organizers: true,
+        },
+      });
+      if (!event) {
+        throw new Error("Event not found");
+      }
+      if (
+        event.Organizers.filter((org) => org.userId === user.id).length === 0
+      ) {
+        throw new Error("Not authorized");
+      }
+      const team = await ctx.prisma.team.create({
+        data: {
+          name: args.name,
+          eventId: Number(args.eventId),
+          leaderId: user.id,
+          confirmed: true,
+          TeamMembers: {
+            create: {
+              userId: user.id,
+            },
+          },
+        },
+      });
+      return team;
+    },
+  })
+);
+
+builder.mutationField("organizerDeleteTeam", (t) =>
+  t.prismaField({
+    type: "Team",
+    args: {
+      teamId: t.arg.id({ required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (user.role !== "ORGANIZER") {
+        throw new Error("Not authorized");
+      }
+      const team = await ctx.prisma.team.findUnique({
+        where: {
+          id: Number(args.teamId),
+        },
+        include: {
+          Event: {
+            include: {
+              Organizers: true,
+            },
+          },
+        },
+      });
+      if (!team) {
+        throw new Error("Team not found");
+      }
+      if (
+        team.Event.Organizers.filter((org) => org.userId === user.id).length ===
+        0
+      ) {
+        throw new Error("Not authorized");
+      }
+      return await ctx.prisma.team.delete({
+        where: {
+          id: Number(args.teamId),
+        },
+        ...query,
+      });
+    },
+  })
+);
+
+builder.mutationField("organizerAddTeamMember", (t) =>
+  t.prismaField({
+    type: "TeamMember",
+    args: {
+      teamId: t.arg.id({ required: true }),
+      userId: t.arg.id({ required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (user.role !== "ORGANIZER") {
+        throw new Error("Not authorized");
+      }
+      const team = await ctx.prisma.team.findUnique({
+        where: {
+          id: Number(args.teamId),
+        },
+        include: {
+          Event: {
+            include: {
+              Organizers: true,
+            },
+          },
+        },
+      });
+      if (!team) {
+        throw new Error("Team not found");
+      }
+      if (
+        team.Event.Organizers.filter((org) => org.userId === user.id).length ===
+        0
+      ) {
+        throw new Error("Not authorized");
+      }
+      const teamMembers = await ctx.prisma.teamMember.findMany({
+        where: {
+          teamId: Number(args.teamId),
+        },
+      });
+      if (teamMembers.length >= team.Event.maxTeamSize) {
+        throw new Error("Team is full");
+      }
+      return await ctx.prisma.teamMember.create({
+        data: {
+          userId: Number(args.userId),
+          teamId: Number(args.teamId),
+        },
+      });
+    },
+  })
+);
+
+builder.mutationField("organizerDeleteTeamMember", (t) =>
+  t.prismaField({
+    type: "TeamMember",
+    args: {
+      teamId: t.arg.id({ required: true }),
+      userId: t.arg.id({ required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (user.role !== "ORGANIZER") {
+        throw new Error("Not authorized");
+      }
+      const team = await ctx.prisma.team.findUnique({
+        where: {
+          id: Number(args.teamId),
+        },
+        include: {
+          Event: {
+            include: {
+              Organizers: true,
+            },
+          },
+        },
+      });
+      if (!team) {
+        throw new Error("Team not found");
+      }
+      if (
+        team.Event.Organizers.filter((org) => org.userId === user.id).length ===
+        0
+      ) {
+        throw new Error("Not authorized");
+      }
+      return await ctx.prisma.teamMember.delete({
+        where: {
+          userId_teamId: {
+            userId: Number(args.userId),
+            teamId: Number(args.teamId),
+          },
+        },
+        ...query,
+      });
+    },
+  })
+);
