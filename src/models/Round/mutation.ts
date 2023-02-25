@@ -6,6 +6,9 @@ builder.mutationField("createRound", (t) =>
     args: {
       eventId: t.arg.id({ required: true }),
     },
+    errors: {
+      types: [Error],
+    },
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;
       if (!user) {
@@ -50,7 +53,9 @@ builder.mutationField("deleteRound", (t) =>
     type: "Round",
     args: {
       eventId: t.arg.id({ required: true }),
-      roundNo: t.arg.int({ required: true }),
+    },
+    errors: {
+      types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;
@@ -60,11 +65,22 @@ builder.mutationField("deleteRound", (t) =>
       if (user.role !== "ORGANIZER") {
         throw new Error("Not authorized");
       }
+      const lastRound = await ctx.prisma.round.findFirst({
+        where: {
+          eventId: Number(args.eventId),
+        },
+        orderBy: {
+          roundNo: "desc",
+        },
+      });
+      if (!lastRound) {
+        throw new Error("No rounds found");
+      }
       const round = await ctx.prisma.round.findUnique({
         where: {
           eventId_roundNo: {
             eventId: Number(args.eventId),
-            roundNo: Number(args.roundNo),
+            roundNo: lastRound.roundNo,
           },
         },
         include: {
@@ -85,7 +101,7 @@ builder.mutationField("deleteRound", (t) =>
         where: {
           eventId_roundNo: {
             eventId: Number(args.eventId),
-            roundNo: Number(args.roundNo),
+            roundNo: lastRound.roundNo,
           },
         },
       });

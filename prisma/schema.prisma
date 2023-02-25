@@ -56,6 +56,7 @@ model User {
   BranchRep         BranchRep?
   Organizers        Organizer[]
   TeamMembers       TeamMember[]
+  Judges            Judge[]
 
   @@index([collegeId])
 }
@@ -128,7 +129,9 @@ model Round {
   Event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   completed Boolean @default(false)
   Teams     Team[]
+  Judges    Judge[]
 
+  @@id([eventId, roundNo])
   @@unique([eventId, roundNo])
 }
 
@@ -176,6 +179,17 @@ model TeamMember {
 
   @@unique([userId, teamId])
   @@index([teamId, userId])
+}
+
+model Judge {
+  userId  Int
+  User    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId Int
+  roundNo Int
+  Round   Round @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
+
+  @@unique([userId, eventId, roundNo])
+  @@index([eventId, roundNo, userId])
 }
 
 // Enums

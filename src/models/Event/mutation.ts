@@ -80,7 +80,7 @@ builder.mutationField("updateEvent", (t) =>
   t.prismaField({
     type: "Event",
     args: {
-      id: t.arg({ type: "Int", required: true }),
+      id: t.arg({ type: "ID", required: true }),
       data: t.arg({
         type: EventUpdateInput,
         required: true,
@@ -96,7 +96,7 @@ builder.mutationField("updateEvent", (t) =>
         throw new Error("No Permission");
       const event = await ctx.prisma.event.findUnique({
         where: {
-          id: args.id,
+          id: Number(args.id),
         },
       });
       if (!event) throw new Error(`No Event with id ${args.id}`);
@@ -116,7 +116,7 @@ builder.mutationField("updateEvent", (t) =>
           where: {
             userId_eventId: {
               userId: user.id,
-              eventId: args.id,
+              eventId: Number(args.id),
             },
           },
         });
@@ -128,7 +128,7 @@ builder.mutationField("updateEvent", (t) =>
 
       return ctx.prisma.event.update({
         where: {
-          id: args.id,
+          id: Number(args.id),
         },
 
         data: {
