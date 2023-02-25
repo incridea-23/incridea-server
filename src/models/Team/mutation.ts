@@ -631,3 +631,56 @@ builder.mutationField("organizerDeleteTeamMember", (t) =>
     },
   })
 );
+
+// mark attendance for team
+builder.mutationField("organizerMarkAttendance", (t) =>
+  t.prismaField({
+    type: "Team",
+    args: {
+      teamId: t.arg.id({ required: true }),
+      attended: t.arg.boolean({ required: true, defaultValue: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (user.role !== "ORGANIZER") {
+        throw new Error("Not authorized");
+      }
+      const team = await ctx.prisma.team.findUnique({
+        where: {
+          id: Number(args.teamId),
+        },
+        include: {
+          Event: {
+            include: {
+              Organizers: true,
+            },
+          },
+        },
+      });
+      if (!team) {
+        throw new Error("Team not found");
+      }
+      if (
+        team.Event.Organizers.filter((org) => org.userId === user.id).length ===
+        0
+      ) {
+        throw new Error("Not authorized");
+      }
+      return await ctx.prisma.team.update({
+        where: {
+          id: Number(args.teamId),
+        },
+        data: {
+          attended: args.attended,
+        },
+        ...query,
+      });
+    },
+  })
+);
