@@ -93,7 +93,7 @@ model Event {
   branchId    Int
   minTeamSize Int         @default(1)
   maxTeamSize Int         @default(1)
-  maxSize     Int?
+  maxTeams    Int?
   published   Boolean     @default(false)
   Branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
   Teams       Team[]

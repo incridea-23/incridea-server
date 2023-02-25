@@ -21,6 +21,11 @@ builder.prismaObject("Event", {
     }),
     branch: t.relation("Branch"),
     published: t.exposeBoolean("published"),
+    minTeamSize: t.exposeInt("minTeamSize"),
+    maxTeamSize: t.exposeInt("maxTeamSize"),
+    maxTeams: t.exposeInt("maxTeams", {
+      nullable: true,
+    }),
     organizers: t.relation("Organizers"),
     eventDate: t.expose("eventDate", {
       type: "Date",

@@ -33,8 +33,12 @@ const EventUpdateInput = builder.inputType("EventUpdateInput", {
     }),
     eventType: t.field({
       type: EventType,
-      required: true,
+      required: false,
     }),
+    fees: t.int({ required: false }),
+    minTeamSize: t.int({ required: false }),
+    maxTeamSize: t.int({ required: false }),
+    maxTeams: t.int({ required: false }),
     venue: t.string({ required: false }),
   }),
 });
@@ -126,14 +130,21 @@ builder.mutationField("updateEvent", (t) =>
           );
       }
 
+      // filter all the null values from the data
+      const data = Object.keys(args.data).reduce((acc: any, key) => {
+        if (args.data[key as keyof typeof args.data] !== null) {
+          acc[key] = args.data[key as keyof typeof args.data];
+        }
+        return acc;
+      }, {});
+
       return ctx.prisma.event.update({
         where: {
           id: Number(args.id),
         },
 
         data: {
-          ...args.data,
-          name: args.data.name || event.name,
+          ...data,
         },
         ...query,
       });
