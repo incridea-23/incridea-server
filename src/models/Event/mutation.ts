@@ -18,7 +18,7 @@ const EventCreateInput = builder.inputType("EventCreateInput", {
     }),
     eventType: t.field({
       type: EventType,
-      required: true,
+      required: false,
     }),
     venue: t.string({ required: false }),
   }),
@@ -65,9 +65,18 @@ builder.mutationField("createEvent", (t) =>
         },
       });
       if (!branch) throw new Error(`No Branch Under ${user.name}`);
+      // filter all the null values
+      const data = Object.keys(args.data).reduce((acc: any, key) => {
+        if (args.data[key as keyof typeof args.data] !== null) {
+          acc[key] = args.data[key as keyof typeof args.data];
+        }
+        return acc;
+      }, {});
+
       return ctx.prisma.event.create({
         data: {
-          ...args.data,
+          ...data,
+
           Branch: {
             connect: {
               id: branch.branchId,
