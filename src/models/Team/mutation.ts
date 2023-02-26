@@ -461,13 +461,7 @@ builder.mutationField("organizerCreateTeam", (t) =>
         data: {
           name: args.name,
           eventId: Number(args.eventId),
-          leaderId: user.id,
           confirmed: true,
-          TeamMembers: {
-            create: {
-              userId: user.id,
-            },
-          },
         },
       });
       return team;
