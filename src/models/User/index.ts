@@ -10,5 +10,8 @@ builder.prismaObject("User", {
     role: t.exposeString("role"),
     isVerified: t.exposeBoolean("isVerified"),
     createdAt: t.expose("createdAt", { type: "Date" }),
+    phoneNumber: t.exposeString("phoneNumber", {
+      nullable: true,
+    }),
   }),
 });

@@ -39,17 +39,17 @@ model VerificationToken {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  role       Role     @default(USER)
-  isVerified Boolean  @default(false)
-  password   String   @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  collegeId  Int?
-  College    College? @relation(fields: [collegeId], references: [id], onDelete: SetNull)
-
+  id                Int                 @id @default(autoincrement())
+  name              String
+  email             String              @unique
+  role              Role                @default(USER)
+  isVerified        Boolean             @default(false)
+  password          String              @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  collegeId         Int?
+  College           College?            @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  phoneNumber       String?
   VerificationToken VerificationToken[]
   RefreshTokens     RefreshToken[]
   PaymentOrders     PaymentOrder[]
