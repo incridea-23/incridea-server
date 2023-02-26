@@ -12,8 +12,13 @@ builder.queryField("eventByOrganizer", (t) =>
     resolve: (query, root, args, ctx, info) => {
       return ctx.prisma.event.findMany({
         where: {
-          id: Number(args.organizerId),
+          Organizers: {
+            some: {
+              userId: Number(args.organizerId),
+            },
+          },
         },
+        ...query,
       });
     },
   })
