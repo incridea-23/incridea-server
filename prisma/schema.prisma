@@ -98,6 +98,7 @@ model Event {
   Branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
   Teams       Team[]
   Rounds      Round[]
+  Winner      Winner[]
 
   @@index([branchId])
 }
@@ -118,6 +119,7 @@ model Team {
   roundRoundNo Int?
   leaderId     Int?
   Round        Round?       @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
+  Winner       Winner[]
 
   @@index([eventId, roundNo])
   @@index([roundEventId, roundRoundNo])
@@ -192,6 +194,17 @@ model Judge {
   @@index([eventId, roundNo, userId])
 }
 
+model Winner {
+  eventId  Int
+  Event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  teamId   Int
+  Team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  position Position
+
+  @@unique([teamId, eventId])
+  @@index([eventId, teamId])
+}
+
 // Enums
 enum PaymentType {
   FEST_REGISTRATION
@@ -224,4 +237,10 @@ enum EventType {
   TEAM
   INDIVIDUAL_MULTIPLE_ENTRY
   TEAM_MULTIPLE_ENTRY
+}
+
+enum Position {
+  FIRST
+  SECOND
+  THIRD
 }
