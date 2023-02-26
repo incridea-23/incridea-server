@@ -163,6 +163,7 @@ builder.mutationField("roundCompleted", (t) =>
           data: {
             completed: true,
           },
+          ...query,
         });
       }
     })
