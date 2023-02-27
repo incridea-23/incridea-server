@@ -9,5 +9,9 @@ builder.prismaObject("Round", {
     completed: t.exposeBoolean("completed"),
     event: t.relation("Event"),
     teams: t.relation("Teams"),
+    date: t.expose("date", {
+      type: "Date",
+      nullable: true,
+    }),
   }),
 });
