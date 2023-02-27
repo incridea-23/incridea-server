@@ -86,7 +86,6 @@ model Event {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   fees        Int         @default(0)
-  eventDate   DateTime?
   Organizers  Organizer[]
   eventType   EventType   @default(INDIVIDUAL)
   venue       String?
@@ -125,11 +124,12 @@ model Team {
 
 model Round {
   eventId   Int
-  roundNo   Int     @default(1)
-  Event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  completed Boolean @default(false)
+  roundNo   Int       @default(1)
+  Event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  completed Boolean   @default(false)
   Teams     Team[]
   Judges    Judge[]
+  date      DateTime?
 
   @@id([eventId, roundNo])
   @@unique([eventId, roundNo])

@@ -27,10 +27,6 @@ builder.prismaObject("Event", {
       nullable: true,
     }),
     organizers: t.relation("Organizers"),
-    eventDate: t.expose("eventDate", {
-      type: "Date",
-      nullable: true,
-    }),
     eventType: t.exposeString("eventType"),
     teams: t.relation("Teams"),
     rounds: t.relation("Rounds"),
