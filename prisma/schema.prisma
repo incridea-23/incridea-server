@@ -195,12 +195,11 @@ model Judge {
 }
 
 model Winner {
-  id       Int      @id @default(autoincrement())
   eventId  Int
   Event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   teamId   Int
   Team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  position Position @default(FIRST)
+  position Position
 
   @@unique([teamId, eventId])
   @@index([eventId, teamId])

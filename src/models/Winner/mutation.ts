@@ -1,26 +1,35 @@
 import { builder } from "../../builder";
 
+enum Position {
+    FIRST="FIRST",
+    SECOND="SECOND",
+    THIRD="THIRD"
+  }
+
+const PositionType = builder.enumType(Position, {
+    name: "PositionType",
+  });
+
 builder.mutationField("addWinner", (t) => 
     t.prismaField({
         type: "Winner",
         args: {
             eventId: t.arg.id({ required: true }),
             teamId: t.arg.id({ required: true }),
-            position: t.arg.string({ required: true })
+            position: t.arg({type: PositionType, required: true })
         },
         errors: {
             types: [Error]
         },
         resolve: async (query, root, args, ctx, info) => {
-            // const user = await ctx.user;
-            // if(!user) 
-            //     throw new Error("Not Authenticated");
+            const user = await ctx.user;
+            if(!user) 
+                throw new Error("Not Authenticated");
 
-            // if(user.role!=="ORGANIZER")
-            //     throw new Error("Not Authorized");
+            if(user.role!=="ORGANIZER")
+                throw new Error("Not Authorized");
                 
-            //give query to find if all rounds are completed
-            const event = await ctx.prisma.event.findMany({
+            const event = await ctx.prisma.event.findUniqueOrThrow({
                 where: {
                     id: Number(args.eventId)
                 },
@@ -29,13 +38,27 @@ builder.mutationField("addWinner", (t) =>
                     Rounds: true
                 }
             });
-            console.log(event);
+
+            if(!event.Organizers.some(organizer => organizer.userId === user.id))
+                throw new Error("Not Authorized");
+
+            const team = await ctx.prisma.team.findUniqueOrThrow({
+                where: {
+                    id: Number(args.teamId)
+                },
+                include: {
+                    Event: true
+                }
+            });
+
+            if(team.Event.id !== event.id)
+                throw new Error("No Team with this id");
 
             return ctx.prisma.winner.create({
                 data: {
                     eventId: Number(args.eventId),
                     teamId: Number(args.teamId),
-                    position: "FIRST"
+                    position: args.position,
                 }
             })
         }
