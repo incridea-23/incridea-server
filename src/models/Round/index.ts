@@ -13,5 +13,6 @@ builder.prismaObject("Round", {
       type: "Date",
       nullable: true,
     }),
+    judges: t.relation("Judges"),
   }),
 });
