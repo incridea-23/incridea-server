@@ -1,11 +1,9 @@
-import { builder } from "../../builder";
 import "./mutation";
+import { builder } from "../../builder";
 
 builder.prismaObject("Judge", {
-    fields: (t) => ({
-        userId: t.exposeID("userId"),
-        eventId: t.exposeID("eventId"),
-        roundNo: t.exposeInt("roundNo"),
-        Round: t.relation("Round"),
-    })
+  fields: (t) => ({
+    user: t.relation("User"),
+    round: t.relation("Round"),
+  }),
 });

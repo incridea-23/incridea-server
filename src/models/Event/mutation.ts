@@ -12,10 +12,6 @@ const EventCreateInput = builder.inputType("EventCreateInput", {
   fields: (t) => ({
     name: t.string({ required: true }),
     description: t.string({ required: false }),
-    eventDate: t.field({
-      type: "Date",
-      required: false,
-    }),
     eventType: t.field({
       type: EventType,
       required: false,

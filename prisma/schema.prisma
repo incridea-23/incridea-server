@@ -39,17 +39,17 @@ model VerificationToken {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  role       Role     @default(USER)
-  isVerified Boolean  @default(false)
-  password   String   @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  collegeId  Int?
-  College    College? @relation(fields: [collegeId], references: [id], onDelete: SetNull)
-
+  id                Int                 @id @default(autoincrement())
+  name              String
+  email             String              @unique
+  role              Role                @default(USER)
+  isVerified        Boolean             @default(false)
+  password          String              @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  collegeId         Int?
+  College           College?            @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  phoneNumber       String?
   VerificationToken VerificationToken[]
   RefreshTokens     RefreshToken[]
   PaymentOrders     PaymentOrder[]
@@ -86,7 +86,6 @@ model Event {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   fees        Int         @default(0)
-  eventDate   DateTime?
   Organizers  Organizer[]
   eventType   EventType   @default(INDIVIDUAL)
   venue       String?
@@ -127,11 +126,12 @@ model Team {
 
 model Round {
   eventId   Int
-  roundNo   Int     @default(1)
-  Event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  completed Boolean @default(false)
+  roundNo   Int       @default(1)
+  Event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  completed Boolean   @default(false)
   Teams     Team[]
   Judges    Judge[]
+  date      DateTime?
 
   @@id([eventId, roundNo])
   @@unique([eventId, roundNo])

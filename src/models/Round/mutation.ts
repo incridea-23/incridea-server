@@ -5,6 +5,7 @@ builder.mutationField("createRound", (t) =>
     type: "Round",
     args: {
       eventId: t.arg.id({ required: true }),
+      date: t.arg({ type: "Date", required: false }),
     },
     errors: {
       types: [Error],
@@ -36,6 +37,7 @@ builder.mutationField("createRound", (t) =>
       return ctx.prisma.round.create({
         data: {
           roundNo: roundNumber,
+          date: args.date,
           Event: {
             connect: {
               id: Number(args.eventId),
