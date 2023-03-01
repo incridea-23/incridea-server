@@ -457,14 +457,19 @@ builder.mutationField("organizerCreateTeam", (t) =>
       ) {
         throw new Error("Not authorized");
       }
-      const team = await ctx.prisma.team.create({
-        data: {
-          name: args.name,
-          eventId: Number(args.eventId),
-          confirmed: true,
-        },
-      });
-      return team;
+      try {
+        const team = await ctx.prisma.team.create({
+          data: {
+            name: args.name,
+            eventId: Number(args.eventId),
+            confirmed: true,
+          },
+        });
+        return team;
+      } catch (e) {
+        console.log(e);
+        throw new Error("Team already exists");
+      }
     },
   })
 );
