@@ -679,7 +679,7 @@ builder.mutationField("organizerMarkAttendance", (t) =>
   })
 );
 
-builder.mutationField("OrganizerRegisterSolo", (t) =>
+builder.mutationField("organizerRegisterSolo", (t) =>
   t.prismaField({
     type: "Team",
     args: {
@@ -743,11 +743,14 @@ builder.mutationField("OrganizerRegisterSolo", (t) =>
         },
       });
       if (
-        (event.eventType === "INDIVIDUAL" ||
-          event.eventType === "INDIVIDUAL_MULTIPLE_ENTRY") &&
-        registered.length > 0
+        event.eventType === "TEAM" ||
+        event.eventType === "TEAM_MULTIPLE_ENTRY"
       )
-        throw new Error("");
+        throw new Error("Team Event");
+
+      if (event.eventType === "INDIVIDUAL" && registered.length > 0)
+        throw new Error("User already registered");
+
       const team = await ctx.prisma.team.create({
         data: {
           eventId: Number(args.eventId),
@@ -756,6 +759,7 @@ builder.mutationField("OrganizerRegisterSolo", (t) =>
           confirmed: true,
           leaderId: Number(args.userId),
         },
+        ...query,
       });
       await ctx.prisma.teamMember.create({
         data: {
