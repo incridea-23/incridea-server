@@ -467,7 +467,6 @@ builder.mutationField("organizerCreateTeam", (t) =>
         });
         return team;
       } catch (e) {
-        console.log(e);
         throw new Error("Team already exists");
       }
     },
@@ -711,12 +710,20 @@ builder.mutationField("organizerRegisterSolo", (t) =>
       if (user.role !== "ORGANIZER") {
         throw new Error("Not authorized");
       }
-      const event = await ctx.prisma.event.findUnique({
+      const event = await ctx.prisma.event.findFirst({
         where: {
-          id: Number(args.eventId),
-        },
-        include: {
-          Organizers: true,
+          AND: [
+            {
+              id: Number(args.eventId),
+            },
+            {
+              Organizers: {
+                some: {
+                  userId: user.id,
+                },
+              },
+            },
+          ],
         },
       });
       if (!event) {
@@ -727,11 +734,6 @@ builder.mutationField("organizerRegisterSolo", (t) =>
         event.eventType === "TEAM_MULTIPLE_ENTRY"
       )
         throw new Error("Team Event");
-      if (
-        event.Organizers.filter((org) => org.userId === user.id).length === 0
-      ) {
-        throw new Error("Not authorized");
-      }
 
       const participant = await ctx.prisma.user.findUnique({
         where: {
