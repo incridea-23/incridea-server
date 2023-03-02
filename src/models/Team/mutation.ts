@@ -555,6 +555,15 @@ builder.mutationField("organizerAddTeamMember", (t) =>
       if (!team) {
         throw new Error("Team not found");
       }
+      const participant = await ctx.prisma.user.findUnique({
+        where: {
+          id: Number(args.userId),
+        },
+      });
+      if (!participant) {
+        throw new Error("Participant not found");
+      }
+
       if (
         team.Event.Organizers.filter((org) => org.userId === user.id).length ===
         0
@@ -571,7 +580,7 @@ builder.mutationField("organizerAddTeamMember", (t) =>
       }
       return await ctx.prisma.teamMember.create({
         data: {
-          userId: Number(args.userId),
+          userId: participant.id,
           teamId: Number(args.teamId),
         },
       });
@@ -763,15 +772,15 @@ builder.mutationField("organizerRegisterSolo", (t) =>
           attended: true,
           confirmed: true,
           leaderId: Number(args.userId),
+          TeamMembers: {
+            create: {
+              userId: Number(args.userId),
+            },
+          },
         },
         ...query,
       });
-      await ctx.prisma.teamMember.create({
-        data: {
-          userId: participant.id,
-          teamId: team.id,
-        },
-      });
+
       return team;
     },
   })
