@@ -714,6 +714,11 @@ builder.mutationField("organizerRegisterSolo", (t) =>
         throw new Error("Event not found");
       }
       if (
+        event.eventType === "TEAM" ||
+        event.eventType === "TEAM_MULTIPLE_ENTRY"
+      )
+        throw new Error("Team Event");
+      if (
         event.Organizers.filter((org) => org.userId === user.id).length === 0
       ) {
         throw new Error("Not authorized");
@@ -726,14 +731,14 @@ builder.mutationField("organizerRegisterSolo", (t) =>
       });
       if (
         !participant ||
-        participant.role == "USER" ||
+        participant.role === "USER" ||
         participant.role === "JUDGE"
       ) {
         throw new Error(`No participant with id ${args.userId}`);
       }
       const registered = await ctx.prisma.team.findMany({
         where: {
-          OR: [
+          AND: [
             {
               eventId: event.id,
             },
@@ -747,14 +752,9 @@ builder.mutationField("organizerRegisterSolo", (t) =>
           ],
         },
       });
-      if (
-        event.eventType === "TEAM" ||
-        event.eventType === "TEAM_MULTIPLE_ENTRY"
-      )
-        throw new Error("Team Event");
 
       if (event.eventType === "INDIVIDUAL" && registered.length > 0)
-        throw new Error("User already registered");
+        throw new Error("Participant already registered");
 
       const team = await ctx.prisma.team.create({
         data: {
