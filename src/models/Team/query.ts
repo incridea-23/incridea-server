@@ -16,48 +16,37 @@ builder.queryField("teamsByRound", (t) =>
       contains: t.arg.string({ required: false }),
     },
     resolve: (query, root, args, ctx, info) => {
+      const filter = args.contains || "";
       return ctx.prisma.team.findMany({
         where: {
           roundNo: {
             gte: args.roundNo,
           },
-          confirmed: true,
+
           eventId: Number(args.eventId),
+          confirmed: true,
           OR: [
             {
               name: {
-                contains: args.contains || undefined,
+                contains: filter,
               },
             },
             {
               TeamMembers: {
                 some: {
                   User: {
-                    name: {
-                      contains: args.contains || undefined,
-                    },
-                  },
-                },
-              },
-            },
-            {
-              TeamMembers: {
-                some: {
-                  User: {
-                    email: {
-                      contains: args.contains || undefined,
-                    },
-                  },
-                },
-              },
-            },
-            {
-              TeamMembers: {
-                some: {
-                  User: {
-                    id: {
-                      equals: Number(args.contains) || undefined,
-                    },
+                    OR: [
+                      {
+                        name: {
+                          contains: filter,
+                        },
+                      },
+                      {
+                        email: {
+                          contains: filter,
+                        },
+                      },
+                    ],
                   },
                 },
               },

@@ -173,9 +173,9 @@ model Organizer {
 
 model TeamMember {
   userId Int
-  User   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   teamId Int
-  Team   Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  Team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@unique([userId, teamId])
   @@index([teamId, userId])

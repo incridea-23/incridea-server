@@ -559,10 +559,13 @@ builder.mutationField("organizerAddTeamMember", (t) =>
           id: Number(args.userId),
         },
       });
-      if (!participant) {
-        throw new Error("Participant not found");
+      if (
+        !participant ||
+        participant.role === "USER" ||
+        participant.role === "JUDGE"
+      ) {
+        throw new Error(`No participant with id ${args.userId}`);
       }
-
       if (
         team.Event.Organizers.filter((org) => org.userId === user.id).length ===
         0

@@ -106,7 +106,14 @@ builder.mutationField("removeOrganizer", (t) =>
           id: Number(args.userId),
         },
       });
-      if (userRole?.role === "ORGANIZER") {
+
+      const count = await ctx.prisma.organizer.count({
+        where: {
+          userId: Number(args.userId),
+        },
+      });
+
+      if (userRole?.role === "ORGANIZER" && !(count > 1)) {
         await ctx.prisma.user.update({
           where: {
             id: Number(args.userId),
