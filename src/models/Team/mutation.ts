@@ -50,13 +50,15 @@ builder.mutationField("createTeam", (t) =>
           throw new Error("Already registered");
         }
       }
-      const totalTeams = await ctx.prisma.team.count({
-        where: {
-          eventId: Number(args.eventId),
-        },
-      });
-      if (event.maxTeamSize && totalTeams >= event.maxTeamSize) {
-        throw new Error("Event is full");
+      if (event.maxTeams && event.maxTeams > 0) {
+        const totalTeams = await ctx.prisma.team.count({
+          where: {
+            eventId: Number(args.eventId),
+          },
+        });
+        if (event.maxTeamSize && totalTeams >= event.maxTeamSize) {
+          throw new Error("Event is full");
+        }
       }
 
       return await ctx.prisma.team.create({
@@ -69,8 +71,9 @@ builder.mutationField("createTeam", (t) =>
             },
           },
           leaderId: user.id,
-          confirmed: !isPaidEvent,
+          confirmed: false,
         },
+        ...query,
       });
     },
   })
@@ -102,7 +105,7 @@ builder.mutationField("joinTeam", (t) =>
         throw new Error("Team not found");
       }
       if (team.confirmed) {
-        throw new Error("Team is confirmed");
+        throw new Error("Can't Join team, Team is confirmed");
       }
       const event = await ctx.prisma.event.findUnique({
         where: {
@@ -112,10 +115,12 @@ builder.mutationField("joinTeam", (t) =>
       if (!event) {
         throw new Error("Event not found");
       }
-      if (event.eventType === "INDIVIDUAL") {
+      if (
+        event.eventType === "INDIVIDUAL" ||
+        event.eventType === "INDIVIDUAL_MULTIPLE_ENTRY"
+      ) {
         throw new Error("Event is individual");
       }
-      const isPaidEvent = event.fees > 0;
       if (event.eventType === "TEAM") {
         const registeredTeam = await ctx.prisma.team.findMany({
           where: {
@@ -265,29 +270,19 @@ builder.mutationField("confirmTeam", (t) =>
         throw new Error("Event is individual");
       }
       const isPaidEvent = event.fees > 0;
-
-      if (event.eventType === "TEAM") {
-        const registeredTeam = await ctx.prisma.team.findMany({
-          where: {
-            eventId: Number(event.id),
-            TeamMembers: {
-              some: {
-                userId: user.id,
-              },
-            },
-          },
-        });
-        if (registeredTeam.length > 0) {
-          throw new Error("Already registered");
-        }
+      if (isPaidEvent) {
+        throw new Error("Event is paid");
       }
+      // check if user is leader of team
       const teamMembers = await ctx.prisma.teamMember.findMany({
         where: {
           teamId: Number(args.teamId),
         },
       });
-      if (teamMembers.length >= event.maxTeamSize) {
-        throw new Error("Team is full");
+      if (teamMembers.length < event.minTeamSize) {
+        throw new Error(
+          `Team is not full need at least ${event.minTeamSize} members`
+        );
       }
       return await ctx.prisma.team.update({
         where: {
@@ -647,6 +642,7 @@ builder.mutationField("organizerMarkAttendance", (t) =>
   t.prismaField({
     type: "Team",
     args: {
+      // TODO: if solo event mark attendance by user id
       teamId: t.arg.id({ required: true }),
       attended: t.arg.boolean({ required: true, defaultValue: true }),
     },
@@ -750,25 +746,27 @@ builder.mutationField("organizerRegisterSolo", (t) =>
       ) {
         throw new Error(`No participant with id ${args.userId}`);
       }
-      const registered = await ctx.prisma.team.findMany({
-        where: {
-          AND: [
-            {
-              eventId: event.id,
-            },
-            {
-              TeamMembers: {
-                some: {
-                  userId: Number(args.userId),
+
+      if (event.eventType === "INDIVIDUAL") {
+        const registered = await ctx.prisma.team.findMany({
+          where: {
+            AND: [
+              {
+                eventId: event.id,
+              },
+              {
+                TeamMembers: {
+                  some: {
+                    userId: Number(args.userId),
+                  },
                 },
               },
-            },
-          ],
-        },
-      });
-
-      if (event.eventType === "INDIVIDUAL" && registered.length > 0)
-        throw new Error("Participant already registered");
+            ],
+          },
+        });
+        if (registered.length > 0)
+          throw new Error("Participant already registered");
+      }
 
       const team = await ctx.prisma.team.create({
         data: {

@@ -103,7 +103,7 @@ model Event {
 
 model Team {
   id   Int    @id @default(autoincrement())
-  name String @unique
+  name String
 
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
@@ -118,6 +118,7 @@ model Team {
   leaderId     Int?
   Round        Round?       @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
 
+  @@unique([eventId, name])
   @@index([eventId, roundNo])
   @@index([roundEventId, roundRoundNo])
 }
