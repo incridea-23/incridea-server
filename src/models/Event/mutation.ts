@@ -211,3 +211,42 @@ builder.mutationField("deleteEvent", (t) =>
     },
   })
 );
+
+
+
+builder.mutationField("publishEvent", (t) =>
+  t.field({
+    type: "String",
+    args: {
+      id: t.arg({ type: "ID", required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (root, args, ctx) => {
+       const user = await ctx.user;
+      if (!user) throw new Error("Not authenticated");
+      if (user.role !== "ADMIN") throw new Error("No Permission");
+     const event = await ctx.prisma.event.findUnique({
+        where: {
+          id: Number(args.id),
+        },
+      });
+       if(!event) throw new Error(`Event ${args.id} does not exist`);
+       
+      await ctx.prisma.event.update({
+        where:{
+         id: Number(args.id),
+         },
+        data:{
+        published:true,
+        }
+      });
+    return "Event published Successfully";
+    },
+  })
+);
+
+
+
+
