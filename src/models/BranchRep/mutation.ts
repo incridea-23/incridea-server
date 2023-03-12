@@ -66,12 +66,19 @@ builder.mutationField("removeBranchRep", (t) =>
       const user = await ctx.user;
       if (!user) throw new Error("Not authenticated");
       if (user.role !== "ADMIN") throw new Error("No Permission");
-      const branch= await ctx.prisma.branch.findMany({
+      const branch= await ctx.prisma.branch.findUnique({
         where: {
           id: Number(args.branchId),
         },
       });
       if (!branch) throw new Error(`No Branch with id ${args.branchId}`);
+      const branchRep = await ctx.prisma.branchRep.findUnique({
+        where: {
+          userId: args.userId as number,
+        },
+      });
+      if (!branchRep) throw new Error(`No Branch Under user ${args.userId}`);
+      if (branchRep.branchId !== branch.id) throw new Error(`No permission`);
       await ctx.prisma.user.update({
           where: {
           id:Number(args.userId),
