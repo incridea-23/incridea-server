@@ -1,5 +1,14 @@
 import { builder } from "../../builder";
 
+enum Role {
+  BRANCH_REP="BRANCH_REP",
+}
+
+const RoleType = builder.enumType(Role, {
+  name: "RoleType",
+});
+
+
 builder.mutationField("addBranchRep", (t) =>
   t.prismaField({
     type: "BranchRep",
@@ -11,7 +20,7 @@ builder.mutationField("addBranchRep", (t) =>
       userId: t.arg({
         type: "ID",
         required: true,
-      }),
+      })
     },
     errors: {
       types: [Error],
@@ -26,7 +35,14 @@ builder.mutationField("addBranchRep", (t) =>
         },
       });
       if (!branch) throw new Error(`No Branch with id ${args.branchId}`);
-      return ctx.prisma.branchRep.create({
+
+      const userRole = await ctx.prisma.user.findUnique({
+        where: {
+          id: Number(args.userId),
+        },
+      });
+
+      const data = await ctx.prisma.branchRep.create({
         data: {
           Branch: {
             connect: {
@@ -40,6 +56,19 @@ builder.mutationField("addBranchRep", (t) =>
           },
         },
       });
+
+      // Update the User record with the new Role
+      if (data && userRole?.role === "PARTICIPANT") {
+        await ctx.prisma.user.update({
+          where: {
+            id: Number(args.userId),
+          },
+          data: {
+            role: Role.BRANCH_REP,
+          },
+        });
+      }
+      return data;
     },
   })
 );
