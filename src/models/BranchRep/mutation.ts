@@ -74,7 +74,7 @@ builder.mutationField("removeBranchRep", (t) =>
       if (!branch) throw new Error(`No Branch with id ${args.branchId}`);
       const branchRep = await ctx.prisma.branchRep.findUnique({
         where: {
-          userId: args.userId as number,
+          userId: Number(args.userId),
         },
       });
       if (!branchRep) throw new Error(`No Branch Under user ${args.userId}`);
