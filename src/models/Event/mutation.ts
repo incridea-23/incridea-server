@@ -219,6 +219,7 @@ builder.mutationField("publishEvent", (t) =>
     type: "String",
     args: {
       id: t.arg({ type: "ID", required: true }),
+      published:t.arg({ type:"Boolean", required:true }),
     },
     errors: {
       types: [Error],
@@ -239,14 +240,11 @@ builder.mutationField("publishEvent", (t) =>
          id: Number(args.id),
          },
         data:{
-        published:true,
+        published:Boolean(args.published),
         }
       });
     return "Event published Successfully";
     },
   })
 );
-
-
-
 
