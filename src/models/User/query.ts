@@ -25,6 +25,11 @@ builder.queryField("users", (t) =>
                 contains: filter,
               },
             },
+            {
+              id: {
+                in: Number(filter),
+              },
+            },
           ],
         },
         ...query,
