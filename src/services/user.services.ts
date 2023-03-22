@@ -13,6 +13,8 @@ export function createUserByEmailAndPassword(user: {
   name: string;
   email: string;
   password: string;
+  phoneNumber: string;
+  collegeId: number;
 }) {
   user.password = bcrypt.hashSync(user.password, 12);
   return prisma.user.create({

@@ -33,6 +33,8 @@ const UserCreateInput = builder.inputType("UserCreateInput", {
     name: t.string({ required: true }),
     email: t.string({ required: true }),
     password: t.string({ required: true }),
+    phoneNumber: t.string({ required: true }),
+    collegeId: t.int({ required: true }),
   }),
 });
 
