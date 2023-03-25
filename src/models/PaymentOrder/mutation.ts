@@ -43,7 +43,7 @@ builder.mutationField("createPaymentOrder", (t) =>
         }
         const event = await ctx.prisma.event.findUnique({
           where: {
-            id: args.eventId as number,
+            id: Number(args.eventId),
           },
         });
         if (!event) {
@@ -74,6 +74,19 @@ builder.mutationField("createPaymentOrder", (t) =>
         });
       }
       // FEST_REGISTRATION
+      //check if user already has a pending order for FEST_REGISTRATION
+      const existingOrder = await ctx.prisma.paymentOrder.findFirst({
+        where: {
+          User: {
+            id: user.id
+          },
+          type: args.type,
+          status: "PENDING"
+        }
+      });
+      if (existingOrder) {
+        return existingOrder;
+      }
       const payment_capture = 1;
       const amount = 250;
       const currency = "INR";
