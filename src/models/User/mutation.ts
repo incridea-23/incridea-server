@@ -215,6 +215,16 @@ builder.mutationField("sendEmailVerification", (t) =>
       if (!existingUser) {
         throw new Error("No user found");
       }
+      //delete old verification token if exists
+      const oldVerificationToken = await ctx.prisma.verificationToken.findFirst({
+        where: {
+          userId: existingUser.id,
+          type: "EMAIL_VERIFICATION",
+        },
+      });
+      if (oldVerificationToken) {
+        await deleteVerificationToken(oldVerificationToken.id);
+      }
       const { id: token } = await addVerificationTokenToWhitelist({
         userId: existingUser.id,
       });
@@ -283,6 +293,18 @@ builder.mutationField("sendPasswordResetEmail", (t) =>
       const existingUser = await findUserByEmail(args.email);
       if (!existingUser) {
         throw new Error("You do not have an account here. Please sign Up");
+      }
+      //delete old password reset token if exists
+      const oldPasswordResetToken = await ctx.prisma.verificationToken.findFirst(
+        {
+          where: {
+            userId: existingUser.id,
+            type: "RESET_PASSWORD",
+          },
+        }
+      );
+      if (oldPasswordResetToken) {
+        await deleteVerificationToken(oldPasswordResetToken.id);
       }
       const { id: token } = await addPasswordResetTokenToWhitelist({
         userId: existingUser.id,
