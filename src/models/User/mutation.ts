@@ -26,6 +26,7 @@ import {
 } from "../../services/auth.service";
 import { hashToken } from "../../utils/auth/hashToken";
 import { sendEmail } from "../../utils/email";
+import { KnownFragmentNamesRule } from "graphql";
 
 // register user
 const UserCreateInput = builder.inputType("UserCreateInput", {
