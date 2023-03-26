@@ -4,10 +4,12 @@ import { context } from "./context";
 import { schema } from "./schema";
 import bodyParser from "body-parser";
 import { handler as razorpayCapture } from "./webhook/capture";
+import { useDepthLimit } from '@envelop/depth-limit'
 const port = Number(process.env.API_PORT) || 4000;
 const yoga = createYoga({
   context,
   schema,
+  plugins: [ useDepthLimit({ maxDepth: 6 }) ] //max depth allowed to avoid infinite nested queries
 });
 
 const app = express();

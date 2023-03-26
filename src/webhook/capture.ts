@@ -12,6 +12,7 @@ export async function handler(req: Request, res: Response) {
       return res.status(400).send({ message: "Invalid request" });
     }
     console.log(req.body.payload.payment.entity);
+    console.log(order_id, status);
     if (status === "captured") {
       const paymentOrder = await prisma.paymentOrder.update({
         where: {
