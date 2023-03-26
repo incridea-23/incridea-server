@@ -26,7 +26,6 @@ import {
 } from "../../services/auth.service";
 import { hashToken } from "../../utils/auth/hashToken";
 import { sendEmail } from "../../utils/email";
-import { KnownFragmentNamesRule } from "graphql";
 
 // register user
 const UserCreateInput = builder.inputType("UserCreateInput", {
@@ -121,6 +120,16 @@ builder.mutationField("login", (t) =>
       }
 
       const jti = uuidv4();
+      //delete old refresh token if exists
+      const oldRefreshToken = await ctx.prisma.refreshToken.findFirst({
+        where: {
+          userId: existingUser.id,
+          },
+        });
+      if (oldRefreshToken) {
+        await deleteRefreshToken(oldRefreshToken.id);
+      }
+      //give new refresh token
       const { accessToken, refreshToken } = generateTokens(existingUser, jti);
       await addRefreshTokenToWhitelist({
         jti,
