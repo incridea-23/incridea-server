@@ -85,7 +85,11 @@ builder.mutationField("createPaymentOrder", (t) =>
         }
       });
       if (existingOrder) {
-        return existingOrder;
+        await ctx.prisma.paymentOrder.delete({
+          where: {
+            id: existingOrder.id
+          }
+        });
       }
       const payment_capture = 1;
       const amount = 250;
