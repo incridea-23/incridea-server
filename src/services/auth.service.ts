@@ -30,24 +30,18 @@ export function findRefreshTokenById(id: string) {
 
 // soft delete tokens after usage.
 export function deleteRefreshToken(id: string) {
-  return prisma.refreshToken.update({
+  return prisma.refreshToken.delete({
     where: {
       id,
-    },
-    data: {
-      revoked: true,
-    },
+    }
   });
 }
 
 export function revokeTokens(userId: number) {
-  return prisma.refreshToken.updateMany({
+  return prisma.refreshToken.deleteMany({
     where: {
       userId,
-    },
-    data: {
-      revoked: true,
-    },
+    }
   });
 }
 
@@ -72,13 +66,10 @@ export function findVerificationTokenByID(id: string) {
 }
 
 export function deleteVerificationToken(id: string) {
-  return prisma.verificationToken.update({
+  return prisma.verificationToken.delete({
     where: {
       id,
-    },
-    data: {
-      revoked: true,
-    },
+    }
   });
 }
 
@@ -104,12 +95,9 @@ export function findPasswordResetTokenByID(id: string) {
 }
 
 export function deletePasswordResetToken(id: string) {
-  return prisma.verificationToken.update({
+  return prisma.verificationToken.delete({
     where: {
       id,
-    },
-    data: {
-      revoked: true,
-    },
+    }
   });
 }

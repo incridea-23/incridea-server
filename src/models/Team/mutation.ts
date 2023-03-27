@@ -345,6 +345,80 @@ builder.mutationField("deleteTeam", (t) =>
   })
 );
 
+
+builder.mutationField("RemoveTeamMember", (t) =>
+  t.prismaField({
+    type: "TeamMember",
+    args: {
+      teamId: t.arg.id({ required: true }),
+      userId: t.arg.id({ required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+
+      const team = await ctx.prisma.team.findUnique({
+        where: {
+          id: Number(args.teamId),
+        },
+        include: {
+          Event: {
+            include: {
+              Teams: {
+                include: {
+                  TeamMembers: true,
+                }
+              }
+            },
+          },
+        },
+      });
+      if (!team) {
+        throw new Error("Team not found");
+      }
+
+      if (
+        team.Event.Teams.TeamMembers.filter((member) => member.userId === args.userId).length ===
+        0
+      ) {
+        throw new Error("User does not belong to this team");
+      }
+      //event exists
+      const event = await ctx.prisma.event.findUnique({
+        where: {
+          id: Number(team.eventId),
+        }
+      });
+      if (!event) {
+        throw new Error("Event does not exist");
+      }
+
+      if (!team.leaderId) {
+        throw new Error("The leader does not exist");
+      }
+      else {
+        if (team.leaderId !== user.id) {
+          throw new Error("Action allowed only for the leader");
+        }
+      }
+
+      return await ctx.prisma.teamMember.delete({
+        where: {
+          userId_teamId: {
+            userId: Number(args.userId),
+            teamId: Number(args.teamId),
+          },
+        },
+        ...query,
+      });
+    },
+  })
+);
 // Solo Events
 
 builder.mutationField("registerSoloEvent", (t) =>

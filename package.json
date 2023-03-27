@@ -32,6 +32,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@envelop/depth-limit": "^2.0.6",
     "@graphql-yoga/node": "^3.5.1",
     "@pothos/core": "^3.24.1",
     "@pothos/plugin-errors": "^3.10.1",

@@ -206,6 +206,8 @@ builder.mutationField("deleteEvent", (t) =>
             `Oops ${user.name}! you are not an organizer of this event`
           );
       }
+      if(event.published) 
+        throw new Error("Event is already published");
       await ctx.prisma.event.delete({
         where: {
           id: args.id,

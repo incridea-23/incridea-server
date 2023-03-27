@@ -34,3 +34,23 @@ builder.queryField("events", (t) =>
     },
   })
 );
+
+//Events By ID
+builder.queryField("eventById", (t) =>
+  t.prismaField({
+    type: "Event",
+    args: {
+      id: t.arg({
+        type: "ID",
+        required: true,
+      }),
+    },
+    resolve: (query, root, args, ctx, info) => {
+      return ctx.prisma.event.findUniqueOrThrow({
+        where: {
+          id: Number(args.id),
+        },
+      });
+    },
+  }),
+);
