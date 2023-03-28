@@ -345,8 +345,7 @@ builder.mutationField("deleteTeam", (t) =>
   })
 );
 
-
-builder.mutationField("RemoveTeamMember", (t) =>
+builder.mutationField("removeTeamMember", (t) =>
   t.prismaField({
     type: "TeamMember",
     args: {
@@ -367,41 +366,20 @@ builder.mutationField("RemoveTeamMember", (t) =>
           id: Number(args.teamId),
         },
         include: {
-          Event: {
-            include: {
-              Teams: {
-                include: {
-                  TeamMembers: true,
-                }
-              }
-            },
-          },
+          TeamMembers: true,
         },
       });
       if (!team) {
         throw new Error("Team not found");
       }
 
-      if (
-        team.Event.Teams.TeamMembers.filter((member) => member.userId === args.userId).length ===
-        0
-      ) {
+      if (team.TeamMembers.find((member) => member.userId === args.userId)) {
         throw new Error("User does not belong to this team");
-      }
-      //event exists
-      const event = await ctx.prisma.event.findUnique({
-        where: {
-          id: Number(team.eventId),
-        }
-      });
-      if (!event) {
-        throw new Error("Event does not exist");
       }
 
       if (!team.leaderId) {
         throw new Error("The leader does not exist");
-      }
-      else {
+      } else {
         if (team.leaderId !== user.id) {
           throw new Error("Action allowed only for the leader");
         }
