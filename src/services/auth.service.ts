@@ -68,10 +68,13 @@ export function findVerificationTokenByID(id: string) {
   });
 }
 
-export function deleteVerificationToken(id: string) {
-  return prisma.verificationToken.delete({
+export function revokeVerificationToken(id: string) {
+  return prisma.verificationToken.update({
     where: {
       id,
+    },
+    data:{
+      revoked: true,
     }
   });
 }
@@ -97,10 +100,13 @@ export function findPasswordResetTokenByID(id: string) {
   });
 }
 
-export function deletePasswordResetToken(id: string) {
-  return prisma.verificationToken.delete({
+export function revokePasswordResetToken(id: string) {
+  return prisma.verificationToken.update({
     where: {
       id,
+    },
+    data:{
+      revoked: true,
     }
   });
 }
