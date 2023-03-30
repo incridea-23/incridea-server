@@ -74,6 +74,23 @@ builder.mutationField("createPaymentOrder", (t) =>
         });
       }
       // FEST_REGISTRATION
+      //check if user already has a pending order for FEST_REGISTRATION
+      const existingOrder = await ctx.prisma.paymentOrder.findFirst({
+        where: {
+          User: {
+            id: user.id
+          },
+          type: args.type,
+          status: "PENDING"
+        }
+      });
+      if (existingOrder) {
+        await ctx.prisma.paymentOrder.delete({
+          where: {
+            id: existingOrder.id
+          }
+        });
+      }
       const payment_capture = 1;
       const amount = 250;
       const currency = "INR";
