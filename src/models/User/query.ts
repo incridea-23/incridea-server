@@ -12,7 +12,7 @@ builder.queryField("users", (t) =>
     },
     resolve: (query, root, args, ctx, info) => {
       const filter = args.contains || "";
-      console.log('filter:', filter);
+      console.log("filter:", filter);
       return ctx.prisma.user.findMany({
         where: {
           OR: [
@@ -26,16 +26,17 @@ builder.queryField("users", (t) =>
                 contains: filter,
               },
             },
-            filter !== '' && !isNaN(Number(filter)) ? {
-              id: Number(filter),
-            } : {},
+            filter !== "" && !isNaN(Number(filter))
+              ? {
+                  id: Number(filter),
+                }
+              : {},
           ],
         },
         ...query,
       });
     },
   })
-  
 );
 
 builder.queryField("me", (t) =>
@@ -67,6 +68,35 @@ builder.queryField("userById", (t) =>
       return ctx.prisma.user.findUniqueOrThrow({
         where: {
           id: Number(args.id),
+        },
+      });
+    },
+  })
+);
+
+// getRegisterd Events
+builder.queryField("registeredEvents", (t) =>
+  t.prismaField({
+    type: ["Event"],
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      return ctx.prisma.event.findMany({
+        where: {
+          Teams: {
+            some: {
+              TeamMembers: {
+                some: {
+                  userId: user.id,
+                },
+              },
+            },
+          },
         },
       });
     },
