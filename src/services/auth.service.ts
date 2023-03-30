@@ -29,10 +29,13 @@ export function findRefreshTokenById(id: string) {
 }
 
 // soft delete tokens after usage.
-export function deleteRefreshToken(id: string) {
-  return prisma.refreshToken.delete({
+export function revokeRefreshToken(id: string) {
+  return prisma.refreshToken.update({
     where: {
       id,
+    },
+    data:{
+      revoked: true,
     }
   });
 }

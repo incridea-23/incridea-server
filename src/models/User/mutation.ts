@@ -16,7 +16,7 @@ import {
 import {
   addVerificationTokenToWhitelist,
   addRefreshTokenToWhitelist,
-  deleteRefreshToken,
+  revokeRefreshToken,
   findRefreshTokenById,
   findVerificationTokenByID,
   deleteVerificationToken,
@@ -33,8 +33,8 @@ const UserCreateInput = builder.inputType("UserCreateInput", {
     name: t.string({ required: true }),
     email: t.string({ required: true }),
     password: t.string({ required: true }),
-    phoneNumber: t.string({ required: true }),
-    collegeId: t.int({ required: true }),
+    phoneNumber: t.string({ required: false }),
+    collegeId: t.int({ required: false }),
   }),
 });
 
@@ -120,15 +120,6 @@ builder.mutationField("login", (t) =>
       }
 
       const jti = uuidv4();
-      //delete old refresh token if exists
-      const oldRefreshToken = await ctx.prisma.refreshToken.findFirst({
-        where: {
-          userId: existingUser.id,
-          },
-        });
-      if (oldRefreshToken) {
-        await deleteRefreshToken(oldRefreshToken.id);
-      }
       //give new refresh token
       const { accessToken, refreshToken } = generateTokens(existingUser, jti);
       await addRefreshTokenToWhitelist({
@@ -178,7 +169,7 @@ builder.mutationField("refreshToken", (t) =>
       if (!user) {
         throw new Error("Unauthorized");
       }
-      await deleteRefreshToken(savedRefreshToken.id);
+      await revokeRefreshToken(savedRefreshToken.id);
       const jti = uuidv4();
       const { accessToken, refreshToken: newRefreshToken } = generateTokens(
         user,
