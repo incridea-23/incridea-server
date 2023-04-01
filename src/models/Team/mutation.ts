@@ -910,3 +910,5 @@ builder.mutationField("organizerRegisterSolo", (t) =>
     },
   })
 );
+
+

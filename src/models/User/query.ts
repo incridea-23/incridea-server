@@ -73,32 +73,3 @@ builder.queryField("userById", (t) =>
     },
   })
 );
-
-// getRegisterd Events
-builder.queryField("registeredEvents", (t) =>
-  t.prismaField({
-    type: ["Event"],
-    errors: {
-      types: [Error],
-    },
-    resolve: async (query, root, args, ctx, info) => {
-      const user = await ctx.user;
-      if (!user) {
-        throw new Error("Not authenticated");
-      }
-      return ctx.prisma.event.findMany({
-        where: {
-          Teams: {
-            some: {
-              TeamMembers: {
-                some: {
-                  userId: user.id,
-                },
-              },
-            },
-          },
-        },
-      });
-    },
-  })
-);

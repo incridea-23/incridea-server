@@ -118,7 +118,7 @@ model Team {
   leaderId     Int?
   Round        Round?       @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
 
-  @@unique([eventId, name])
+  @@unique([name, eventId])
   @@index([eventId, roundNo])
   @@index([roundEventId, roundRoundNo])
 }
