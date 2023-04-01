@@ -13,5 +13,6 @@ builder.prismaObject("User", {
     phoneNumber: t.exposeString("phoneNumber", {
       nullable: true,
     }),
+    college: t.relation("College"),
   }),
 });
