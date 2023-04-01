@@ -11,6 +11,9 @@ builder.prismaObject("Team", {
     members: t.relation("TeamMembers"),
     confirmed: t.exposeBoolean("confirmed"),
     attended: t.exposeBoolean("attended"),
+    leaderId: t.exposeInt("leaderId", {
+      nullable: true,
+    }),
   }),
 });
 
