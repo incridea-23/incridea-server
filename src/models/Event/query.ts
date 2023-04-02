@@ -50,6 +50,7 @@ builder.queryField("eventById", (t) =>
         where: {
           id: Number(args.id),
         },
+        ...query,
       });
     },
   })
@@ -78,6 +79,7 @@ builder.queryField("registeredEvents", (t) =>
             },
           },
         },
+        ...query,
         include: {
           Teams: {
             where: {
@@ -89,6 +91,20 @@ builder.queryField("registeredEvents", (t) =>
             },
           },
         },
+      });
+    },
+  })
+);
+
+builder.queryField("publishedEvents", (t) =>
+  t.prismaField({
+    type: ["Event"],
+    resolve: (query, root, args, ctx, info) => {
+      return ctx.prisma.event.findMany({
+        where: {
+          published: true,
+        },
+        ...query,
       });
     },
   })
