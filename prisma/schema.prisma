@@ -47,7 +47,7 @@ model User {
   password          String              @db.Text
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  collegeId         Int?
+  collegeId         Int?                @default(1)
   College           College?            @relation(fields: [collegeId], references: [id], onDelete: SetNull)
   phoneNumber       String?
   VerificationToken VerificationToken[]
