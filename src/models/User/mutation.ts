@@ -16,12 +16,12 @@ import {
 import {
   addVerificationTokenToWhitelist,
   addRefreshTokenToWhitelist,
-  deleteRefreshToken,
+  revokeRefreshToken,
   findRefreshTokenById,
   findVerificationTokenByID,
-  deleteVerificationToken,
+  revokeVerificationToken,
   addPasswordResetTokenToWhitelist,
-  deletePasswordResetToken,
+  revokePasswordResetToken,
   findPasswordResetTokenByID,
 } from "../../services/auth.service";
 import { hashToken } from "../../utils/auth/hashToken";
@@ -33,6 +33,8 @@ const UserCreateInput = builder.inputType("UserCreateInput", {
     name: t.string({ required: true }),
     email: t.string({ required: true }),
     password: t.string({ required: true }),
+    phoneNumber: t.string({ required: true }),
+    collegeId: t.int({ required: true }),
   }),
 });
 
@@ -118,6 +120,7 @@ builder.mutationField("login", (t) =>
       }
 
       const jti = uuidv4();
+      //give new refresh token
       const { accessToken, refreshToken } = generateTokens(existingUser, jti);
       await addRefreshTokenToWhitelist({
         jti,
@@ -166,7 +169,7 @@ builder.mutationField("refreshToken", (t) =>
       if (!user) {
         throw new Error("Unauthorized");
       }
-      await deleteRefreshToken(savedRefreshToken.id);
+      await revokeRefreshToken(savedRefreshToken.id);
       const jti = uuidv4();
       const { accessToken, refreshToken: newRefreshToken } = generateTokens(
         user,
@@ -247,7 +250,7 @@ builder.mutationField("verifyEmail", (t) =>
         where: { id: user.id },
         data: { isVerified: true },
       });
-      await deleteVerificationToken(savedToken.id);
+      await revokeVerificationToken(savedToken.id);
 
       return verified_user;
     },
@@ -322,7 +325,7 @@ builder.mutationField("resetPassword", (t) =>
         where: { id: user.id },
         data: { password: hashedPassword },
       });
-      await deletePasswordResetToken(savedToken.id);
+      await revokePasswordResetToken(savedToken.id);
 
       return updated_user;
     },

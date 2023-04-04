@@ -12,6 +12,7 @@ builder.queryField("users", (t) =>
     },
     resolve: (query, root, args, ctx, info) => {
       const filter = args.contains || "";
+      console.log("filter:", filter);
       return ctx.prisma.user.findMany({
         where: {
           OR: [
@@ -25,6 +26,11 @@ builder.queryField("users", (t) =>
                 contains: filter,
               },
             },
+            filter !== "" && !isNaN(Number(filter))
+              ? {
+                  id: Number(filter),
+                }
+              : {},
           ],
         },
         ...query,
