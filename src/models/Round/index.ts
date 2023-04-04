@@ -16,3 +16,4 @@ builder.prismaObject("Round", {
     judges: t.relation("Judges"),
   }),
 });
+  

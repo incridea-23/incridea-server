@@ -32,6 +32,7 @@ builder.mutationField("createPaymentOrder", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
+
       const razorpay = new Razorpay({
         key_id: process.env.RAZORPAY_KEY as string,
         key_secret: process.env.RAZORPAY_SECRET as string,
@@ -58,6 +59,7 @@ builder.mutationField("createPaymentOrder", (t) =>
           payment_capture,
           recept: uuidv4(),
         };
+
         const response = await razorpay.orders.create(options);
         return ctx.prisma.paymentOrder.create({
           data: {
@@ -75,20 +77,23 @@ builder.mutationField("createPaymentOrder", (t) =>
       }
       // FEST_REGISTRATION
       //check if user already has a pending order for FEST_REGISTRATION
+      if (user.role !== "USER") {
+        throw new Error("Already Registered");
+      }
       const existingOrder = await ctx.prisma.paymentOrder.findFirst({
         where: {
           User: {
-            id: user.id
+            id: user.id,
           },
           type: args.type,
-          status: "PENDING"
-        }
+          status: "PENDING",
+        },
       });
       if (existingOrder) {
         await ctx.prisma.paymentOrder.delete({
           where: {
-            id: existingOrder.id
-          }
+            id: existingOrder.id,
+          },
         });
       }
       const payment_capture = 1;
