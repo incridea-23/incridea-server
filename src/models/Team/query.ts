@@ -82,3 +82,37 @@ builder.queryField("teamDetails", (t) =>
     },
   })
 );
+
+// check if user is in team for particular event and retrun team details
+builder.queryField("myTeam", (t) =>
+  t.prismaField({
+    type: "Team",
+    args: {
+      eventId: t.arg({ type: "ID", required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      const data = await ctx.prisma.team.findFirst({
+        where: {
+          eventId: Number(args.eventId),
+          TeamMembers: {
+            some: {
+              userId: user.id,
+            },
+          },
+        },
+        ...query,
+      });
+      if (!data) {
+        throw new Error("Team not found");
+      }
+      return data;
+    },
+  })
+);
