@@ -5,6 +5,7 @@ import { schema } from "./schema";
 import bodyParser from "body-parser";
 import { handler as razorpayCapture } from "./webhook/capture";
 import { uploader as imageUpload } from "./cloudinary/upload";
+import cors from "cors";
 
 import { config } from "./cloudinary/config";
 const { upload } = config
@@ -22,7 +23,9 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("/graphql", yoga);
+app.use("/graphql", 
+        cors<cors.CorsRequest>({ origin: process.env.FRONTEND_URL }), 
+        yoga);
 app.post("/webhook/capture", razorpayCapture);
 app.post("/cloudinary/upload", upload.single('image'), imageUpload);
 
