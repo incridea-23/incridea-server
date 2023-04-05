@@ -105,18 +105,19 @@ model Team {
   id   Int    @id @default(autoincrement())
   name String
 
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  eventId      Int
-  Event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  roundNo      Int          @default(1)
-  confirmed    Boolean      @default(false)
-  attended     Boolean      @default(false)
-  TeamMembers  TeamMember[]
-  roundEventId Int?
-  roundRoundNo Int?
-  leaderId     Int?
-  Round        Round?       @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  eventId           Int
+  Event             Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  roundNo           Int                 @default(1)
+  confirmed         Boolean             @default(false)
+  attended          Boolean             @default(false)
+  TeamMembers       TeamMember[]
+  roundEventId      Int?
+  roundRoundNo      Int?
+  leaderId          Int?
+  Round             Round?              @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
+  EventPaymentOrder EventPaymentOrder[]
 
   @@unique([name, eventId])
   @@index([eventId, roundNo])
@@ -151,7 +152,19 @@ model PaymentOrder {
   @@index([userId])
 }
 
-// n-n relations
+model EventPaymentOrder {
+  id          String   @id @default(cuid())
+  orderId     String   @unique
+  status      Status   @default(PENDING)
+  amount      Int      @default(250)
+  paymentData Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  teamId      Int
+  Team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+}
 
 model BranchRep {
   userId   Int    @unique

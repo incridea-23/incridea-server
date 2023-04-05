@@ -19,10 +19,6 @@ builder.mutationField("createPaymentOrder", (t) =>
         type: OrderType,
         required: true,
       }),
-      eventId: t.arg({
-        type: "ID",
-        required: false,
-      }),
     },
     errors: {
       types: [Error],
@@ -32,6 +28,13 @@ builder.mutationField("createPaymentOrder", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
+      if (
+        user.role == "ORGANIZER" ||
+        user.role == "PARTICIPANT" ||
+        user.role == "BRANCH_REP"
+      ) {
+        throw new Error("Already Registered");
+      }
 
       const razorpay = new Razorpay({
         key_id: process.env.RAZORPAY_KEY as string,
@@ -39,41 +42,7 @@ builder.mutationField("createPaymentOrder", (t) =>
       });
       if (args.type === OrderTypeEnum.EVENT_REGISTRATION) {
         // EVENT_REGISTRATION
-        if (!args.eventId) {
-          throw new Error("Event Id not provided");
-        }
-        const event = await ctx.prisma.event.findUnique({
-          where: {
-            id: Number(args.eventId),
-          },
-        });
-        if (!event) {
-          throw new Error("Event not found");
-        }
-        const payment_capture = 1;
-        const amount = event.fees;
-        const currency = "INR";
-        const options = {
-          amount: (amount * 100).toString(),
-          currency,
-          payment_capture,
-          recept: uuidv4(),
-        };
-
-        const response = await razorpay.orders.create(options);
-        return ctx.prisma.paymentOrder.create({
-          data: {
-            amount: Number(response.amount),
-            status: "PENDING",
-            type: args.type,
-            User: {
-              connect: {
-                id: user.id,
-              },
-            },
-            orderId: response.id as string,
-          },
-        });
+        throw new Error("Not implemented");
       }
       // FEST_REGISTRATION
       //check if user already has a pending order for FEST_REGISTRATION
@@ -114,6 +83,74 @@ builder.mutationField("createPaymentOrder", (t) =>
           User: {
             connect: {
               id: user.id,
+            },
+          },
+          orderId: response.id as string,
+        },
+      });
+    },
+  })
+);
+
+builder.mutationField("EventPaymentOrder", (t) =>
+  t.prismaField({
+    type: "EventPaymentOrder",
+    args: {
+      teamId: t.arg({
+        type: "ID",
+        required: true,
+      }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      // find team exists in that event
+      const team = await ctx.prisma.team.findUnique({
+        where: {
+          id: Number(args.teamId),
+        },
+        include: {
+          Event: true,
+        },
+      });
+      if (!team) {
+        throw new Error("Team not found");
+      }
+      if (team.Event.fees === 0) {
+        throw new Error("Event is free");
+      }
+      if (team.confirmed) {
+        throw new Error("Already confirmed");
+      }
+      if (user.id != team.leaderId) {
+        throw new Error("Oops! You are Not the leader");
+      }
+      const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY as string,
+        key_secret: process.env.RAZORPAY_SECRET as string,
+      });
+      const payment_capture = 1;
+      const amount = team.Event.fees;
+      const currency = "INR";
+      const options = {
+        amount: (amount * 100).toString(),
+        currency,
+        payment_capture,
+      };
+      const response = await razorpay.orders.create(options);
+      return ctx.prisma.eventPaymentOrder.create({
+        ...query,
+        data: {
+          amount: Number(response.amount),
+          status: "PENDING",
+          Team: {
+            connect: {
+              id: team.id,
             },
           },
           orderId: response.id as string,

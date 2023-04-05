@@ -11,19 +11,25 @@ export async function handler(req: Request, res: Response) {
     if (!order_id || !status) {
       return res.status(400).send({ message: "Invalid request" });
     }
-    console.log(req.body.payload.payment.entity);
-    console.log(order_id, status);
     if (status === "captured") {
-      const paymentOrder = await prisma.paymentOrder.update({
+      // find payment order from two tables
+      const paymentOrder = await prisma.paymentOrder.findUnique({
         where: {
           orderId: order_id,
         },
-        data: {
-          status: "SUCCESS",
-        },
       });
-      if (paymentOrder.type === "FEST_REGISTRATION") {
-        await prisma.user.update({
+
+      if (paymentOrder) {
+        const updatedPaymentOrder = await prisma.paymentOrder.update({
+          where: {
+            orderId: order_id,
+          },
+          data: {
+            status: "SUCCESS",
+            paymentData: req.body.payload.payment.entity.paymentData,
+          },
+        });
+        const updatedUser = await prisma.user.update({
           where: {
             id: paymentOrder.userId,
           },
@@ -31,7 +37,27 @@ export async function handler(req: Request, res: Response) {
             role: "PARTICIPANT",
           },
         });
-        return res.status(200).json({ status: "OK" });
+
+        return res.status(200).json(updatedPaymentOrder);
+      } else {
+        const updatedPaymentOrder = await prisma.eventPaymentOrder.update({
+          where: {
+            orderId: order_id,
+          },
+          data: {
+            status: "SUCCESS",
+            paymentData: req.body.payload.payment.entity.paymentData,
+          },
+        });
+        const updateTeam = await prisma.team.update({
+          where: {
+            id: updatedPaymentOrder.teamId,
+          },
+          data: {
+            confirmed: true,
+          },
+        });
+        return res.status(200).json(updatedPaymentOrder);
       }
     } else {
       await prisma.paymentOrder.update({
