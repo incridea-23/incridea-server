@@ -92,7 +92,7 @@ builder.mutationField("createPaymentOrder", (t) =>
   })
 );
 
-builder.mutationField("EventPaymentOrder", (t) =>
+builder.mutationField("eventPaymentOrder", (t) =>
   t.prismaField({
     type: "EventPaymentOrder",
     args: {
