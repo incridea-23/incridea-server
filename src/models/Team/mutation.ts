@@ -60,7 +60,7 @@ builder.mutationField("createTeam", (t) =>
           throw new Error("Event is full");
         }
       }
-      // if team name is not unique, throw error
+
       const team = await ctx.prisma.team.findUnique({
         where: {
           name_eventId: {
@@ -72,7 +72,7 @@ builder.mutationField("createTeam", (t) =>
           TeamMembers: true,
         },
       });
-      if (!team) {
+      if (team) {
         throw new Error("Team name already exists");
       }
       return await ctx.prisma.team.create({
