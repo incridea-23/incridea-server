@@ -1,4 +1,5 @@
 import { createYoga } from "graphql-yoga";
+import cors from "cors";
 import express from "express";
 import { context } from "./context";
 import { schema } from "./schema";
@@ -14,13 +15,16 @@ const port = Number(process.env.API_PORT) || 4000;
 const yoga = createYoga({
   context,
   schema,
-  plugins: [ useDepthLimit({ maxDepth: 6 }) ] //max depth allowed to avoid infinite nested queries
+  plugins: [useDepthLimit({ maxDepth: 6 })] //max depth allowed to avoid infinite nested queries
 });
 
 const app = express();
 
+app.use(cors());
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 app.use("/graphql", yoga);
 app.post("/webhook/capture", razorpayCapture);
