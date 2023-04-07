@@ -116,6 +116,7 @@ builder.mutationField("eventPaymentOrder", (t) =>
         },
         include: {
           Event: true,
+          TeamMembers: true,
         },
       });
       if (!team) {
@@ -124,6 +125,23 @@ builder.mutationField("eventPaymentOrder", (t) =>
       if (team.Event.fees === 0) {
         throw new Error("Event is free");
       }
+      if (
+        team.Event.minTeamSize &&
+        team.TeamMembers.length < team.Event.minTeamSize
+      ) {
+        throw new Error(
+          `Still need ${team.Event.minTeamSize} members to register`
+        );
+      }
+      if (
+        team.Event.maxTeamSize &&
+        team.TeamMembers.length > team.Event.maxTeamSize
+      ) {
+        throw new Error(
+          `Team size exceeded. Max team size is ${team.Event.maxTeamSize}`
+        );
+      }
+
       if (team.confirmed) {
         throw new Error("Already confirmed");
       }
@@ -134,6 +152,7 @@ builder.mutationField("eventPaymentOrder", (t) =>
         key_id: process.env.RAZORPAY_KEY as string,
         key_secret: process.env.RAZORPAY_SECRET as string,
       });
+
       const payment_capture = 1;
       const amount = team.Event.fees;
       const currency = "INR";
