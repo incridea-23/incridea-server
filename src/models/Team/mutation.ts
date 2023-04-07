@@ -56,11 +56,25 @@ builder.mutationField("createTeam", (t) =>
             eventId: Number(args.eventId),
           },
         });
-        if (event.maxTeamSize && totalTeams >= event.maxTeamSize) {
+        if (event.maxTeams && totalTeams >= event.maxTeams) {
           throw new Error("Event is full");
         }
       }
-
+      // if team name is not unique, throw error
+      const team = await ctx.prisma.team.findUnique({
+        where: {
+          name_eventId: {
+            name: args.name,
+            eventId: Number(args.eventId),
+          },
+        },
+        include: {
+          TeamMembers: true,
+        },
+      });
+      if (!team) {
+        throw new Error("Team name already exists");
+      }
       return await ctx.prisma.team.create({
         data: {
           name: args.name,
@@ -910,5 +924,3 @@ builder.mutationField("organizerRegisterSolo", (t) =>
     },
   })
 );
-
-
