@@ -116,3 +116,24 @@ builder.queryField("myTeam", (t) =>
     },
   })
 );
+
+//get all the teams of a particular event
+builder.queryField("teamsByEvent", (t) =>
+  t.prismaField({
+    type: ["Team"],
+    args: {
+      eventId: t.arg({ type: "ID", required: true }),
+    },
+    resolve: async(query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) throw new Error("Not authenticated");
+      if(user.role !== "ADMIN") throw new Error("No Permission");
+      return ctx.prisma.team.findMany({
+        where: {
+          eventId: Number(args.eventId),
+        },
+        ...query,
+      });
+    }
+  })
+);
