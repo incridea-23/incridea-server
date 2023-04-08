@@ -36,6 +36,7 @@ const EventUpdateInput = builder.inputType("EventUpdateInput", {
     maxTeamSize: t.int({ required: false }),
     maxTeams: t.int({ required: false }),
     venue: t.string({ required: false }),
+    image: t.string({ required: false }),
   }),
 });
 
@@ -206,8 +207,7 @@ builder.mutationField("deleteEvent", (t) =>
             `Oops ${user.name}! you are not an organizer of this event`
           );
       }
-      if(event.published) 
-        throw new Error("Event is already published");
+      if (event.published) throw new Error("Event is already published");
       await ctx.prisma.event.delete({
         where: {
           id: args.id,

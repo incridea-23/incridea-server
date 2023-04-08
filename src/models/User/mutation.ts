@@ -53,7 +53,7 @@ builder.mutationField("signUp", (t) =>
     resolve: async (query, root, args, ctx, info) => {
       // if user already exists throw error
       const existingUser = await findUserByEmail(args.data.email);
-      if (!existingUser?.isVerified) {
+      if (existingUser && !existingUser.isVerified) {
         throw new Error("Please verify your email and Login");
       }
       if (existingUser) {
