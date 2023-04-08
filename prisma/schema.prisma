@@ -206,6 +206,12 @@ model Judge {
   @@index([eventId, roundNo, userId])
 }
 
+model EmailMonitor {
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+}
+
 // Enums
 enum PaymentType {
   FEST_REGISTRATION
