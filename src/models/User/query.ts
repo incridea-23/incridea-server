@@ -15,6 +15,9 @@ builder.queryField("users", (t) =>
       console.log("filter:", filter);
       return ctx.prisma.user.findMany({
         where: {
+          role: {
+            notIn: ["ADMIN", "JUDGE", "USER", "JURY"],
+          },
           OR: [
             {
               email: {

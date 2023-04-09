@@ -16,7 +16,11 @@ builder.mutationField("createTeam", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role in ["USER", "JUDGE", "JURY"]) {
+      if (
+        user.role === "USER" ||
+        user.role === "JUDGE" ||
+        user.role === "JURY"
+      ) {
         throw new Error("Not authorized");
       }
       const event = await ctx.prisma.event.findUnique({
@@ -107,7 +111,11 @@ builder.mutationField("joinTeam", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role in ["USER", "JUDGE", "JURY"]) {
+      if (
+        user.role === "USER" ||
+        user.role === "JUDGE" ||
+        user.role === "JURY"
+      ) {
         throw new Error("Not authorized");
       }
       const team = await ctx.prisma.team.findUnique({
@@ -182,7 +190,11 @@ builder.mutationField("leaveTeam", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role in ["USER", "JUDGE", "JURY"]) {
+      if (
+        user.role === "USER" ||
+        user.role === "JUDGE" ||
+        user.role === "JURY"
+      ) {
         throw new Error("Not authorized");
       }
       const team = await ctx.prisma.team.findUnique({
@@ -232,7 +244,11 @@ builder.mutationField("confirmTeam", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role in ["USER", "JUDGE", "JURY"]) {
+      if (
+        user.role === "USER" ||
+        user.role === "JUDGE" ||
+        user.role === "JURY"
+      ) {
         throw new Error("Not authorized");
       }
       const team = await ctx.prisma.team.findUnique({
@@ -298,7 +314,11 @@ builder.mutationField("deleteTeam", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role in ["USER", "JUDGE", "JURY"]) {
+      if (
+        user.role === "USER" ||
+        user.role === "JUDGE" ||
+        user.role === "JURY"
+      ) {
         throw new Error("Not authorized");
       }
       const team = await ctx.prisma.team.findUnique({
@@ -401,7 +421,11 @@ builder.mutationField("registerSoloEvent", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role in ["USER", "JUDGE", "JURY"]) {
+      if (
+        user.role === "USER" ||
+        user.role === "JUDGE" ||
+        user.role === "JURY"
+      ) {
         throw new Error("Not authorized");
       }
       const event = await ctx.prisma.event.findUnique({
