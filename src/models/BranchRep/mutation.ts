@@ -26,6 +26,14 @@ builder.mutationField("addBranchRep", (t) =>
         },
       });
       if (!branch) throw new Error(`No Branch with id ${args.branchId}`);
+      await ctx.prisma.user.update({
+        where: {
+          id: Number(args.userId),
+        },
+        data: {
+          role: "BRANCH_REP",
+        },
+      });
       return ctx.prisma.branchRep.create({
         data: {
           Branch: {
@@ -44,8 +52,6 @@ builder.mutationField("addBranchRep", (t) =>
   })
 );
 
-
-
 builder.mutationField("removeBranchRep", (t) =>
   t.field({
     type: "String",
@@ -55,9 +61,9 @@ builder.mutationField("removeBranchRep", (t) =>
         required: true,
       }),
       branchId: t.arg({
-             type: "ID",
-              required:true,
-            }),
+        type: "ID",
+        required: true,
+      }),
     },
     errors: {
       types: [Error],
@@ -66,7 +72,7 @@ builder.mutationField("removeBranchRep", (t) =>
       const user = await ctx.user;
       if (!user) throw new Error("Not authenticated");
       if (user.role !== "ADMIN") throw new Error("No Permission");
-      const branch= await ctx.prisma.branch.findUnique({
+      const branch = await ctx.prisma.branch.findUnique({
         where: {
           id: Number(args.branchId),
         },
@@ -80,20 +86,19 @@ builder.mutationField("removeBranchRep", (t) =>
       if (!branchRep) throw new Error(`No Branch Under user ${args.userId}`);
       if (branchRep.branchId !== branch.id) throw new Error(`No permission`);
       await ctx.prisma.user.update({
-          where: {
-          id:Number(args.userId),
-          },
-          data: {
-            role: "PARTICIPANT",
-          },
+        where: {
+          id: Number(args.userId),
+        },
+        data: {
+          role: "PARTICIPANT",
+        },
       });
       await ctx.prisma.branchRep.delete({
         where: {
           userId: Number(args.userId),
-        
         },
       });
-     return "Branch Representative has been Removed";
+      return "Branch Representative has been Removed";
     },
   })
 );

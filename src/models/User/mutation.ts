@@ -206,6 +206,9 @@ builder.mutationField("sendEmailVerification", (t) =>
       if (!existingUser) {
         throw new Error("No user found");
       }
+      if (existingUser.isVerified) {
+        throw new Error("User already verified");
+      }
       const { id: token } = await addVerificationTokenToWhitelist({
         userId: existingUser.id,
       });
