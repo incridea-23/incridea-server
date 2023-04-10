@@ -28,6 +28,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
   res.send("Hello Incridea");
 });
+
 app.use("/graphql", yoga);
 app.post("/webhook/capture", razorpayCapture);
 app.post("/cloudinary/upload/:eventName", upload.single("image"), imageUpload);

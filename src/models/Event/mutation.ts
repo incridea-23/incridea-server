@@ -5,9 +5,19 @@ enum EventTypeEnum {
   INDIVIDUAL_MULTIPLE_ENTRY = "INDIVIDUAL_MULTIPLE_ENTRY",
   TEAM_MULTIPLE_ENTRY = "TEAM_MULTIPLE_ENTRY",
 }
+enum EventCategoryEnum {
+  TECHNICAL = "TECHNICAL",
+  NON_TECHNICAL = "NON_TECHNICAL",
+  CORE = "CORE",
+}
 const EventType = builder.enumType(EventTypeEnum, {
   name: "EventType",
 });
+
+const EventCategory = builder.enumType(EventCategoryEnum, {
+  name: "EventCategory",
+});
+
 const EventCreateInput = builder.inputType("EventCreateInput", {
   fields: (t) => ({
     name: t.string({ required: true }),
@@ -37,6 +47,10 @@ const EventUpdateInput = builder.inputType("EventUpdateInput", {
     maxTeams: t.int({ required: false }),
     venue: t.string({ required: false }),
     image: t.string({ required: false }),
+    category: t.field({
+      type: EventCategory,
+      required: false,
+    }),
   }),
 });
 
