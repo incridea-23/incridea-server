@@ -53,13 +53,13 @@ builder.mutationField("signUp", (t) =>
     resolve: async (query, root, args, ctx, info) => {
       // if user already exists throw error
       const existingUser = await findUserByEmail(args.data.email);
+      if (existingUser && !existingUser.isVerified) {
+        throw new Error("Please verify your email and Login");
+      }
       if (existingUser) {
         throw new Error("User already exists please login");
       }
       const user = await createUserByEmailAndPassword(args.data);
-      // const jti = uuidv4();
-      // const { accessToken, refreshToken } = generateTokens(user, jti);
-      // await addRefreshTokenToWhitelist({ jti, refreshToken, userId: user.id });
       return user;
     },
   })
@@ -205,6 +205,9 @@ builder.mutationField("sendEmailVerification", (t) =>
       const existingUser = await findUserByEmail(args.email);
       if (!existingUser) {
         throw new Error("No user found");
+      }
+      if (existingUser.isVerified) {
+        throw new Error("User already verified");
       }
       const { id: token } = await addVerificationTokenToWhitelist({
         userId: existingUser.id,

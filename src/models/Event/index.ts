@@ -30,5 +30,8 @@ builder.prismaObject("Event", {
     eventType: t.exposeString("eventType"),
     teams: t.relation("Teams"),
     rounds: t.relation("Rounds"),
+    category: t.exposeString("category", {
+      nullable: true,
+    }),
   }),
 });

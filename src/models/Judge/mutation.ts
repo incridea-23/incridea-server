@@ -29,6 +29,9 @@ builder.mutationField("createJudge", (t) =>
       if (!event.Organizers.find((o) => o.userId === user.id)) {
         throw new Error("Not authorized");
       }
+      if (!args.email.endsWith("@incridea.in"))
+        throw new Error("Email should end with @incridea.in");
+
       const judge = await ctx.prisma.judge.create({
         data: {
           User: {
@@ -94,6 +97,11 @@ builder.mutationField("deleteJudge", (t) =>
             },
           },
           ...query,
+        });
+        const deletedUser = await ctx.prisma.user.delete({
+          where: {
+            id: Number(args.userId),
+          },
         });
         return deletedJudge;
       } catch (err) {

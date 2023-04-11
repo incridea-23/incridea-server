@@ -79,24 +79,25 @@ model Branch {
 }
 
 model Event {
-  id          Int         @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   name        String
-  description String?     @db.Text
+  description String?       @db.Text
   image       String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  fees        Int         @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  fees        Int           @default(0)
   Organizers  Organizer[]
-  eventType   EventType   @default(INDIVIDUAL)
+  eventType   EventType     @default(INDIVIDUAL)
   venue       String?
   branchId    Int
-  minTeamSize Int         @default(1)
-  maxTeamSize Int         @default(1)
+  minTeamSize Int           @default(1)
+  maxTeamSize Int           @default(1)
   maxTeams    Int?
-  published   Boolean     @default(false)
-  Branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  published   Boolean       @default(false)
+  Branch      Branch        @relation(fields: [branchId], references: [id], onDelete: Restrict)
   Teams       Team[]
   Rounds      Round[]
+  category    EventCategory @default(TECHNICAL)
 
   @@index([branchId])
 }
@@ -206,6 +207,12 @@ model Judge {
   @@index([eventId, roundNo, userId])
 }
 
+model EmailMonitor {
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+}
+
 // Enums
 enum PaymentType {
   FEST_REGISTRATION
@@ -238,4 +245,10 @@ enum EventType {
   TEAM
   INDIVIDUAL_MULTIPLE_ENTRY
   TEAM_MULTIPLE_ENTRY
+}
+
+enum EventCategory {
+  TECHNICAL
+  NON_TECHNICAL
+  CORE
 }

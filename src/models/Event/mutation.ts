@@ -5,9 +5,19 @@ enum EventTypeEnum {
   INDIVIDUAL_MULTIPLE_ENTRY = "INDIVIDUAL_MULTIPLE_ENTRY",
   TEAM_MULTIPLE_ENTRY = "TEAM_MULTIPLE_ENTRY",
 }
+enum EventCategoryEnum {
+  TECHNICAL = "TECHNICAL",
+  NON_TECHNICAL = "NON_TECHNICAL",
+  CORE = "CORE",
+}
 const EventType = builder.enumType(EventTypeEnum, {
   name: "EventType",
 });
+
+const EventCategory = builder.enumType(EventCategoryEnum, {
+  name: "EventCategory",
+});
+
 const EventCreateInput = builder.inputType("EventCreateInput", {
   fields: (t) => ({
     name: t.string({ required: true }),
@@ -36,6 +46,11 @@ const EventUpdateInput = builder.inputType("EventUpdateInput", {
     maxTeamSize: t.int({ required: false }),
     maxTeams: t.int({ required: false }),
     venue: t.string({ required: false }),
+    image: t.string({ required: false }),
+    category: t.field({
+      type: EventCategory,
+      required: false,
+    }),
   }),
 });
 
@@ -206,8 +221,7 @@ builder.mutationField("deleteEvent", (t) =>
             `Oops ${user.name}! you are not an organizer of this event`
           );
       }
-      if(event.published) 
-        throw new Error("Event is already published");
+      if (event.published) throw new Error("Event is already published");
       await ctx.prisma.event.delete({
         where: {
           id: args.id,

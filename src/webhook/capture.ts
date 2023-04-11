@@ -40,6 +40,7 @@ export async function handler(req: Request, res: Response) {
 
         return res.status(200).json(updatedPaymentOrder);
       } else {
+        // TODO : fix payment order
         const updatedPaymentOrder = await prisma.eventPaymentOrder.update({
           where: {
             orderId: order_id,
