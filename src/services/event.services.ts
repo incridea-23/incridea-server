@@ -1,11 +1,12 @@
 import { prisma } from "../utils/db/prisma";
+import { EventCategory } from "@prisma/client";
 
 export async function canRegister(
   userId: number,
   type: string,
-  eventCategory: string
+  eventCategory: EventCategory
 ) {
-  if (eventCategory !== "CORE") {
+  if (eventCategory != "CORE") {
     return false;
   }
   const registeredEvents = await prisma.event.findMany({

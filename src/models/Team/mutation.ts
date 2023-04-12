@@ -147,7 +147,7 @@ builder.mutationField("joinTeam", (t) =>
       if (!event) {
         throw new Error("Event not found");
       }
-      if (!(user.College?.type === "ENGINEERING")) {
+      if (!(user.College?.type == "ENGINEERING")) {
         if (
           !canRegister(user.id, user.College?.type as string, event.category)
         ) {
