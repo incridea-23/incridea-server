@@ -65,11 +65,28 @@ builder.mutationField("createPaymentOrder", (t) =>
           },
         });
       }
+      let amount = 300;
+      if (user.email.endsWith("nmamit.in")) {
+        amount = 200;
+      } else {
+        const userData = await ctx.prisma.user.findUnique({
+          where: {
+            id: user.id,
+          },
+          include: {
+            College: true,
+          },
+        });
+        if (userData?.College?.type === "OTHER") {
+          amount = 150;
+        }
+      }
+
       const payment_capture = 1;
-      const amount = 250;
+
       const currency = "INR";
       const options = {
-        amount: (amount * 100).toString(),
+        amount: (Math.ceil(amount / 0.98) * 100).toString(),
         currency,
         payment_capture,
       };
@@ -109,7 +126,6 @@ builder.mutationField("eventPaymentOrder", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      // find team exists in that event
       const team = await ctx.prisma.team.findUnique({
         where: {
           id: Number(args.teamId),
