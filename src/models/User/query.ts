@@ -12,7 +12,6 @@ builder.queryField("users", (t) =>
     },
     resolve: (query, root, args, ctx, info) => {
       const filter = args.contains || "";
-      console.log("filter:", filter);
       return ctx.prisma.user.findMany({
         where: {
           role: {

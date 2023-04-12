@@ -6,7 +6,7 @@ export async function canRegister(
   type: string,
   eventCategory: EventCategory
 ) {
-  if (eventCategory != "CORE") {
+  if (eventCategory !== "CORE") {
     return false;
   }
   const registeredEvents = await prisma.event.findMany({

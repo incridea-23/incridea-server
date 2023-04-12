@@ -35,7 +35,11 @@ builder.mutationField("createTeam", (t) =>
       // Non engineering college students can't register for more than 1 core event
       if (!(user.College?.type === "ENGINEERING")) {
         if (
-          !canRegister(user.id, user.College?.type as string, event.category)
+          !(await canRegister(
+            user.id,
+            user.College?.type as string,
+            event.category
+          ))
         ) {
           throw new Error("Not eligible to register");
         }
@@ -149,7 +153,11 @@ builder.mutationField("joinTeam", (t) =>
       }
       if (!(user.College?.type == "ENGINEERING")) {
         if (
-          !canRegister(user.id, user.College?.type as string, event.category)
+          !(await canRegister(
+            user.id,
+            user.College?.type as string,
+            event.category
+          ))
         ) {
           throw new Error("Not eligible to register");
         }
@@ -457,7 +465,11 @@ builder.mutationField("registerSoloEvent", (t) =>
       // Non engineering college students can't register for more than 1 core event
       if (!(user.College?.type === "ENGINEERING")) {
         if (
-          !canRegister(user.id, user.College?.type as string, event.category)
+          !(await canRegister(
+            user.id,
+            user.College?.type as string,
+            event.category
+          ))
         ) {
           throw new Error("Not eligible to register");
         }
