@@ -2,6 +2,16 @@ import { builder } from "../../builder";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+const fs = require("fs");
+const path = require("path");
+let verifyEmail = fs.readFileSync(
+  path.resolve(__dirname, "../../utils/templates/verifyEmail.html"),
+  "utf8"
+);
+let forgotPassword = fs.readFileSync(
+  path.resolve(__dirname, "../../utils/templates/forgotPassword.html"),
+  "utf8"
+);
 import {
   findUserByEmail,
   createUserByEmailAndPassword,
@@ -214,10 +224,13 @@ builder.mutationField("sendEmailVerification", (t) =>
       });
       const verificationToken = generateVerificationToken(existingUser, token);
       const url = `${process.env.FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
+      const content = verifyEmail
+        .replace("{{name}}", existingUser.name)
+        .replace("{{link}}", url);
       await sendEmail(
         existingUser.email,
-        `Verify Email <a href="${url}">Click Here to verifiy Email</a>`,
-        "Incridea Verify Email"
+        content,
+        "Incridea Email Verification"
       );
       return "Email sent";
     },
@@ -286,11 +299,10 @@ builder.mutationField("sendPasswordResetEmail", (t) =>
         token
       );
       const url = `${process.env.FRONTEND_URL}/auth/reset-password?token=${passwordResetToken}`;
-      await sendEmail(
-        existingUser.email,
-        `Reset Password <a href="${url}" > Click here to reset password </a>`,
-        "Incridea Rest password"
-      );
+      const content = forgotPassword
+        .replace("{{name}}", existingUser.name)
+        .replace("{{link}}", url);
+      await sendEmail(existingUser.email, content, "Incridea Reset Password");
       return "Email sent";
     },
   })

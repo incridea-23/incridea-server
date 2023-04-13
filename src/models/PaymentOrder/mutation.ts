@@ -170,7 +170,7 @@ builder.mutationField("eventPaymentOrder", (t) =>
       });
 
       const payment_capture = 1;
-      const amount = team.Event.fees;
+      const amount = Math.ceil(team.Event.fees / 0.98);
       const currency = "INR";
       const options = {
         amount: (amount * 100).toString(),

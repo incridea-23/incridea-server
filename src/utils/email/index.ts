@@ -21,8 +21,8 @@ export async function sendEmail(
     identifier: email,
     provider,
     subject: subject,
-    text: content,
     html: content,
+    text: "",
   });
   await updateCount(count + 1);
 }
