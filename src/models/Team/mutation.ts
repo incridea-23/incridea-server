@@ -1,4 +1,5 @@
 import { builder } from "../../builder";
+import { canRegister } from "../../services/event.services";
 
 builder.mutationField("createTeam", (t) =>
   t.prismaField({
@@ -31,6 +32,19 @@ builder.mutationField("createTeam", (t) =>
       if (!event) {
         throw new Error("Event not found");
       }
+      // Non engineering college students can't register for more than 1 core event
+      if (!(user.College?.type === "ENGINEERING")) {
+        if (
+          !(await canRegister(
+            user.id,
+            user.College?.type as string,
+            event.category
+          ))
+        ) {
+          throw new Error("Not eligible to register");
+        }
+      }
+
       // TODO: check if event started and if yes, throw error
       if (
         event.eventType === "INDIVIDUAL" ||
@@ -136,6 +150,17 @@ builder.mutationField("joinTeam", (t) =>
       });
       if (!event) {
         throw new Error("Event not found");
+      }
+      if (!(user.College?.type == "ENGINEERING")) {
+        if (
+          !(await canRegister(
+            user.id,
+            user.College?.type as string,
+            event.category
+          ))
+        ) {
+          throw new Error("Not eligible to register");
+        }
       }
       if (
         event.eventType === "INDIVIDUAL" ||
@@ -283,6 +308,7 @@ builder.mutationField("confirmTeam", (t) =>
           teamId: Number(args.teamId),
         },
       });
+
       if (teamMembers.length < event.minTeamSize) {
         throw new Error(
           `Team is not full need at least ${event.minTeamSize} members`
@@ -436,9 +462,23 @@ builder.mutationField("registerSoloEvent", (t) =>
       if (!event) {
         throw new Error("Event not found");
       }
+      // Non engineering college students can't register for more than 1 core event
+      if (!(user.College?.type === "ENGINEERING")) {
+        if (
+          !(await canRegister(
+            user.id,
+            user.College?.type as string,
+            event.category
+          ))
+        ) {
+          throw new Error("Not eligible to register");
+        }
+      }
+
       if (event.eventType === "TEAM") {
         throw new Error("Event is team");
       }
+
       const isPaidEvent = event.fees > 0;
       if (event.eventType === "INDIVIDUAL") {
         const registeredTeam = await ctx.prisma.team.findMany({
@@ -516,6 +556,7 @@ builder.mutationField("organizerCreateTeam", (t) =>
       ) {
         throw new Error("Not authorized");
       }
+
       try {
         const team = await ctx.prisma.team.create({
           data: {
@@ -617,6 +658,9 @@ builder.mutationField("organizerAddTeamMember", (t) =>
         where: {
           id: Number(args.userId),
         },
+        include: {
+          College: true,
+        },
       });
       if (
         !participant ||
@@ -631,6 +675,18 @@ builder.mutationField("organizerAddTeamMember", (t) =>
       ) {
         throw new Error("Not authorized");
       }
+      if (!(user.College?.type === "ENGINEERING")) {
+        if (
+          !canRegister(
+            participant.id,
+            participant.College?.type as string,
+            team.Event.category
+          )
+        ) {
+          throw new Error("Not eligible to register");
+        }
+      }
+
       const teamMembers = await ctx.prisma.teamMember.findMany({
         where: {
           teamId: Number(args.teamId),
@@ -872,6 +928,9 @@ builder.mutationField("organizerRegisterSolo", (t) =>
         where: {
           id: Number(args.userId),
         },
+        include: {
+          College: true,
+        },
       });
       if (
         !participant ||
@@ -879,6 +938,18 @@ builder.mutationField("organizerRegisterSolo", (t) =>
         participant.role === "JUDGE"
       ) {
         throw new Error(`No participant with id ${args.userId}`);
+      }
+
+      if (!(user.College?.type === "ENGINEERING")) {
+        if (
+          !canRegister(
+            participant.id,
+            participant.College?.type as string,
+            event.category
+          )
+        ) {
+          throw new Error("Not eligible to register");
+        }
       }
 
       if (event.eventType === "INDIVIDUAL") {

@@ -18,7 +18,10 @@ export async function authenticateUser(
 
       const userId = tokenPayload.userId;
 
-      return await prisma.user.findUnique({ where: { id: userId } });
+      return await prisma.user.findUnique({
+        where: { id: userId },
+        include: { College: true },
+      });
     } catch (error) {
       return null;
     }

@@ -62,12 +62,13 @@ model User {
 }
 
 model College {
-  id        Int      @id @default(autoincrement())
+  id        Int         @id @default(autoincrement())
   name      String
   details   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   Users     User[]
+  type      CollegeType @default(ENGINEERING)
 }
 
 model Branch {
@@ -251,4 +252,10 @@ enum EventCategory {
   TECHNICAL
   NON_TECHNICAL
   CORE
+}
+
+enum CollegeType {
+  ENGINEERING
+  NON_ENGINEERING
+  OTHER
 }
