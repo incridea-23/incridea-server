@@ -99,13 +99,42 @@ builder.queryField("registeredEvents", (t) =>
 builder.queryField("publishedEvents", (t) =>
   t.prismaField({
     type: ["Event"],
-    resolve: (query, root, args, ctx, info) => {
-      return ctx.prisma.event.findMany({
+    resolve: async (query, root, args, ctx, info) => {
+      const core_event = await ctx.prisma.event.findMany({
         where: {
-          published: true,
+          AND: [
+            {
+              published: true,
+            },
+            {
+              category: "CORE",
+            },
+          ],
+        },
+        orderBy: {
+          name: "asc",
         },
         ...query,
       });
+      const non_core_event = await ctx.prisma.event.findMany({
+        where: {
+          AND: [
+            {
+              published: true,
+            },
+            {
+              NOT: {
+                category: "CORE",
+              },
+            },
+          ],
+        },
+        orderBy: {
+          name: "asc",
+        },
+        ...query,
+      });
+      return [...core_event, ...non_core_event];
     },
   })
 );
