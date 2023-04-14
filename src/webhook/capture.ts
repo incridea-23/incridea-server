@@ -1,9 +1,21 @@
 import { Request, Response } from "express";
 import { prisma } from "../utils/db/prisma";
+import { validateWebhookSignature } from "razorpay/dist/utils/razorpay-utils";
 
 export async function handler(req: Request, res: Response) {
   if (req.method !== "POST") {
     return res.status(405).send({ message: "Only POST requests allowed" });
+  }
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET as string;
+  const webhookSignature = req.headers["x-razorpay-signature"] as string;
+  if (
+    !validateWebhookSignature(
+      JSON.stringify(req.body),
+      webhookSignature,
+      webhookSecret
+    )
+  ) {
+    return res.status(400).send({ message: "Invalid request" });
   }
   try {
     const order_id = req.body?.payload?.payment?.entity?.order_id as string;
@@ -40,7 +52,6 @@ export async function handler(req: Request, res: Response) {
 
         return res.status(200).json(updatedPaymentOrder);
       } else {
-        // TODO : fix payment order
         const updatedPaymentOrder = await prisma.eventPaymentOrder.update({
           where: {
             orderId: order_id,
