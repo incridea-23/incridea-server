@@ -1,5 +1,5 @@
 import { builder } from "../../builder";
-
+import { Role } from "@prisma/client";
 builder.mutationField("addBranchRep", (t) =>
   t.prismaField({
     type: "BranchRep",
@@ -85,12 +85,24 @@ builder.mutationField("removeBranchRep", (t) =>
       });
       if (!branchRep) throw new Error(`No Branch Under user ${args.userId}`);
       if (branchRep.branchId !== branch.id) throw new Error(`No permission`);
+      let role: Role = Role.USER;
+      // chek if user is paid
+      const successPaymentOrder = await ctx.prisma.paymentOrder.findMany({
+        where: {
+          userId: Number(args.userId),
+          status: "SUCCESS",
+        },
+      });
+
+      if (successPaymentOrder.length > 0) {
+        role = Role.PARTICIPANT;
+      }
       await ctx.prisma.user.update({
         where: {
           id: Number(args.userId),
         },
         data: {
-          role: "PARTICIPANT",
+          role,
         },
       });
       await ctx.prisma.branchRep.delete({

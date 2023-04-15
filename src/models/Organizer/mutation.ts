@@ -1,5 +1,5 @@
 import { builder } from "../../builder";
-
+import { Role } from "@prisma/client";
 builder.mutationField("addOrganizer", (t) =>
   t.prismaField({
     type: "Organizer",
@@ -112,14 +112,25 @@ builder.mutationField("removeOrganizer", (t) =>
           userId: Number(args.userId),
         },
       });
+      let role: Role = Role.USER;
+      // chek if user is paid
+      const successPaymentOrder = await ctx.prisma.paymentOrder.findMany({
+        where: {
+          userId: Number(args.userId),
+          status: "SUCCESS",
+        },
+      });
 
+      if (successPaymentOrder.length > 0) {
+        role = Role.PARTICIPANT;
+      }
       if (userRole?.role === "ORGANIZER" && !(count > 1)) {
         await ctx.prisma.user.update({
           where: {
             id: Number(args.userId),
           },
           data: {
-            role: "PARTICIPANT",
+            role: role,
           },
         });
       }
