@@ -6,7 +6,6 @@ import { schema } from "./schema";
 import bodyParser from "body-parser";
 import { handler as razorpayCapture } from "./webhook/capture";
 import { uploader as imageUpload } from "./cloudinary/upload";
-
 import { config } from "./cloudinary/config";
 const { upload } = config;
 // import "./test.ts";

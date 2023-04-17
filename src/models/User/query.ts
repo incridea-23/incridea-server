@@ -75,3 +75,49 @@ builder.queryField("userById", (t) =>
     },
   })
 );
+
+builder.queryField("totalRegistrations", (t) =>
+  t.field({
+    type: "Int",
+    args: {
+      date: t.arg({ type: "Date", required: false }),
+      last: t.arg({ type: "Int", required: false }),
+    },
+    resolve: async (root, args, ctx) => {
+      if (args.date) {
+        return ctx.prisma.user.count({
+          where: {
+            role: {
+              in: ["PARTICIPANT", "ORGANIZER", "BRANCH_REP"],
+            },
+            createdAt: {
+              gte: args.date,
+              lte: new Date(args.date.getTime() + 86400000),
+            },
+          },
+        });
+      }
+      if (args.last) {
+        return ctx.prisma.user.count({
+          where: {
+            role: {
+              in: ["PARTICIPANT", "ORGANIZER", "BRANCH_REP"],
+            },
+            createdAt: {
+              gte: new Date(
+                new Date().getTime() - args.last * 86400000
+              ).toISOString(),
+            },
+          },
+        });
+      }
+      return ctx.prisma.user.count({
+        where: {
+          role: {
+            in: ["PARTICIPANT", "ORGANIZER", "BRANCH_REP"],
+          },
+        },
+      });
+    },
+  })
+);
