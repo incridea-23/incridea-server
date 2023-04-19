@@ -99,6 +99,7 @@ model Event {
   Teams       Team[]
   Rounds      Round[]
   category    EventCategory @default(TECHNICAL)
+  Winner      Winners[]
 
   @@index([branchId])
 }
@@ -120,6 +121,8 @@ model Team {
   leaderId          Int?
   Round             Round?              @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
   EventPaymentOrder EventPaymentOrder[]
+  Score             Score[]
+  Winner            Winners?
 
   @@unique([name, eventId])
   @@index([eventId, roundNo])
@@ -128,12 +131,13 @@ model Team {
 
 model Round {
   eventId   Int
-  roundNo   Int       @default(1)
-  Event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  completed Boolean   @default(false)
+  roundNo   Int        @default(1)
+  Event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  completed Boolean    @default(false)
   Teams     Team[]
   Judges    Judge[]
   date      DateTime?
+  Criteria  Criteria[]
 
   @@id([eventId, roundNo])
   @@unique([eventId, roundNo])
@@ -214,6 +218,44 @@ model EmailMonitor {
   id        Int      @id @default(autoincrement())
 }
 
+model Criteria {
+  id      Int          @id @default(autoincrement())
+  name    String
+  eventId Int
+  roundNo Int
+  Round   Round        @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
+  type    CriteriaType @default(NUMBER)
+  Score   Score[]
+
+  @@index([eventId, roundNo])
+}
+
+model Score {
+  id          Int      @id @default(autoincrement())
+  teamId      Int
+  Team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  criteriaId  Int
+  Criteria    Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+  score       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([teamId, criteriaId])
+  @@index([criteriaId])
+}
+
+model Winners {
+  id      Int   @id @default(autoincrement())
+  teamId  Int   @unique
+  Team    Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  eventId Int
+  Event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([eventId])
+}
+
 // Enums
 enum PaymentType {
   FEST_REGISTRATION
@@ -258,4 +300,10 @@ enum CollegeType {
   ENGINEERING
   NON_ENGINEERING
   OTHER
+}
+
+enum CriteriaType {
+  TEXT
+  NUMBER
+  TIME
 }
