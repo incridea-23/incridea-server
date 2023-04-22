@@ -1,8 +1,8 @@
 import { builder } from "../../builder";
 
-builder.queryField("eventByJudge", (t) =>
+builder.queryField("roundByJudge", (t) =>
   t.prismaField({
-    type: "Event",
+    type: "Round",
     errors: {
       types: [Error],
     },
@@ -14,15 +14,11 @@ builder.queryField("eventByJudge", (t) =>
       if (user.role !== "JUDGE") {
         throw new Error("Not authorized");
       }
-      return await ctx.prisma.event.findFirstOrThrow({
+      return await ctx.prisma.round.findFirstOrThrow({
         where: {
-          Rounds: {
+          Judges: {
             some: {
-              Judges: {
-                some: {
-                  userId: user.id,
-                },
-              },
+              userId: user.id,
             },
           },
         },
