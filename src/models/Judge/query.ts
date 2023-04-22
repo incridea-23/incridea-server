@@ -4,7 +4,7 @@ builder.queryField("eventByJudge", (t) =>
   t.prismaField({
     type: ["Event"],
     args: {
-      organizerId: t.arg({
+      judgeId: t.arg({
         type: "ID",
         required: true,
       }),
@@ -16,7 +16,7 @@ builder.queryField("eventByJudge", (t) =>
             some: {
               Judges: {
                 some: {
-                  userId: Number(args.organizerId),
+                  userId: Number(args.judgeId),
                 },
               },
             },
