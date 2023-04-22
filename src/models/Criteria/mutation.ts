@@ -48,6 +48,7 @@ builder.mutationField('createCriteria', (t) =>
           Rounds: {
             include: {
               Criteria: true,
+              Judges: true,
             },
           },
         },
@@ -56,10 +57,17 @@ builder.mutationField('createCriteria', (t) =>
 
       // 3. organizer related checks
       if (!event.Organizers.find((o) => o.userId === user.id)) {
-        throw new Error('Not authorized for this event!');
+        // 4. judge related checks
+        if (!event.Rounds.find((r) => r.roundNo === args.data.roundNo)?.Judges.find((j) => j.userId === user.id)) {
+          throw new Error('Not authorized for this event!');
+        } else {
+          throw new Error('Not authorized for this event!');
+        }
       }
 
-      const criteriaNo = (event.Rounds.find((r) => r.roundNo === args.data.roundNo)?.Criteria.length ?? 0) + 1;
+      const criteriaNo =
+        (event.Rounds.find((r) => r.roundNo === args.data.roundNo)?.Criteria
+          .length ?? 0) + 1;
 
       return ctx.prisma.criteria.create({
         data: {
@@ -112,6 +120,7 @@ builder.mutationField('deleteCriteria', (t) =>
           Rounds: {
             include: {
               Criteria: true,
+              Judges: true,
             },
           },
         },
@@ -120,15 +129,16 @@ builder.mutationField('deleteCriteria', (t) =>
 
       // 3. organizer related checks
       if (!event.Organizers.find((o) => o.userId === user.id)) {
-        throw new Error('Not authorized for this event!');
+        // 4. judge related checks
+        if (!event.Rounds.find((r) => r.roundNo === args.roundNo)?.Judges.find((j) => j.userId === user.id)) {
+          throw new Error('Not authorized for this event!');
+        } else {
+          throw new Error('Not authorized for this event!');
+        }
       }
 
       // 4. criteria related checks
-      if (
-        !event.Rounds.find((r) => r.roundNo === args.roundNo)?.Criteria.find(
-          (c) => c.id === Number(args.criteriaId)
-        )
-      ) {
+      if (!event.Rounds.find((r) => r.roundNo === args.roundNo)?.Criteria.find((c) => c.id === Number(args.criteriaId))) {
         throw new Error(`No Criteria with id ${args.criteriaId}!`);
       }
 
