@@ -271,7 +271,7 @@ model Winners {
   Team    Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
   eventId Int
   Event   Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  type    WinnerType @default(WINNER)
+  type    WinnerType
 
   @@index([teamId])
   @@index([eventId])
