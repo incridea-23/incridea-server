@@ -12,6 +12,9 @@ builder.prismaObject("Round", {
       type: "DateTime",
       nullable: true,
     }),
+    criteria: t.relation("Criteria", {
+      nullable: true,
+    }),
     judges: t.relation("Judges"),
   }),
 });
