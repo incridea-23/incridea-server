@@ -59,16 +59,14 @@ builder.mutationField('createCriteria', (t) =>
         throw new Error('Not authorized for this event!');
       }
 
-      const criteriaNo =
-      (event.Rounds.find((r) => r.roundNo === args.data.roundNo)?.Criteria
-        .length ?? 0) + 1;
+      const criteriaNo = (event.Rounds.find((r) => r.roundNo === args.data.roundNo)?.Criteria.length ?? 0) + 1;
 
       return ctx.prisma.criteria.create({
         data: {
           eventId: Number(args.data.eventId),
           roundNo: Number(args.data.roundNo),
-          name: args.data.name ?? `Criteria ${criteriaNo}`,
-          type: args.data.type ?? CriteriaType.NUMBER,
+          name: args.data.name ? `${args.data.name}` : `Criteria ${criteriaNo}`,
+          type: args.data.type ? args.data.type : CriteriaType.NUMBER,
         },
       });
     },
