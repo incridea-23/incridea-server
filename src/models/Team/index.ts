@@ -1,6 +1,7 @@
 import { builder } from "../../builder";
 import "./mutation";
 import "./query";
+import "./subscription";
 
 builder.prismaObject("Team", {
   fields: (t) => ({
@@ -23,6 +24,3 @@ builder.prismaObject("TeamMember", {
     team: t.relation("Team"),
   }),
 });
-
-
-

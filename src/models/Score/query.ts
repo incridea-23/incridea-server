@@ -16,7 +16,7 @@ builder.queryField("getScore", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role in ["ORGANIZER", "ADMIN","USER","PARTICIPANT","BRANCH_REP"]) {
+      if (!["JUDGE", "JURY"].includes(user.role)) {
         throw new Error("Not authorized");
       }
       const data = await ctx.prisma.scores.findUniqueOrThrow({
@@ -50,7 +50,7 @@ builder.queryField("getComment", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role in ["ORGANIZER", "ADMIN","USER","PARTICIPANT","BRANCH_REP"]) {
+      if (!["JUDGE", "JURY"].includes(user.role)) {
         throw new Error("Not authorized");
       }
       const data = await ctx.prisma.comments.findUniqueOrThrow({
