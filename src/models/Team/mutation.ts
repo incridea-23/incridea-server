@@ -1041,11 +1041,14 @@ builder.mutationField("promoteToNextRound", (t) =>
           Judges: true,
         },
       });
-      if (round?.completed) {
+      if (!round) {
+        throw new Error("Round not found");
+      }
+      if (round.completed) {
         throw new Error("Round completed");
       }
       if (
-        round?.Judges.filter((judge) => judge.userId === user.id).length === 0
+        round.Judges.filter((judge) => judge.userId === user.id).length === 0
       ) {
         throw new Error("Not authorized");
       }
@@ -1055,13 +1058,20 @@ builder.mutationField("promoteToNextRound", (t) =>
       ) {
         throw new Error("Invalid round number");
       }
+      let roundNo = team.roundNo;
+
+      if (args.selected && team.roundNo === Number(args.roundNo)) {
+        roundNo = Number(args.roundNo) + 1;
+      } else if (!args.selected && team.roundNo === Number(args.roundNo) + 1) {
+        roundNo = Number(args.roundNo);
+      }
 
       return await ctx.prisma.team.update({
         where: {
           id: Number(args.teamId),
         },
         data: {
-          [`round${args.roundNo}`]: args.selected,
+          roundNo,
         },
         ...query,
       });
