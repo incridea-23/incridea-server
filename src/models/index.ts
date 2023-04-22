@@ -10,3 +10,4 @@ import "./Round";
 import "./Team";
 import "./Judge";
 import "./Criteria";
+import "./Score";

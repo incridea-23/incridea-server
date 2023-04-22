@@ -121,8 +121,9 @@ model Team {
   leaderId          Int?
   Round             Round?              @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
   EventPaymentOrder EventPaymentOrder[]
-  Score             Score[]
+  Score             Scores[]
   Winner            Winners?
+  Comments          Comments[]
 
   @@unique([name, eventId])
   @@index([eventId, roundNo])
@@ -138,6 +139,7 @@ model Round {
   Judges    Judge[]
   date      DateTime?
   Criteria  Criteria[]
+  Comments  Comments[]
 
   @@id([eventId, roundNo])
   @@unique([eventId, roundNo])
@@ -225,24 +227,34 @@ model Criteria {
   roundNo Int
   Round   Round        @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
   type    CriteriaType @default(NUMBER)
-  Score   Score[]
+  Score   Scores[]
 
   @@index([eventId, roundNo])
 }
 
-model Score {
-  id          Int      @id @default(autoincrement())
-  teamId      Int
-  Team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  criteriaId  Int
-  Criteria    Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
-  score       String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Scores {
+  teamId     Int
+  Team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  criteriaId Int
+  Criteria   Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+  score      String
 
+  @@unique([teamId, criteriaId])
   @@index([teamId, criteriaId])
   @@index([criteriaId])
+}
+
+model Comments {
+  teamId  Int
+  Team    Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  eventId Int
+  roundNo Int
+  Round   Round  @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
+  comment String
+
+  @@unique([teamId, eventId, roundNo])
+  @@index([teamId])
+  @@index([eventId, roundNo])
 }
 
 model Winners {
@@ -256,7 +268,6 @@ model Winners {
   @@index([eventId])
 }
 
-// Enums
 enum PaymentType {
   FEST_REGISTRATION
   EVENT_REGISTRATION
