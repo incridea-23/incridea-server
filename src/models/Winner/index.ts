@@ -6,5 +6,6 @@ builder.prismaObject("Winners", {
         id: t.exposeID("id"),
         team: t.relation("Team"),
         event: t.relation("Event"),
+        type: t.exposeString("type"),
     }),
 });

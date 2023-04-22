@@ -266,11 +266,12 @@ model Comments {
 }
 
 model Winners {
-  id      Int   @id @default(autoincrement())
-  teamId  Int   @unique
-  Team    Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  id      Int        @id @default(autoincrement())
+  teamId  Int        @unique
+  Team    Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
   eventId Int
-  Event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Event   Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  type    WinnerType @default(WINNER)
 
   @@index([teamId])
   @@index([eventId])
@@ -325,4 +326,9 @@ enum CriteriaType {
   TEXT
   NUMBER
   TIME
+}
+
+enum WinnerType {
+  WINNER
+  RUNNER_UP
 }

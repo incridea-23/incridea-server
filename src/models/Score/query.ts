@@ -1,5 +1,4 @@
 import { builder } from "../../builder";
-import { Scores, Comments } from "@prisma/client";
 
 builder.queryField("getScore", (t) =>
   t.prismaField({
@@ -17,7 +16,7 @@ builder.queryField("getScore", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role !== "JUDGE") {
+      if (user.role in ["ORGANIZER", "ADMIN","USER","PARTICIPANT","BRANCH_REP"]) {
         throw new Error("Not authorized");
       }
       const data = await ctx.prisma.scores.findUniqueOrThrow({
@@ -51,7 +50,7 @@ builder.queryField("getComment", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role !== "JUDGE") {
+      if (user.role in ["ORGANIZER", "ADMIN","USER","PARTICIPANT","BRANCH_REP"]) {
         throw new Error("Not authorized");
       }
       const data = await ctx.prisma.comments.findUniqueOrThrow({
