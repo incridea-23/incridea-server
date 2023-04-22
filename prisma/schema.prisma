@@ -332,8 +332,3 @@ enum WinnerType {
   WINNER
   RUNNER_UP
 }
-
-model test {
-  id   Int    @id @default(autoincrement())
-  name String
-}
