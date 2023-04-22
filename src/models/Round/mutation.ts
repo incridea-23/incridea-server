@@ -49,7 +49,6 @@ builder.mutationField("createRound", (t) =>
   })
 );
 
-// deleteRound
 builder.mutationField("deleteRound", (t) =>
   t.prismaField({
     type: "Round",

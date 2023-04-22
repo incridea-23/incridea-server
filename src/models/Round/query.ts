@@ -11,7 +11,6 @@ builder.queryField("rounds", (t) =>
   })
 );
 
-
 builder.queryField("roundsByEvent", (t) =>
   t.prismaField({
     type: ["Round"],

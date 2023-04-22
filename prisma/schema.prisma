@@ -204,11 +204,13 @@ model TeamMember {
 }
 
 model Judge {
-  userId  Int
-  User    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  eventId Int
-  roundNo Int
-  Round   Round @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
+  userId   Int        @unique
+  User     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId  Int
+  roundNo  Int
+  Round    Round      @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
+  Scores   Scores[]
+  Comments Comments[]
 
   @@unique([userId, eventId, roundNo])
   @@index([eventId, roundNo, userId])
@@ -238,10 +240,13 @@ model Scores {
   criteriaId Int
   Criteria   Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
   score      String
+  judgeId    Int
+  Judge      Judge    @relation(fields: [judgeId], references: [userId])
 
-  @@unique([teamId, criteriaId])
+  @@unique([teamId, criteriaId, judgeId])
   @@index([teamId, criteriaId])
   @@index([criteriaId])
+  @@index([judgeId])
 }
 
 model Comments {
@@ -251,10 +256,13 @@ model Comments {
   roundNo Int
   Round   Round  @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
   comment String
+  judgeId Int
+  Judge   Judge  @relation(fields: [judgeId], references: [userId])
 
-  @@unique([teamId, eventId, roundNo])
+  @@unique([teamId, eventId, roundNo, judgeId])
   @@index([teamId])
   @@index([eventId, roundNo])
+  @@index([judgeId])
 }
 
 model Winners {

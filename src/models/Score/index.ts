@@ -8,6 +8,8 @@ builder.prismaObject("Scores", {
     criteriaId: t.exposeID("criteriaId"),
     score: t.exposeString("score"),
     team: t.relation("Team"),
+    criteria: t.relation("Criteria"),
+    judge: t.relation("Judge"),
   }),
 });
 
@@ -19,5 +21,6 @@ builder.prismaObject("Comments", {
     comment: t.exposeString("comment"),
     team: t.relation("Team"),
     round: t.relation("Round"),
+    judge: t.relation("Judge"),
   }),
 });

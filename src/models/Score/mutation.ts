@@ -34,9 +34,10 @@ builder.mutationField("addScore", (t) =>
       // create or update
       const score = await ctx.prisma.scores.upsert({
         where: {
-          teamId_criteriaId: {
+          teamId_criteriaId_judgeId: {
             teamId: args.teamId,
             criteriaId: args.criteriaId,
+            judgeId: user.id,
           },
         },
         update: {
@@ -46,6 +47,7 @@ builder.mutationField("addScore", (t) =>
           teamId: args.teamId,
           criteriaId: args.criteriaId,
           score: args.score,
+          judgeId: user.id,
         },
         ...query,
       });
