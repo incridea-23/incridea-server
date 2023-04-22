@@ -23,3 +23,6 @@ builder.prismaObject("TeamMember", {
     team: t.relation("Team"),
   }),
 });
+
+
+

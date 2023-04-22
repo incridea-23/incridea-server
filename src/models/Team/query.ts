@@ -15,9 +15,47 @@ builder.queryField("teamsByRound", (t) =>
       }),
       contains: t.arg.string({ required: false }),
     },
-    resolve: (query, root, args, ctx, info) => {
+    resolve: async (query, root, args, ctx, info) => {
       const filter = args.contains || "";
-      return ctx.prisma.team.findMany({
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not Authenticated");
+      }
+      if (user.role !== "JURY") {
+        if (user.role !== "ORGANIZER" && user.role !== "JUDGE") {
+          return [];
+        }
+        const isOrganizerOrJudge = await ctx.prisma.event.findMany({
+          where: {
+            id: Number(args.eventId),
+            OR: [
+              {
+                Organizers: {
+                  some: {
+                    userId: user.id,
+                  },
+                },
+              },
+              {
+                Rounds: {
+                  some: {
+                    Judges: {
+                      some: {
+                        userId: user.id,
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        });
+        if (isOrganizerOrJudge.length === 0) {
+          return [];
+        }
+      }
+
+      const teams = ctx.prisma.team.findMany({
         where: {
           roundNo: {
             gte: args.roundNo,
@@ -55,6 +93,7 @@ builder.queryField("teamsByRound", (t) =>
         },
         ...query,
       });
+      return teams;
     },
   })
 );
