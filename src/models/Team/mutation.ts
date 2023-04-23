@@ -1075,7 +1075,7 @@ builder.mutationField("promoteToNextRound", (t) =>
         },
         ...query,
       });
-      ctx.pubsub.publish(`TEAM_UPDATED/${team.Event.id}-${roundNo}`, data);
+      ctx.pubsub.publish(`TEAM_UPDATED/${team.Event.id}-${args.roundNo}`, data);
       return data;
     },
   })
