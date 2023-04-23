@@ -110,3 +110,51 @@ builder.mutationField("deleteRound", (t) =>
   })
 );
 
+// judge mark round as completed
+builder.mutationField("completeRound", (t) =>
+  t.prismaField({
+    type: "Round",
+    args: {
+      eventId: t.arg.id({ required: true }),
+      roundNo: t.arg({ type: "Int", required: true }),
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (user.role !== "JUDGE") {
+        throw new Error("Not authorized");
+      }
+      const round = await ctx.prisma.round.findUnique({
+        where: {
+          eventId_roundNo: {
+            eventId: Number(args.eventId),
+            roundNo: args.roundNo,
+          },
+        },
+        include: {
+          Judges: true,
+        },
+      });
+      if (!round) {
+        throw new Error("Round not found");
+      }
+      const judge = round.Judges.find((j) => j.userId === user.id);
+      if (!judge) {
+        throw new Error("Not authorized");
+      }
+      return ctx.prisma.round.update({
+        where: {
+          eventId_roundNo: {
+            eventId: Number(args.eventId),
+            roundNo: args.roundNo,
+          },
+        },
+        data: {
+          completed: true,
+        },
+      });
+    },
+  })
+);
