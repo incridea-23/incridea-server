@@ -1066,7 +1066,7 @@ builder.mutationField("promoteToNextRound", (t) =>
         roundNo = Number(args.roundNo);
       }
 
-      return await ctx.prisma.team.update({
+      const data = await ctx.prisma.team.update({
         where: {
           id: Number(args.teamId),
         },
@@ -1075,6 +1075,8 @@ builder.mutationField("promoteToNextRound", (t) =>
         },
         ...query,
       });
+      ctx.pubsub.publish(`TEAM_UPDATED/${team.Event.id}-${roundNo}`, data);
+      return data;
     },
   })
 );

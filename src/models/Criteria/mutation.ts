@@ -36,7 +36,7 @@ builder.mutationField('createCriteria', (t) =>
       // 1. user related checks
       const user = await ctx.user;
       if (!user) throw new Error('Not authenticated');
-      if (user?.role != 'ORGANIZER') throw new Error('Not Permitted');
+      if (user?.role != 'ORGANIZER' && user?.role != 'JUDGE') throw new Error('Not Permitted');
 
       // 2. event related checks
       const event = await ctx.prisma.event.findUnique({
@@ -108,7 +108,7 @@ builder.mutationField('deleteCriteria', (t) =>
       // 1. user related checks
       const user = await ctx.user;
       if (!user) throw new Error('Not authenticated');
-      if (user?.role != 'ORGANIZER') throw new Error('Not Permitted');
+      if (user?.role != 'ORGANIZER' && user?.role != 'JUDGE') throw new Error('Not Permitted');
 
       // 2. event related checks
       const event = await ctx.prisma.event.findUnique({

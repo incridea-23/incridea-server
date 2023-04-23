@@ -7,7 +7,6 @@ builder.prismaObject("Round", {
     roundNo: t.exposeInt("roundNo"),
     completed: t.exposeBoolean("completed"),
     event: t.relation("Event"),
-    teams: t.relation("Teams"),
     date: t.expose("date", {
       type: "DateTime",
       nullable: true,
