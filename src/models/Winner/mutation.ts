@@ -55,13 +55,6 @@ builder.mutationField("createWinner", (t) =>
         where: {
           id: Number(args.teamId),
         },
-        include: {
-          Round: {
-            select: {
-              roundNo: true,
-            },
-          },
-        },
       });
       if (!team) {
         throw new Error("Team not in final round");

@@ -8,6 +8,9 @@ builder.mutationField("addScore", (t) =>
       criteriaId: t.arg.int({ required: true }),
       score: t.arg.string({ required: true }),
     },
+    errors: {
+      types: [Error],
+    },
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;
       if (!user) {
@@ -64,6 +67,9 @@ builder.mutationField("addComment", (t) =>
       comment: t.arg.string({ required: true }),
       roundNo: t.arg.int({ required: true }),
       eventId: t.arg.int({ required: true }),
+    },
+    errors: {
+      types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;

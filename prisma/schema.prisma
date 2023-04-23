@@ -116,10 +116,7 @@ model Team {
   confirmed         Boolean             @default(false)
   attended          Boolean             @default(false)
   TeamMembers       TeamMember[]
-  roundEventId      Int?
-  roundRoundNo      Int?
   leaderId          Int?
-  Round             Round?              @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
   EventPaymentOrder EventPaymentOrder[]
   Score             Scores[]
   Winner            Winners?
@@ -127,7 +124,6 @@ model Team {
 
   @@unique([name, eventId])
   @@index([eventId, roundNo])
-  @@index([roundEventId, roundRoundNo])
 }
 
 model Round {
@@ -135,7 +131,6 @@ model Round {
   roundNo   Int        @default(1)
   Event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
   completed Boolean    @default(false)
-  Teams     Team[]
   Judges    Judge[]
   date      DateTime?
   Criteria  Criteria[]
