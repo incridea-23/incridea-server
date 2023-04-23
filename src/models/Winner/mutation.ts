@@ -24,35 +24,51 @@ builder.mutationField("createWinner", (t) =>
       if (user.role !== "JUDGE") {
         throw new Error("Not authorized");
       }
-      const isJudgeOfLastRound = await ctx.prisma.event.findUnique({
+      const event = await ctx.prisma.event.findFirst({
         where: {
           id: Number(args.eventId),
+          Rounds: {
+            some: {
+              Judges: {
+                some: {
+                  userId: user.id,
+                },
+              },
+            },
+          },
         },
         select: {
           Rounds: {
             select: {
+              completed: true,
+              roundNo: true,
               Judges: true,
             },
           },
         },
       });
-      if (!isJudgeOfLastRound) {
+      if (!event) {
         throw new Error("Not authorized");
       }
 
-      const total_rounds = isJudgeOfLastRound.Rounds.length;
-      const isJudge = isJudgeOfLastRound.Rounds[total_rounds - 1].Judges.some(
-        (judge) => judge.userId === user.id
-      );
-      if (!isJudge) {
+      const total_rounds = event.Rounds.length;
+      if (event.Rounds[total_rounds - 1].completed) {
+        throw new Error("Cant Change Round Completed");
+      }
+      // check if he is the judge of last round
+      if (
+        !event.Rounds[total_rounds - 1].Judges.some(
+          (judge) => judge.userId === user.id
+        )
+      ) {
         throw new Error("Not authorized");
       }
-
       const team = await ctx.prisma.team.findUnique({
         where: {
           id: Number(args.teamId),
         },
       });
+
       if (!team) {
         throw new Error("Team not found");
       }
@@ -112,27 +128,40 @@ builder.mutationField("deleteWinner", (t) =>
       if (!winner) {
         throw new Error("Winner not found");
       }
-      const isJudgeOfLastRound = await ctx.prisma.event.findUnique({
+      const event = await ctx.prisma.event.findFirst({
         where: {
           id: winner.eventId,
+          Rounds: {
+            some: {
+              Judges: {
+                some: {
+                  userId: user.id,
+                },
+              },
+            },
+          },
         },
         select: {
           Rounds: {
             select: {
               Judges: true,
+              completed: true,
             },
           },
         },
       });
-      if (!isJudgeOfLastRound) {
+      if (!event) {
         throw new Error("Not authorized");
       }
-
-      const total_rounds = isJudgeOfLastRound.Rounds.length;
-      const isJudge = isJudgeOfLastRound.Rounds[total_rounds - 1].Judges.some(
-        (judge) => judge.userId === user.id
-      );
-      if (!isJudge) {
+      const total_rounds = event.Rounds.length;
+      if (event.Rounds[total_rounds - 1].completed) {
+        throw new Error("Cant Change Round Completed");
+      }
+      if (
+        !event.Rounds[total_rounds - 1].Judges.some(
+          (judge) => judge.userId === user.id
+        )
+      ) {
         throw new Error("Not authorized");
       }
 
