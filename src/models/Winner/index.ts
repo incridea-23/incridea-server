@@ -1,5 +1,6 @@
 import { builder } from "../../builder";
 import "./query";
+import "./mutation";
 
 builder.prismaObject("Winners", {
     fields: (t) => ({
