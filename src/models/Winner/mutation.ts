@@ -11,7 +11,6 @@ builder.mutationField("createWinner", (t) =>
     args: {
       teamId: t.arg({ type: "ID", required: true }),
       eventId: t.arg({ type: "ID", required: true }),
-      roundNo: t.arg({ type: "Int", required: true }),
       type: t.arg({ type: WinnerTypeEnum, required: true }),
     },
     errors: {
@@ -25,49 +24,53 @@ builder.mutationField("createWinner", (t) =>
       if (user.role !== "JUDGE") {
         throw new Error("Not authorized");
       }
-      //check if the user is a judge of the event
-      const event = await ctx.prisma.judge.findUnique({
+      const isJudgeOfLastRound = await ctx.prisma.event.findUnique({
         where: {
-          userId: Number(user.id),
+          id: Number(args.eventId),
+        },
+        select: {
+          Rounds: {
+            select: {
+              Judges: true,
+            },
+          },
         },
       });
-      if (!event) {
-        throw new Error("Event not found");
+      if (!isJudgeOfLastRound) {
+        throw new Error("Not authorized");
       }
-      if (event.eventId !== Number(args.eventId)) {
-        throw new Error("Not judge of this event");
+
+      const total_rounds = isJudgeOfLastRound.Rounds.length;
+      const isJudge = isJudgeOfLastRound.Rounds[total_rounds - 1].Judges.some(
+        (judge) => judge.userId === user.id
+      );
+      if (!isJudge) {
+        throw new Error("Not authorized");
       }
-      //get the final round no for the event
-      const maxRoundNo = await ctx.prisma.round.findMany({
-        where: {
-          eventId: Number(args.eventId),
-        },
-        orderBy: {
-          roundNo: "desc",
-        },
-        take: 1,
-      });
-      if (maxRoundNo[0].roundNo !== Number(args.roundNo)) {
-        throw new Error("Not final Round");
-      }
-      //check if the team qualified for the final round
+
       const team = await ctx.prisma.team.findUnique({
         where: {
           id: Number(args.teamId),
         },
       });
       if (!team) {
-        throw new Error("Team not in final round");
+        throw new Error("Team not found");
       }
-      //check if winner already exists
-      const winner = await ctx.prisma.winners.findMany({
+      if (team.eventId !== Number(args.eventId)) {
+        throw new Error("Team not found");
+      }
+      if (team.roundNo !== total_rounds) {
+        throw new Error("Team not promoted to last round");
+      }
+
+      const winner = await ctx.prisma.winners.findFirst({
         where: {
           type: args.type as WinnerType,
           eventId: Number(args.eventId),
           teamId: Number(args.teamId),
         },
       });
-      if (winner.length > 0) {
+      if (winner) {
         throw new Error("Winner already exists");
       }
       const data = await ctx.prisma.winners.create({
@@ -75,6 +78,67 @@ builder.mutationField("createWinner", (t) =>
           teamId: Number(args.teamId),
           eventId: Number(args.eventId),
           type: args.type,
+        },
+        ...query,
+      });
+      return data;
+    },
+  })
+);
+
+// delete winner
+builder.mutationField("deleteWinner", (t) =>
+  t.prismaField({
+    type: "Winners",
+    args: {
+      id: t.arg({ type: "ID", required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (user.role !== "JUDGE") {
+        throw new Error("Not authorized");
+      }
+      const winner = await ctx.prisma.winners.findUnique({
+        where: {
+          id: Number(args.id),
+        },
+      });
+      if (!winner) {
+        throw new Error("Winner not found");
+      }
+      const isJudgeOfLastRound = await ctx.prisma.event.findUnique({
+        where: {
+          id: winner.eventId,
+        },
+        select: {
+          Rounds: {
+            select: {
+              Judges: true,
+            },
+          },
+        },
+      });
+      if (!isJudgeOfLastRound) {
+        throw new Error("Not authorized");
+      }
+
+      const total_rounds = isJudgeOfLastRound.Rounds.length;
+      const isJudge = isJudgeOfLastRound.Rounds[total_rounds - 1].Judges.some(
+        (judge) => judge.userId === user.id
+      );
+      if (!isJudge) {
+        throw new Error("Not authorized");
+      }
+
+      const data = await ctx.prisma.winners.delete({
+        where: {
+          id: Number(args.id),
         },
         ...query,
       });
