@@ -118,6 +118,9 @@ builder.mutationField("completeRound", (t) =>
       eventId: t.arg.id({ required: true }),
       roundNo: t.arg({ type: "Int", required: true }),
     },
+    errors: {
+      types: [Error],
+    },
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;
       if (!user) {

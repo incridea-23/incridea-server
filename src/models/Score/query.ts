@@ -258,6 +258,8 @@ builder.queryField("getScoreSheetJuryView", (t) =>
         where: {
           roundNo: Number(args.roundNo),
           eventId: Number(args.eventId),
+          confirmed: true,
+          attended: true,
         },
       });
       const judges = await ctx.prisma.judge.findMany({
@@ -272,6 +274,7 @@ builder.queryField("getScoreSheetJuryView", (t) =>
       const criteria = await ctx.prisma.criteria.findMany({
         where: {
           eventId: Number(args.eventId),
+          roundNo: Number(args.roundNo),
         },
       });
       const scoreSheet = teams.map(async (team) => {
