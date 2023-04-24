@@ -10,23 +10,10 @@ builder.queryField("winnersByEvent", (t) =>
       eventId: t.arg.id({ required: true }),
     },
     resolve: async (query, root, args, ctx, info) => {
-      return ctx.prisma.winners.findMany({
-        where: {
-          eventId: Number(args.eventId),
-        },
-        ...query,
-      });
-    },
-  })
-);
-
-builder.queryField("winner", (t) =>
-  t.prismaField({
-    type: ["Winners"],
-    args: {
-      eventId: t.arg.id({ required: true }),
-    },
-    resolve: (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) throw new Error("Not Authenticated");
+      if (!["JUDGE", "JURY"].includes(user.role))
+        throw new Error("You are not authorized");
       return ctx.prisma.winners.findMany({
         where: {
           eventId: Number(args.eventId),
