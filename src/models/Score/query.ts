@@ -1,6 +1,4 @@
-import { GraphQLString } from "graphql";
 import { builder } from "../../builder";
-import { uploader } from "../../cloudinary/upload";
 
 builder.queryField("getScore", (t) =>
   t.prismaField({
@@ -139,3 +137,95 @@ builder.queryField("getComment", (t) =>
 //     }
 //   })
 // );
+
+class TotalScoreClass {
+  totalScore: number;
+  judgeScore: number;
+  teamId: number;
+  constructor(totalScore: number, judgeScore: number, teamId: number) {
+    this.totalScore = totalScore;
+    this.judgeScore = judgeScore;
+    this.teamId = teamId;
+  }
+}
+
+const TotalScore = builder.objectType(TotalScoreClass, {
+  name: "TotalScores",
+  fields: (t) => ({
+    totalScore: t.exposeFloat("totalScore"),
+    judgeScore: t.exposeFloat("judgeScore"),
+    teamId: t.exposeInt("judgeScore"),
+  }),
+});
+
+builder.queryField("getTotalScore", (t) =>
+  t.field({
+    type: [TotalScore],
+    args: {
+      eventId: t.arg({ type: "ID", required: true }),
+      roundNo: t.arg({ type: "Int", required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (!["JUDGE", "JURY"].includes(user.role)) {
+        throw new Error("Not authorized");
+      }
+      if (user.role == "JUDGE") {
+        // check if the judge is assigned to the event
+        const judge = await ctx.prisma.judge.findUnique({
+          where: {
+            userId_eventId_roundNo: {
+              userId: user.id,
+              eventId: Number(args.eventId),
+              roundNo: Number(args.roundNo),
+            },
+          },
+        });
+        if (!judge) {
+          throw new Error("Not authorized");
+        }
+      }
+      const teams = await ctx.prisma.team.findMany({
+        where: {
+          roundNo: Number(args.roundNo),
+          eventId: Number(args.eventId),
+        },
+      });
+      const judges = await ctx.prisma.judge.findMany({
+        where: {
+          eventId: Number(args.eventId),
+          roundNo: Number(args.roundNo),
+        },
+      });
+      const scores = teams.map(async (team) => {
+        const scores = await ctx.prisma.scores.findMany({
+          where: {
+            teamId: team.id,
+            judgeId: {
+              in: judges.map((judge) => judge.userId),
+            },
+          },
+          include: {
+            Criteria: true,
+          },
+        });
+        const totalScore = scores.reduce(
+          (acc, score) => acc + Number(score.score),
+          0
+        );
+        const judgeScore = scores.find(
+          (score) => score.judgeId === user.id
+        )?.score;
+
+        return new TotalScoreClass(totalScore, Number(judgeScore), team.id);
+      });
+      return Promise.all(scores);
+    },
+  })
+);
