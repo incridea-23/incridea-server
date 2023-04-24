@@ -352,6 +352,7 @@ enum CriteriaType {
 enum WinnerType {
   WINNER
   RUNNER_UP
+  SECOND_RUNNER_UP
 }
 
 enum DayType {
