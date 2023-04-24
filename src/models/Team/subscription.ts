@@ -38,6 +38,8 @@ builder.queryField("judgeGetTeamsByRound", (t) =>
           roundNo: {
             gte: args.roundId,
           },
+          confirmed: true,
+          attended: true,
         },
         ...query,
       });
