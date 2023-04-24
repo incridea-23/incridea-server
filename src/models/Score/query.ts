@@ -154,11 +154,11 @@ const TotalScore = builder.objectType(TotalScoreClass, {
   fields: (t) => ({
     totalScore: t.exposeFloat("totalScore"),
     judgeScore: t.exposeFloat("judgeScore"),
-    teamId: t.exposeInt("judgeScore"),
+    teamId: t.exposeInt("teamId"),
   }),
 });
 
-builder.queryField("getTotalScore", (t) =>
+builder.queryField("getTotalScores", (t) =>
   t.field({
     type: [TotalScore],
     args: {
@@ -203,7 +203,14 @@ builder.queryField("getTotalScore", (t) =>
           roundNo: Number(args.roundNo),
         },
       });
-      const scores = teams.map(async (team) => {
+      const criteria = await ctx.prisma.criteria.findMany({
+        where: {
+          eventId: Number(args.eventId),
+          roundNo: Number(args.roundNo),
+        },
+      });
+
+      const total_scores = teams.map(async (team) => {
         const scores = await ctx.prisma.scores.findMany({
           where: {
             teamId: team.id,
@@ -211,21 +218,26 @@ builder.queryField("getTotalScore", (t) =>
               in: judges.map((judge) => judge.userId),
             },
           },
-          include: {
-            Criteria: true,
-          },
         });
+
         const totalScore = scores.reduce(
-          (acc, score) => acc + Number(score.score),
+          (acc, score) => acc + (score.score ? Number(score.score) : 0),
           0
         );
-        const judgeScore = scores.find(
-          (score) => score.judgeId === user.id
-        )?.score;
-
-        return new TotalScoreClass(totalScore, Number(judgeScore), team.id);
+        const judgeScore = scores.reduce((acc, score) => {
+          if (score.judgeId === user.id) {
+            return acc + (score.score ? Number(score.score) : 0);
+          }
+          return acc;
+        }, 0);
+        console.log(totalScore, judgeScore, team.id);
+        return {
+          totalScore,
+          judgeScore,
+          teamId: team.id,
+        };
       });
-      return Promise.all(scores);
+      return Promise.all(total_scores);
     },
   })
 );
