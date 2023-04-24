@@ -1,4 +1,5 @@
 import { builder } from "../../builder";
+import checkIfPublicityMember from "../../publicityMembers/checkIfPublicityMember";
 
 builder.queryField("getCards",(t) => 
     t.prismaField({
@@ -7,10 +8,11 @@ builder.queryField("getCards",(t) =>
             types:[Error]
         },
         resolve: async (query, root, args, ctx, info) => {
-            const user = ctx.user;
+            const user = await ctx.user;
             if(!user)
                 throw new Error("Not authenticated");
-            //TODO: check if authorized people access
+            if(!checkIfPublicityMember(user.id))
+                throw new Error("Not authorized");
             return ctx.prisma.card.findMany({})
         }
     })

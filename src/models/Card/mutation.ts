@@ -1,5 +1,6 @@
 import { builder } from "../../builder";
 import { DayType } from "@prisma/client";
+import checkIfPublicityMember from "../../publicityMembers/checkIfPublicityMember";
 
 const DayTypeEnum = builder.enumType(DayType, {
   name: "DayType",
@@ -18,8 +19,9 @@ builder.mutationField("createCard",(t) =>
         resolve: async (query, root, args, ctx, info) => {
             const user = await ctx.user;
             if(!user)
-                throw new Error("Not authenticated");
-            //TODO: check if authorized people access
+                throw new Error("Not authenticated");    
+            if(!checkIfPublicityMember(user.id))
+                throw new Error("Not authorized");
             return ctx.prisma.card.create({
                 data:{
                     clue: args.clue,
@@ -42,10 +44,11 @@ builder.mutationField("updateCard",(t)=>
             types:[Error]
         },
         resolve: async (query, root, args, ctx, info) => {
-            const user = ctx.user;
+            const user = await ctx.user;
             if(!user)
                 throw new Error("Not authenticated");
-            //TODO: check if authorized people access
+            if(!checkIfPublicityMember(user.id))
+                throw new Error("Not authorized");
             const card = await ctx.prisma.card.findUnique({
                 where:{
                     id: Number(args.id),
@@ -76,10 +79,11 @@ builder.mutationField("deleteCard",(t) =>
             types:[Error]
         },
         resolve: async (query, root, args, ctx, info) => {
-            const user = ctx.user;
+            const user = await ctx.user;
             if(!user)
                 throw new Error("Not authenticated");
-            //TODO: check if authorized people access
+            if(!checkIfPublicityMember(user.id))
+                throw new Error("Not authorized");
             const card = await ctx.prisma.card.findUnique({
                 where:{
                     id: Number(args.id),

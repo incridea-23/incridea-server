@@ -1,4 +1,5 @@
 import { builder } from "../../builder";
+import checkIfPublicityMember from "../../publicityMembers/checkIfPublicityMember";
 
 builder.queryField("getAllSubmissions",(t) =>
     t.prismaField({
@@ -10,7 +11,8 @@ builder.queryField("getAllSubmissions",(t) =>
             const user = await ctx.user;
             if(!user)
                 throw new Error("Not authenticated");
-            //TODO: check if some pids can access
+            if(!checkIfPublicityMember(user.id))
+                throw new Error("Not authorized");
             return ctx.prisma.submission.findMany({});
         }
     }) 
