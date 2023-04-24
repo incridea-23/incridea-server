@@ -169,10 +169,12 @@ builder.queryField("getTotalScores", (t) =>
 
 class CriteriaClass {
   criteriaId: number;
+  criteriaName: string;
   score: number;
-  constructor(criteriaId: number, score: number) {
+  constructor(criteriaName: string, criteriaId: number, score: number) {
     this.criteriaId = criteriaId;
     this.score = score;
+    this.criteriaName = criteriaName;
   }
 }
 
@@ -210,6 +212,7 @@ const Criteria = builder.objectType(CriteriaClass, {
   fields: (t) => ({
     criteriaId: t.exposeInt("criteriaId"),
     score: t.exposeFloat("score"),
+    criteriaName: t.exposeString("criteriaName"),
   }),
 });
 
@@ -292,6 +295,7 @@ builder.queryField("getScoreSheetJuryView", (t) =>
             return {
               criteriaId: criterion.id,
               score: score ? Number(score.score) : 0,
+              criteriaName: criterion.name,
             };
           });
           return {
