@@ -276,16 +276,18 @@ model Winners {
 model Card {
   id          Int          @id @default(autoincrement())
   clue        String
-  date        DayType
+  day         DayType
   Submissions Submission[]
 }
 
 model Submission {
-  userId Int
-  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  image  String
-  cardId Int
-  Card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId    Int
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image     String
+  cardId    Int
+  Card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, cardId])
   @@index([cardId])

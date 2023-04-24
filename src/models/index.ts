@@ -12,3 +12,4 @@ import "./Judge";
 import "./Criteria";
 import "./Score";
 import "./Winner";
+import "./Submission"
