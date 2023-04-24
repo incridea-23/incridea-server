@@ -128,14 +128,15 @@ model Team {
 }
 
 model Round {
-  eventId   Int
-  roundNo   Int        @default(1)
-  Event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  completed Boolean    @default(false)
-  Judges    Judge[]
-  date      DateTime?
-  Criteria  Criteria[]
-  Comments  Comments[]
+  eventId      Int
+  roundNo      Int        @default(1)
+  Event        Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  completed    Boolean    @default(false)
+  Judges       Judge[]
+  date         DateTime?
+  Criteria     Criteria[]
+  Comments     Comments[]
+  selectStatus Boolean    @default(false)
 
   @@id([eventId, roundNo])
   @@unique([eventId, roundNo])
