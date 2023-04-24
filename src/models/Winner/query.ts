@@ -19,3 +19,20 @@ builder.queryField("winnersByEvent", (t) =>
     },
   })
 );
+
+builder.queryField("winner", (t) =>
+  t.prismaField({
+    type: ["Winners"],
+    args: {
+      eventId: t.arg.id({ required: true }),
+    },
+    resolve: (query, root, args, ctx, info) => {
+      return ctx.prisma.winners.findMany({
+        where: {
+          eventId: Number(args.eventId),
+        },
+        ...query,
+      });
+    },
+  })
+);
