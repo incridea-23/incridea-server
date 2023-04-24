@@ -57,6 +57,7 @@ model User {
   Organizers        Organizer[]
   TeamMembers       TeamMember[]
   Judges            Judge[]
+  Submissions       Submission[]
 
   @@index([collegeId])
 }
@@ -272,6 +273,25 @@ model Winners {
   @@index([eventId])
 }
 
+model Card {
+  id          Int          @id @default(autoincrement())
+  clue        String
+  date        DayType
+  Submissions Submission[]
+}
+
+model Submission {
+  userId Int
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image  String
+  cardId Int
+  Card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cardId])
+  @@index([cardId])
+  @@index([userId])
+}
+
 enum PaymentType {
   FEST_REGISTRATION
   EVENT_REGISTRATION
@@ -326,4 +346,11 @@ enum CriteriaType {
 enum WinnerType {
   WINNER
   RUNNER_UP
+}
+
+enum DayType {
+  Day1
+  Day2
+  Day3
+  Day4
 }
