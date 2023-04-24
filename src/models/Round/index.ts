@@ -1,6 +1,8 @@
 import { builder } from "../../builder";
 import "./mutation";
 import "./query";
+import "./subscription";
+
 builder.prismaObject("Round", {
   fields: (t) => ({
     eventId: t.exposeID("eventId"),
@@ -15,5 +17,6 @@ builder.prismaObject("Round", {
       nullable: true,
     }),
     judges: t.relation("Judges"),
+    selectStatus: t.exposeBoolean("selectStatus"),
   }),
 });
