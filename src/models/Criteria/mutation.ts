@@ -1,11 +1,11 @@
-import { CriteriaType } from '@prisma/client';
-import { builder } from '../../builder';
+import { CriteriaType } from "@prisma/client";
+import { builder } from "../../builder";
 
 const CriteriaTypeEnum = builder.enumType(CriteriaType, {
-  name: 'CriteriaType',
+  name: "CriteriaType",
 });
 
-const CreateCriteriaInput = builder.inputType('CreateCriteriaInput', {
+const CreateCriteriaInput = builder.inputType("CreateCriteriaInput", {
   fields: (t) => ({
     name: t.string({ required: false }),
     type: t.field({
@@ -18,9 +18,9 @@ const CreateCriteriaInput = builder.inputType('CreateCriteriaInput', {
 });
 
 // 1. Create Criteria - Organizers
-builder.mutationField('createCriteria', (t) =>
+builder.mutationField("createCriteria", (t) =>
   t.prismaField({
-    type: 'Criteria',
+    type: "Criteria",
     args: {
       data: t.arg({
         type: CreateCriteriaInput,
@@ -35,8 +35,9 @@ builder.mutationField('createCriteria', (t) =>
     resolve: async (query, root, args, ctx, info) => {
       // 1. user related checks
       const user = await ctx.user;
-      if (!user) throw new Error('Not authenticated');
-      if (user?.role != 'ORGANIZER' && user?.role != 'JUDGE') throw new Error('Not Permitted');
+      if (!user) throw new Error("Not authenticated");
+      if (user?.role != "ORGANIZER" && user?.role != "JUDGE")
+        throw new Error("Not Permitted");
 
       // 2. event related checks
       const event = await ctx.prisma.event.findUnique({
@@ -55,15 +56,24 @@ builder.mutationField('createCriteria', (t) =>
       });
       if (!event) throw new Error(`No Event with id ${args.data.eventId}`);
 
-      // 3. organizer related checks
-      if (!event.Organizers.find((o) => o.userId === user.id)) {
-        // 4. judge related checks
-        if (!event.Rounds.find((r) => r.roundNo === args.data.roundNo)?.Judges.find((j) => j.userId === user.id)) {
-          throw new Error('Not authorized for this event!');
-        } else {
-          throw new Error('Not authorized for this event!');
-        }
+      if (!user) {
+        throw new Error("Not Authenticated");
       }
+      // check if the user is an organizer or a judge of the event
+      if (
+        user.role == "ORGANIZER" &&
+        !event.Organizers.find((o) => o.userId === user.id)
+      )
+        throw new Error("Not Permitted");
+      if (
+        user.role == "JUDGE" &&
+        !event.Rounds.find(
+          (r) =>
+            r.roundNo === args.data.roundNo &&
+            r.Judges.find((j) => j.userId === user.id)
+        )
+      )
+        throw new Error("Not Permitted");
 
       const criteriaNo =
         (event.Rounds.find((r) => r.roundNo === args.data.roundNo)?.Criteria
@@ -82,20 +92,20 @@ builder.mutationField('createCriteria', (t) =>
 );
 
 // 2. Delete Criteria - Organizers
-builder.mutationField('deleteCriteria', (t) =>
+builder.mutationField("deleteCriteria", (t) =>
   t.prismaField({
-    type: 'Criteria',
+    type: "Criteria",
     args: {
       criteriaId: t.arg({
-        type: 'ID',
+        type: "ID",
         required: true,
       }),
       eventId: t.arg({
-        type: 'ID',
+        type: "ID",
         required: true,
       }),
       roundNo: t.arg({
-        type: 'Int',
+        type: "Int",
         required: true,
       }),
     },
@@ -107,8 +117,9 @@ builder.mutationField('deleteCriteria', (t) =>
     resolve: async (query, root, args, ctx, info) => {
       // 1. user related checks
       const user = await ctx.user;
-      if (!user) throw new Error('Not authenticated');
-      if (user?.role != 'ORGANIZER' && user?.role != 'JUDGE') throw new Error('Not Permitted');
+      if (!user) throw new Error("Not authenticated");
+      if (user.role != "ORGANIZER" && user.role != "JUDGE")
+        throw new Error("Not Permitted");
 
       // 2. event related checks
       const event = await ctx.prisma.event.findUnique({
@@ -128,17 +139,27 @@ builder.mutationField('deleteCriteria', (t) =>
       if (!event) throw new Error(`No Event with id ${args.eventId}`);
 
       // 3. organizer related checks
-      if (!event.Organizers.find((o) => o.userId === user.id)) {
-        // 4. judge related checks
-        if (!event.Rounds.find((r) => r.roundNo === args.roundNo)?.Judges.find((j) => j.userId === user.id)) {
-          throw new Error('Not authorized for this event!');
-        } else {
-          throw new Error('Not authorized for this event!');
-        }
-      }
+      if (
+        user.role == "ORGANIZER" &&
+        !event.Organizers.find((o) => o.userId === user.id)
+      )
+        throw new Error("Not Permitted");
+      if (
+        user.role == "JUDGE" &&
+        !event.Rounds.find(
+          (r) =>
+            r.roundNo === args.roundNo &&
+            r.Judges.find((j) => j.userId === user.id)
+        )
+      )
+        throw new Error("Not Permitted");
 
       // 4. criteria related checks
-      if (!event.Rounds.find((r) => r.roundNo === args.roundNo)?.Criteria.find((c) => c.id === Number(args.criteriaId))) {
+      if (
+        !event.Rounds.find((r) => r.roundNo === args.roundNo)?.Criteria.find(
+          (c) => c.id === Number(args.criteriaId)
+        )
+      ) {
         throw new Error(`No Criteria with id ${args.criteriaId}!`);
       }
 
