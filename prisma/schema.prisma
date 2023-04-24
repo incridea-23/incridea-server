@@ -278,6 +278,9 @@ model Card {
   clue        String
   day         DayType
   Submissions Submission[]
+
+  @@unique([id])
+  @@index([id])
 }
 
 model Submission {

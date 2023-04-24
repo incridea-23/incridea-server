@@ -13,3 +13,4 @@ import "./Criteria";
 import "./Score";
 import "./Winner";
 import "./Submission"
+import "./Card"
