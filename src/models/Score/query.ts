@@ -259,7 +259,9 @@ builder.queryField("getScoreSheetJuryView", (t) =>
       }
       const teams = await ctx.prisma.team.findMany({
         where: {
-          roundNo: Number(args.roundNo),
+          roundNo: {
+            gte: Number(args.roundNo),
+          },
           eventId: Number(args.eventId),
           confirmed: true,
           attended: true,
