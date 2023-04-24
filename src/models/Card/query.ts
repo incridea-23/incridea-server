@@ -15,8 +15,6 @@ builder.queryField("getCards",(t) =>
             const user = await ctx.user;
             if(!user)
                 throw new Error("Not authenticated");
-            if(!checkIfPublicityMember(user.id))
-                throw new Error("Not authorized");
             return ctx.prisma.card.findMany({
                 where:{
                     day: args.day
