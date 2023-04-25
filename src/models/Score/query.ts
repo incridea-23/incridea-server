@@ -1,5 +1,5 @@
 import { builder } from "../../builder";
-
+import { CriteriaType } from "@prisma/client";
 builder.queryField("getScore", (t) =>
   t.prismaField({
     type: "Scores",
@@ -170,10 +170,17 @@ class CriteriaClass {
   criteriaId: number;
   criteriaName: string;
   score: number;
-  constructor(criteriaName: string, criteriaId: number, score: number) {
+  criteriaType: CriteriaType;
+  constructor(
+    criteriaName: string,
+    criteriaId: number,
+    score: number,
+    criteriaType: CriteriaType
+  ) {
     this.criteriaId = criteriaId;
     this.score = score;
     this.criteriaName = criteriaName;
+    this.criteriaType = criteriaType;
   }
 }
 
@@ -212,6 +219,9 @@ const Criteria = builder.objectType(CriteriaClass, {
     criteriaId: t.exposeInt("criteriaId"),
     score: t.exposeFloat("score"),
     criteriaName: t.exposeString("criteriaName"),
+    criteriaType: t.expose("criteriaType", {
+      type: CriteriaType,
+    }),
   }),
 });
 
@@ -297,6 +307,7 @@ builder.queryField("getScoreSheetJuryView", (t) =>
               criteriaId: criterion.id,
               score: score ? Number(score.score) : 0,
               criteriaName: criterion.name,
+              criteriaType: criterion.type,
             };
           });
           return {
