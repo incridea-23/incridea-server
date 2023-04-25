@@ -72,11 +72,18 @@ builder.queryField("getComment", (t) =>
 class TotalScoreClass {
   totalScore: number;
   judgeScore: number;
+  criteriaType: CriteriaType;
   teamId: number;
-  constructor(totalScore: number, judgeScore: number, teamId: number) {
+  constructor(
+    totalScore: number,
+    judgeScore: number,
+    teamId: number,
+    criteriaType: CriteriaType
+  ) {
     this.totalScore = totalScore;
     this.judgeScore = judgeScore;
     this.teamId = teamId;
+    this.criteriaType = criteriaType;
   }
 }
 
@@ -86,6 +93,7 @@ const TotalScore = builder.objectType(TotalScoreClass, {
     totalScore: t.exposeFloat("totalScore"),
     judgeScore: t.exposeFloat("judgeScore"),
     teamId: t.exposeInt("teamId"),
+    criteriaType: t.exposeString("criteriaType"),
   }),
 });
 
@@ -134,6 +142,12 @@ builder.queryField("getTotalScores", (t) =>
           roundNo: Number(args.roundNo),
         },
       });
+      const criteria = await ctx.prisma.criteria.findFirst({
+        where: {
+          eventId: Number(args.eventId),
+          roundNo: Number(args.roundNo),
+        },
+      });
 
       const total_scores = teams.map(async (team) => {
         const scores = await ctx.prisma.scores.findMany({
@@ -159,6 +173,7 @@ builder.queryField("getTotalScores", (t) =>
           totalScore,
           judgeScore,
           teamId: team.id,
+          criteriaType: criteria?.type || CriteriaType.NUMBER,
         };
       });
       return Promise.all(total_scores);
