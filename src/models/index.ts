@@ -12,5 +12,6 @@ import "./Judge";
 import "./Criteria";
 import "./Score";
 import "./Winner";
-import "./Submission"
-import "./Card"
+import "./Submission";
+import "./Card";
+import "./ProniteRegistration";
