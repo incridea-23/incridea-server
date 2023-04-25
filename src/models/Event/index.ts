@@ -33,5 +33,8 @@ builder.prismaObject("Event", {
     category: t.exposeString("category", {
       nullable: true,
     }),
+    winner: t.relation("Winner", {
+      nullable: true,
+    }),
   }),
 });

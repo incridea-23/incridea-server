@@ -57,6 +57,7 @@ model User {
   Organizers        Organizer[]
   TeamMembers       TeamMember[]
   Judges            Judge[]
+  Submissions       Submission[]
 
   @@index([collegeId])
 }
@@ -116,28 +117,26 @@ model Team {
   confirmed         Boolean             @default(false)
   attended          Boolean             @default(false)
   TeamMembers       TeamMember[]
-  roundEventId      Int?
-  roundRoundNo      Int?
   leaderId          Int?
-  Round             Round?              @relation(fields: [roundEventId, roundRoundNo], references: [eventId, roundNo])
   EventPaymentOrder EventPaymentOrder[]
-  Score             Score[]
+  Score             Scores[]
   Winner            Winners?
+  Comments          Comments[]
 
   @@unique([name, eventId])
   @@index([eventId, roundNo])
-  @@index([roundEventId, roundRoundNo])
 }
 
 model Round {
-  eventId   Int
-  roundNo   Int        @default(1)
-  Event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  completed Boolean    @default(false)
-  Teams     Team[]
-  Judges    Judge[]
-  date      DateTime?
-  Criteria  Criteria[]
+  eventId      Int
+  roundNo      Int        @default(1)
+  Event        Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  completed    Boolean    @default(false)
+  Judges       Judge[]
+  date         DateTime?
+  Criteria     Criteria[]
+  Comments     Comments[]
+  selectStatus Boolean    @default(false)
 
   @@id([eventId, roundNo])
   @@unique([eventId, roundNo])
@@ -202,11 +201,13 @@ model TeamMember {
 }
 
 model Judge {
-  userId  Int
-  User    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  eventId Int
-  roundNo Int
-  Round   Round @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
+  userId   Int        @unique
+  User     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId  Int
+  roundNo  Int
+  Round    Round      @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
+  Scores   Scores[]
+  Comments Comments[]
 
   @@unique([userId, eventId, roundNo])
   @@index([eventId, roundNo, userId])
@@ -225,38 +226,78 @@ model Criteria {
   roundNo Int
   Round   Round        @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
   type    CriteriaType @default(NUMBER)
-  Score   Score[]
+  Score   Scores[]
 
   @@index([eventId, roundNo])
 }
 
-model Score {
-  id          Int      @id @default(autoincrement())
-  teamId      Int
-  Team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  criteriaId  Int
-  Criteria    Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
-  score       String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Scores {
+  teamId     Int
+  Team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  criteriaId Int
+  Criteria   Criteria @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
+  score      String
+  judgeId    Int
+  Judge      Judge    @relation(fields: [judgeId], references: [userId])
 
+  @@unique([teamId, criteriaId, judgeId])
   @@index([teamId, criteriaId])
   @@index([criteriaId])
+  @@index([judgeId])
+}
+
+model Comments {
+  teamId  Int
+  Team    Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  eventId Int
+  roundNo Int
+  Round   Round  @relation(fields: [eventId, roundNo], references: [eventId, roundNo], onDelete: Cascade)
+  comment String
+  judgeId Int
+  Judge   Judge  @relation(fields: [judgeId], references: [userId])
+
+  @@unique([teamId, eventId, roundNo, judgeId])
+  @@index([teamId])
+  @@index([eventId, roundNo])
+  @@index([judgeId])
 }
 
 model Winners {
-  id      Int   @id @default(autoincrement())
-  teamId  Int   @unique
-  Team    Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  id      Int        @id @default(autoincrement())
+  teamId  Int        @unique
+  Team    Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
   eventId Int
-  Event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Event   Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  type    WinnerType
 
   @@index([teamId])
   @@index([eventId])
 }
 
-// Enums
+model Card {
+  id          Int          @id @default(autoincrement())
+  clue        String
+  day         DayType
+  Submissions Submission[]
+
+  @@unique([id])
+  @@index([id])
+}
+
+model Submission {
+  userId    Int
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image     String
+  cardId    Int
+  Card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, cardId])
+  @@index([cardId])
+  @@index([userId])
+}
+
 enum PaymentType {
   FEST_REGISTRATION
   EVENT_REGISTRATION
@@ -306,4 +347,17 @@ enum CriteriaType {
   TEXT
   NUMBER
   TIME
+}
+
+enum WinnerType {
+  WINNER
+  RUNNER_UP
+  SECOND_RUNNER_UP
+}
+
+enum DayType {
+  Day1
+  Day2
+  Day3
+  Day4
 }

@@ -138,3 +138,30 @@ builder.queryField("publishedEvents", (t) =>
     },
   })
 );
+
+//completed events by checking if winners are present or not
+builder.queryField("completedEvents", (t) =>
+  t.prismaField({
+    type: ["Event"],
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const eventIds = await ctx.prisma.winners.findMany({
+        select: {
+          eventId: true,
+        },
+      }
+      );
+        const events = await ctx.prisma.event.findMany({
+        where: {
+          id: {
+            in: eventIds.map((event) => event.eventId),
+          }
+        },
+        ...query,
+      });
+      return events;
+    },
+  })
+);

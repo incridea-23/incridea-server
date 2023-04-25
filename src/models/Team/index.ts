@@ -1,13 +1,14 @@
 import { builder } from "../../builder";
 import "./mutation";
 import "./query";
+import "./subscription";
 
 builder.prismaObject("Team", {
   fields: (t) => ({
     id: t.exposeID("id"),
     name: t.exposeString("name"),
     event: t.relation("Event"),
-    rounds: t.relation("Round"),
+    roundNo: t.exposeInt("roundNo"),
     members: t.relation("TeamMembers"),
     confirmed: t.exposeBoolean("confirmed"),
     attended: t.exposeBoolean("attended"),

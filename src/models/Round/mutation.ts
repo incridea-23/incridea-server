@@ -49,7 +49,6 @@ builder.mutationField("createRound", (t) =>
   })
 );
 
-// deleteRound
 builder.mutationField("deleteRound", (t) =>
   t.prismaField({
     type: "Round",
@@ -107,6 +106,126 @@ builder.mutationField("deleteRound", (t) =>
           },
         },
       });
+    },
+  })
+);
+
+// judge mark round as completed
+builder.mutationField("completeRound", (t) =>
+  t.prismaField({
+    type: "Round",
+    args: {
+      eventId: t.arg.id({ required: true }),
+      roundNo: t.arg({ type: "Int", required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (user.role !== "JUDGE") {
+        throw new Error("Not authorized");
+      }
+      const round = await ctx.prisma.round.findUnique({
+        where: {
+          eventId_roundNo: {
+            eventId: Number(args.eventId),
+            roundNo: args.roundNo,
+          },
+        },
+        include: {
+          Judges: true,
+        },
+      });
+      if (!round) {
+        throw new Error("Round not found");
+      }
+      const judge = round.Judges.find((j) => j.userId === user.id);
+      if (!judge) {
+        throw new Error("Not authorized");
+      }
+      const data = await ctx.prisma.round.update({
+        where: {
+          eventId_roundNo: {
+            eventId: Number(args.eventId),
+            roundNo: args.roundNo,
+          },
+        },
+        data: {
+          completed: true,
+        },
+      });
+      ctx.pubsub.publish(`STATUS_UPDATE/${args.eventId}-${args.roundNo}`, {
+        eventId: args.eventId,
+        roundNo: args.roundNo,
+      });
+      return data;
+    },
+  })
+);
+
+builder.mutationField("changeSelectStatus", (t) =>
+  t.prismaField({
+    type: "Round",
+    errors: {
+      types: [Error],
+    },
+    args: {
+      eventId: t.arg.id({ required: true }),
+      roundNo: t.arg({ type: "Int", required: true }),
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not Authenticated");
+      }
+      if (user.role != "JUDGE") {
+        throw new Error("Not Authorized");
+      }
+
+      const isJudge = await ctx.prisma.judge.findUnique({
+        where: {
+          userId_eventId_roundNo: {
+            userId: user.id,
+            eventId: Number(args.eventId),
+            roundNo: args.roundNo,
+          },
+        },
+      });
+      if (!isJudge) {
+        throw new Error("Not Authorized");
+      }
+      const round = await ctx.prisma.round.findUnique({
+        where: {
+          eventId_roundNo: {
+            eventId: Number(args.eventId),
+            roundNo: args.roundNo,
+          },
+        },
+      });
+      if (!round) {
+        throw new Error("Round not found");
+      }
+      const data = await ctx.prisma.round.update({
+        where: {
+          eventId_roundNo: {
+            eventId: Number(args.eventId),
+            roundNo: args.roundNo,
+          },
+        },
+        data: {
+          selectStatus: !round.selectStatus,
+        },
+      });
+      if (!data) throw new Error("No ROund FOund");
+      ctx.pubsub.publish(`STATUS_UPDATE/${args.eventId}-${args.roundNo}`, {
+        eventId: args.eventId,
+        roundNo: args.roundNo,
+      });
+      return data;
     },
   })
 );

@@ -1,4 +1,5 @@
 import "./mutation";
+import "./query";
 import { builder } from "../../builder";
 
 builder.prismaObject("Judge", {

@@ -993,3 +993,90 @@ builder.mutationField("organizerRegisterSolo", (t) =>
     },
   })
 );
+
+builder.mutationField("promoteToNextRound", (t) =>
+  t.prismaField({
+    type: "Team",
+    args: {
+      teamId: t.arg.id({ required: true }),
+      selected: t.arg.boolean({ required: true, defaultValue: true }),
+      roundNo: t.arg.id({ required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      if (user.role !== "JUDGE") {
+        throw new Error("Not authorized");
+      }
+      const team = await ctx.prisma.team.findUnique({
+        where: {
+          id: Number(args.teamId),
+        },
+        include: {
+          Event: {
+            include: {
+              Rounds: true,
+            },
+          },
+        },
+      });
+
+      if (!team) {
+        throw new Error("Team not found");
+      }
+
+      const round = await ctx.prisma.round.findUnique({
+        where: {
+          eventId_roundNo: {
+            eventId: team.Event.id,
+            roundNo: Number(args.roundNo),
+          },
+        },
+        include: {
+          Judges: true,
+        },
+      });
+      if (!round) {
+        throw new Error("Round not found");
+      }
+      if (round.completed) {
+        throw new Error("Round completed");
+      }
+      if (
+        round.Judges.filter((judge) => judge.userId === user.id).length === 0
+      ) {
+        throw new Error("Not authorized");
+      }
+      if (
+        team.Event.Rounds.length <= Number(args.roundNo) ||
+        Number(args.roundNo) <= 0
+      ) {
+        throw new Error("Invalid round number");
+      }
+      let roundNo = team.roundNo;
+
+      if (args.selected && team.roundNo === Number(args.roundNo)) {
+        roundNo = Number(args.roundNo) + 1;
+      } else if (!args.selected && team.roundNo === Number(args.roundNo) + 1) {
+        roundNo = Number(args.roundNo);
+      }
+
+      const data = await ctx.prisma.team.update({
+        where: {
+          id: Number(args.teamId),
+        },
+        data: {
+          roundNo,
+        },
+        ...query,
+      });
+      ctx.pubsub.publish(`TEAM_UPDATED/${team.Event.id}-${args.roundNo}`, data);
+      return data;
+    },
+  })
+);

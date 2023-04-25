@@ -9,3 +9,8 @@ import "./BranchRep";
 import "./Round";
 import "./Team";
 import "./Judge";
+import "./Criteria";
+import "./Score";
+import "./Winner";
+import "./Submission"
+import "./Card"
