@@ -12,26 +12,6 @@ builder.queryField("judgeGetTeamsByRound", (t) =>
       subscription.register(`TEAM_UPDATED/${args.eventId}-${args.roundId}`);
     },
     resolve: async (query, root, args, ctx, info) => {
-      const user = await ctx.user;
-      if (!user) {
-        throw new Error("Not Authenticated");
-      }
-      if (user.role !== "JUDGE") {
-        throw new Error("Not Authorized");
-      }
-      const isJudgeOfRound = await ctx.prisma.round.findMany({
-        where: {
-          eventId: args.eventId,
-          Judges: {
-            some: {
-              userId: user.id,
-            },
-          },
-        },
-      });
-      if (isJudgeOfRound.length === 0) {
-        throw new Error("Not Authorized");
-      }
       const teams = await ctx.prisma.team.findMany({
         where: {
           eventId: args.eventId,

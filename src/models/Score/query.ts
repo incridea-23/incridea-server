@@ -155,7 +155,6 @@ builder.queryField("getTotalScores", (t) =>
           }
           return acc;
         }, 0);
-        console.log(totalScore, judgeScore, team.id);
         return {
           totalScore,
           judgeScore,
