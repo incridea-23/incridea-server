@@ -695,6 +695,21 @@ builder.mutationField("organizerAddTeamMember", (t) =>
       if (teamMembers.length >= team.Event.maxTeamSize) {
         throw new Error("Team is full");
       }
+      if (team.Event.eventType === "TEAM") {
+        const registeredTeam = await ctx.prisma.team.findMany({
+          where: {
+            eventId: Number(team.Event.id),
+            TeamMembers: {
+              some: {
+                userId: user.id,
+              },
+            },
+          },
+        });
+        if (registeredTeam.length > 0) {
+          throw new Error("Already registered");
+        }
+      }
       return await ctx.prisma.teamMember.create({
         data: {
           userId: participant.id,
