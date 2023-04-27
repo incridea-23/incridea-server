@@ -1,5 +1,5 @@
 import { builder } from "../../builder";
-
+import "./mutation";
 builder.prismaObject("ProniteRegistration", {
   fields: (t) => ({
     userId: t.exposeID("userId"),
