@@ -38,7 +38,6 @@ builder.queryField("submissionsByUser", (t) =>
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;
       if (!user) throw new Error("Not authenticated");
-      if (!checkIfPublicityMember(user.id)) throw new Error("Not authorized");
 
       const submissions = await ctx.prisma.submission.findMany({
         where: {
