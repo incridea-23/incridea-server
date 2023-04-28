@@ -18,7 +18,11 @@ builder.mutationField("registerPronite", (t) =>
       if (!user) {
         throw new Error("No such user exists");
       }
-     
+      const authUser = await ctx.user;
+      if (!authUser) throw new Error("Not authenticated");
+      if (authUser.id != 4790) {
+        throw new Error("Not authorized to register for pronite");
+      }
       if (user.collegeId === 1) {
         throw new Error("User is not from a college");
       }
