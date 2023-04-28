@@ -18,7 +18,9 @@ builder.mutationField("registerPronite", (t) =>
       if (!user) {
         throw new Error("No such user exists");
       }
-      if (user.email !== "pronite@incridea.in") {
+      const authUser = await ctx.user;
+      if (!authUser) throw new Error("Not authenticated");
+      if (authUser.email !== "pronite@incridea.in") {
         throw new Error("Not authorized to register for pronite");
       }
       if (user.collegeId === 1) {
