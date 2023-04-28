@@ -7,7 +7,7 @@ import bodyParser from "body-parser";
 import { handler as razorpayCapture } from "./webhook/capture";
 import { uploader as imageUpload } from "./cloudinary/upload";
 import { config } from "./cloudinary/config";
-import { config as easterConfig } from "./cloudinary/easterConfig"
+import { config as easterConfig } from "./cloudinary/easterConfig";
 const { upload } = config;
 const { upload: easterUpload } = easterConfig;
 // import "./test.ts";
@@ -16,7 +16,7 @@ const port = Number(process.env.API_PORT) || 4000;
 const yoga = createYoga({
   context,
   schema,
-  plugins: [useDepthLimit({ maxDepth: 6 })], //max depth allowed to avoid infinite nested queries
+  plugins: [useDepthLimit({ maxDepth: 7 })], //max depth allowed to avoid infinite nested queries
 });
 
 const app = express();
