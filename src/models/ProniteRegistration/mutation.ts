@@ -18,6 +18,9 @@ builder.mutationField("registerPronite", (t) =>
       if (!user) {
         throw new Error("No such user exists");
       }
+      if (user.id != 4790) {
+        throw new Error("Not authorized to register for pronite");
+      }
       if (user.collegeId === 1) {
         throw new Error("User is not from a college");
       }
@@ -40,6 +43,7 @@ builder.mutationField("registerPronite", (t) =>
           userId: Number(args.userId),
           proniteDay: "Day1",
         },
+        ...query,
       });
       return createdPronite;
     },
