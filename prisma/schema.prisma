@@ -59,6 +59,7 @@ model User {
   Judges              Judge[]
   Submissions         Submission[]
   ProniteRegistration ProniteRegistration[]
+  CertificateIssue    CertificateIssue[]
 
   @@index([collegeId])
 }
@@ -82,26 +83,27 @@ model Branch {
 }
 
 model Event {
-  id          Int           @id @default(autoincrement())
-  name        String
-  description String?       @db.Text
-  image       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  fees        Int           @default(0)
-  Organizers  Organizer[]
-  eventType   EventType     @default(INDIVIDUAL)
-  venue       String?
-  branchId    Int
-  minTeamSize Int           @default(1)
-  maxTeamSize Int           @default(1)
-  maxTeams    Int?
-  published   Boolean       @default(false)
-  Branch      Branch        @relation(fields: [branchId], references: [id], onDelete: Restrict)
-  Teams       Team[]
-  Rounds      Round[]
-  category    EventCategory @default(TECHNICAL)
-  Winner      Winners[]
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String?            @db.Text
+  image            String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  fees             Int                @default(0)
+  Organizers       Organizer[]
+  eventType        EventType          @default(INDIVIDUAL)
+  venue            String?
+  branchId         Int
+  minTeamSize      Int                @default(1)
+  maxTeamSize      Int                @default(1)
+  maxTeams         Int?
+  published        Boolean            @default(false)
+  Branch           Branch             @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  Teams            Team[]
+  Rounds           Round[]
+  category         EventCategory      @default(TECHNICAL)
+  Winner           Winners[]
+  CertificateIssue CertificateIssue[]
 
   @@index([branchId])
 }
@@ -308,6 +310,19 @@ model ProniteRegistration {
 
   @@unique([userId, proniteDay])
   @@index([userId])
+}
+
+model CertificateIssue {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  EventId   Int
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Event     Event    @relation(fields: [EventId], references: [id], onDelete: Cascade)
+  issued    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([EventId])
 }
 
 enum ProniteDay {

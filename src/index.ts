@@ -10,7 +10,7 @@ import { config } from "./cloudinary/config";
 import { config as easterConfig } from "./cloudinary/easterConfig";
 const { upload } = config;
 const { upload: easterUpload } = easterConfig;
-// import "./test.ts";
+// import "./certificate.ts";
 import { useDepthLimit } from "@envelop/depth-limit";
 const port = Number(process.env.API_PORT) || 4000;
 const yoga = createYoga({

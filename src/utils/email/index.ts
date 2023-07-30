@@ -27,24 +27,23 @@ export async function sendEmail(
   await updateCount(count + 1);
 }
 
-const getUser = (count: number) => {
+export const getUser = (count: number) => {
   const user1 = process.env.EMAIL_SERVER_USER1 as string;
   const user2 = process.env.EMAIL_SERVER_USER2 as string;
   const user3 = process.env.EMAIL_SERVER_USER3 as string;
   const user4 = process.env.EMAIL_SERVER_USER4 as string;
-  const user5 = process.env.EMAIL_SERVER_USER5 as string;
-  const queue = [user1, user2, user3, user4, user5];
-  return queue[count % 5];
+  const queue = [user1, user2, user3, user4];
+  return queue[count % 4];
 };
 
-const getCount = async () => {
+export const getCount = async () => {
   const emailMonitor = await prisma.emailMonitor.findFirst({});
   if (!emailMonitor) return 0;
   let count = emailMonitor.count;
   return count;
 };
 
-const updateCount = async (count: number) => {
+export const updateCount = async (count: number) => {
   await prisma.emailMonitor.update({
     where: { id: 1 },
     data: { count: count + 1 },
