@@ -82,6 +82,10 @@ model Branch {
   Event      Event[]
 }
 
+// User many-to-many  Branch 
+
+// BranchRep userId-BranchID
+
 model Event {
   id               Int                @id @default(autoincrement())
   name             String
