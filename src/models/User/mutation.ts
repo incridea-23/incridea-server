@@ -5,11 +5,11 @@ import jwt from "jsonwebtoken";
 const fs = require("fs");
 const path = require("path");
 let verifyEmail = fs.readFileSync(
-  path.resolve(__dirname, "../../../templates/verifyEmail.html"),
+  path.resolve(__dirname, "../../templates/verifyEmail.html"),
   "utf8"
 );
 let forgotPassword = fs.readFileSync(
-  path.resolve(__dirname, "../../../templates/forgotPassword.html"),
+  path.resolve(__dirname, "../../templates/forgotPassword.html"),
   "utf8"
 );
 import {
