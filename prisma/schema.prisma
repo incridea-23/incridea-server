@@ -60,6 +60,7 @@ model User {
   Submissions         Submission[]
   ProniteRegistration ProniteRegistration[]
   CertificateIssue    CertificateIssue[]
+  XP                  XP[]
 
   @@index([collegeId])
 }
@@ -327,6 +328,27 @@ model CertificateIssue {
 
   @@index([userId])
   @@index([EventId])
+}
+
+model Level {
+  id        String   @id @default(uuid())
+  point     Int      @default(0)
+  createdAt DateTime @default(now())
+  XP        XP[]
+}
+
+model XP {
+  id        Int      @id @default(autoincrement())
+  xp        Int      @default(0)
+  userId    Int
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Level     Level    @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  levelId   String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, levelId])
+  @@index([userId])
+  @@index([levelId])
 }
 
 enum ProniteDay {
