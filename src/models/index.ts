@@ -16,3 +16,4 @@ import "./Submission";
 import "./Card";
 import "./ProniteRegistration";
 import "./XP"
+import "./Level"
