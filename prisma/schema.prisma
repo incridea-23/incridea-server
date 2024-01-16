@@ -50,6 +50,7 @@ model User {
   collegeId           Int?                  @default(1)
   College             College?              @relation(fields: [collegeId], references: [id], onDelete: SetNull)
   phoneNumber         String?
+  totalXp             Int                   @default(0)
   VerificationToken   VerificationToken[]
   RefreshTokens       RefreshToken[]
   PaymentOrders       PaymentOrder[]
@@ -331,7 +332,7 @@ model CertificateIssue {
 }
 
 model Level {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   point     Int      @default(0)
   createdAt DateTime @default(now())
   XP        XP[]
@@ -339,11 +340,10 @@ model Level {
 
 model XP {
   id        Int      @id @default(autoincrement())
-  xp        Int      @default(0)
   userId    Int
   User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   Level     Level    @relation(fields: [levelId], references: [id], onDelete: Cascade)
-  levelId   String
+  levelId   Int
   createdAt DateTime @default(now())
 
   @@unique([userId, levelId])
