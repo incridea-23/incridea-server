@@ -1,0 +1,31 @@
+import { builder } from "../../builder";
+
+//add level
+builder.mutationField("addLevel", (t) =>
+    t.prismaField({
+        type: "Level",
+        args: {
+            point: t.arg({ type: "Int", required: true }),
+        },
+        errors: {
+            types: [Error],
+        },
+        resolve: async (query, root, args, ctx, info) => {
+            const user = await ctx.user;
+            if (!user) {
+                throw new Error("Not authenticated");
+            }
+            //check if user admin
+            if (user.role !== "ADMIN") {
+                throw new Error("Not authorized");
+            }
+            const data = await ctx.prisma.level.create({
+                data: {
+                    point: args.point,
+                },
+                ...query,
+            });
+            return data;
+        },
+    })
+);
