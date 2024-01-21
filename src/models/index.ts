@@ -18,4 +18,4 @@ import "./ProniteRegistration";
 import "./XP"
 import "./Level"
 import "./UserInHotel"
-import "./Hotel"
+import "./Hotels"
