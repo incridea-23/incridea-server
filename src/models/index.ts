@@ -17,3 +17,5 @@ import "./Card";
 import "./ProniteRegistration";
 import "./XP"
 import "./Level"
+import "./UserInHotel"
+import "./Hotel"
