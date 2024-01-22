@@ -23,7 +23,7 @@ builder.mutationField("createHotel", (t) =>
       if(!isAllowed) throw new Error("Not allowed to perform this action")
 
       //check if hotel already exists
-      const isHotel = await ctx.prisma.hotel.findUnique({
+      const isHotel = await ctx.prisma.hotel.findMany({
         where: {
           name: args.name,
         },

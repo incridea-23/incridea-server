@@ -6,6 +6,9 @@ import { builder } from "../../builder";
 builder.queryField("accommodationRequests", (t) =>
     t.prismaField({
         type: ["UserInHotel"],
+        errors: {
+            types: [Error],
+          },
         resolve: async (query, root, args, ctx, info) => {
         const user = await ctx.user;
         if (!user) throw new Error("Not authenticated");
@@ -34,6 +37,28 @@ builder.queryField("accommodationRequests", (t) =>
         },
     })
     );
+
+    builder.queryField("accommodationRequestsByUserId",(t)=>
+        t.prismaField({
+            type:["UserInHotel"],
+            args:{
+                userId:t.arg({type:"ID",required:true})
+            },
+            resolve: async(query,root,args,ctx,info)=>{
+                const user = await ctx.user;
+                if(!user) throw new Error("Not authenticated");
+                if(!checkIfAccommodationMember(user.id)) throw new Error("Not authorized");
+                const userId = Number(args.userId);
+                return ctx.prisma.userInHotel.findMany({
+                    where:{
+                        userId:userId
+                    },
+                    ...query
+                })
+            }
+        })
+    )
+
 
     //Accommodation requests by Day
     builder.queryField("accommodationRequestByDay",(t)=>
@@ -64,16 +89,28 @@ builder.queryField("accommodationRequests", (t) =>
     t.prismaField({
         type:["UserInHotel"],
         args:{
-            hotelId:t.arg({type:"ID",required:true})
+            name:t.arg({type:"String",required:true})
         },
         resolve: async(query,root,args,ctx,info)=>{
             const user = await ctx.user;
             if(!user) throw new Error("Not authenticated");
             if(!checkIfAccommodationMember(user.id)) throw new Error("Not authorized");
-            const hotelId = Number(args.hotelId);
+            const hotelName = args.name;
             return ctx.prisma.userInHotel.findMany({
                 where:{
-                    hotelId:hotelId
+                    Hotel:{
+                        OR:[{
+                            name:{
+                                contains:hotelName
+                            },
+                        },
+                    {
+                        details:{
+                            contains:hotelName
+                        }
+                    }]
+                        
+                    }
                 },
                 ...query
             })
