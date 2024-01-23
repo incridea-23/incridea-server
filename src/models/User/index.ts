@@ -4,7 +4,7 @@ import "./mutation";
 
 builder.prismaObject("User", {
   fields: (t) => ({
-    id: t.exposeBoolean("isVerified"),
+    id: t.exposeID("id"),
     name: t.exposeString("name"),
     email: t.exposeString("email"),
     role: t.exposeString("role"),
