@@ -18,6 +18,5 @@ builder.prismaObject("Hotel", {
       type: "DateTime",
       nullable: true,
     }),
-    ac: t.exposeBoolean("AC"),
   }),
 });

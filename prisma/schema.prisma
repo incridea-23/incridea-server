@@ -355,8 +355,10 @@ model Question {
     quizId   String
     Quiz     Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
     question String
-    options  Options[] //Options separated by comma
+    options  Options[] 
     image    String?
+    points  Float
+    negativePoints Float @default(0)
 
     @@index([quizId])
 }
@@ -426,8 +428,7 @@ model Hotel {
     details     String?
     price       Int
     createdAt   DateTime      @default(now())
-    updatedAt   DateTime      @updatedAt
-    AC          Boolean       @default(false)
+    updatedAt   DateTime      @updatedAt 
     UserInHotel UserInHotel[]
 }
 
@@ -437,8 +438,9 @@ model UserInHotel {
     User      User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
     hotelId   Int
     Hotel     Hotel                      @relation(fields: [hotelId], references: [id], onDelete: Cascade)
-    room      String?
     gender    Gender
+    room      String?
+    AC          Boolean       @default(false) 
     status    AccommodationBookingStatus @default(PENDING)
     checkIn   DateTime?
     checkOut  DateTime?

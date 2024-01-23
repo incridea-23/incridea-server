@@ -39,7 +39,7 @@ builder.mutationField("createHotel", (t) =>
             name: args.name,
             details: args.details,
             price: args.price,
-            AC: args.isAC,
+            
           },
         });
         return data;

@@ -10,6 +10,7 @@ builder.prismaObject("UserInHotel", {
         nullable:true
     }),
     status:t.exposeString("status"),
+    ac:t.exposeBoolean("AC"),
     hotel: t.relation("Hotel"), 
     user: t.relation("User"), //Check if this can be included
     checkIn: t.expose("checkIn", {
