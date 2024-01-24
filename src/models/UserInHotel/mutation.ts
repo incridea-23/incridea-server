@@ -67,18 +67,16 @@ builder.mutationField("editAccommodationDetails",(t)=>
       const isAllowed = checkIfAccommodationMember(user.id);
       if (!isAllowed) throw new Error("Not allowed to perform this action");
 
-      //create accommodation request
       const data = await ctx.prisma.userInHotel.update({
         where: {
           id: Number(args.id),
         },
         data: {
-          
           room: args.room,
           status: args.status as AccommodationBookingStatus,
           Hotel:{
-          update:{
-            name:args.hotel
+          connect:{
+            id:Number(args.hotel)
           }
           }
         },
