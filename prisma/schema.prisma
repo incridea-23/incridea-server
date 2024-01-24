@@ -50,7 +50,6 @@ model User {
   collegeId           Int?                  @default(1)
   College             College?              @relation(fields: [collegeId], references: [id], onDelete: SetNull)
   phoneNumber         String?
-  totalXp             Int                   @default(0)
   VerificationToken   VerificationToken[]
   RefreshTokens       RefreshToken[]
   PaymentOrders       PaymentOrder[]
