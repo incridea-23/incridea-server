@@ -81,8 +81,12 @@ builder.mutationField("updateStatus", (t) =>
             },
           },
         },
+		include:{
+			user:true
+		},
         ...query,
       });
+
       return data;
     },
   }),
