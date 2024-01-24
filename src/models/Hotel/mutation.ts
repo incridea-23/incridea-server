@@ -8,7 +8,6 @@ builder.mutationField("createHotel", (t) =>
       name: t.arg({ type: "String", required: true }),
       details: t.arg({ type: "String", required: true }),
       price: t.arg({ type: "Float", required: true }),
-      isAC: t.arg({ type: "Boolean", required: true }),
     },
     errors: {
       types: [Error],
@@ -39,7 +38,6 @@ builder.mutationField("createHotel", (t) =>
             name: args.name,
             details: args.details,
             price: args.price,
-            
           },
         });
         return data;
