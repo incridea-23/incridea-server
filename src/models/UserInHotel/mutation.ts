@@ -48,7 +48,7 @@ builder.mutationField("editAccommodationDetails",(t)=>
   t.prismaField({
     type: "UserInHotel",
     args:{
-      id:t.arg({type:"Int",required:true}),
+      id:t.arg({type:"String",required:true}),
       hotel: t.arg({ type: "String", required: true }),
       room: t.arg({ type: "String", required: true }),
       status: t.arg({ type: "String", required: true })
@@ -68,7 +68,7 @@ builder.mutationField("editAccommodationDetails",(t)=>
       //create accommodation request
       const data = await ctx.prisma.userInHotel.update({
         where: {
-          id: args.id,
+          id: Number(args.id),
         },
         data: {
           
