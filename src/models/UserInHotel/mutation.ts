@@ -1,4 +1,4 @@
-import { AccommodationBookingStatus, Gender,Status } from "@prisma/client";
+import { AccommodationBookingStatus, Gender, Status } from "@prisma/client";
 import checkIfAccommodationMember from "../../accommodationMembers/checkIfAccommodationMembers";
 import { builder } from "../../builder";
 
@@ -37,7 +37,7 @@ builder.mutationField("addAccommodationRequest", (t) =>
           gender: args.gender as Gender,
           checkIn: new Date(args.checkIn),
           checkOut: new Date(args.checkOut),
-		  AC:args.ac
+          AC: args.ac,
         },
         ...query,
       });
@@ -46,53 +46,14 @@ builder.mutationField("addAccommodationRequest", (t) =>
   }),
 );
 
-builder.mutationField("editAccommodationDetails",(t)=>
-  t.prismaField({
-    type: "UserInHotel",
-    args:{
-      id:t.arg({type:"String",required:true}),
-      hotel: t.arg({ type: "String", required: true }),
-      room: t.arg({ type: "String", required: true }),
-      status: t.arg({ type: "String", required: true })
-    },
-    errors: {
-      types: [Error],
-    },
-    resolve: async (query, root, args, ctx, info) => {
-      const user = await ctx.user;
-      if (!user) {
-        throw new Error("Not authenticated");
-      }
-
-      const isAllowed = checkIfAccommodationMember(user.id);
-      if (!isAllowed) throw new Error("Not allowed to perform this action");
-
-      const data = await ctx.prisma.userInHotel.update({
-        where: {
-          id: Number(args.id),
-        },
-        data: {
-          room: args.room,
-          status: args.status as AccommodationBookingStatus,
-          Hotel:{
-          connect:{
-            id:Number(args.hotel)
-          }
-          }
-        },
-        ...query,
-      });
-      return data;
-    },
-  })
-)
-
 builder.mutationField("updateStatus", (t) =>
   t.prismaField({
     type: "UserInHotel",
     args: {
-      bookingId: t.arg({ type: "Int", required: true }),
+      bookingId: t.arg({ type: "String", required: true }),
       status: t.arg({ type: "String", required: true }),
+      room: t.arg({ type: "String", required: true }),
+      hotelId: t.arg({ type: "String", required: true }),
     },
     errors: {
       types: [Error],
@@ -109,10 +70,16 @@ builder.mutationField("updateStatus", (t) =>
       //create accommodation request
       const data = await ctx.prisma.userInHotel.update({
         where: {
-          id: args.bookingId,
+          id: Number(args.bookingId),
         },
         data: {
           status: args.status as AccommodationBookingStatus,
+          room: args.room,
+          Hotel: {
+            connect: {
+              id: Number(args.hotelId),
+            },
+          },
         },
         ...query,
       });
