@@ -8,8 +8,9 @@ builder.mutationField("addAccommodationRequest", (t) =>
     args: {
       gender: t.arg({ type: "String", required: true }),
       hotelId: t.arg({ type: "Int", required: true }),
-      checkIn: t.arg({ type: "DateTime", required: true }),
-      checkOut: t.arg({ type: "DateTime", required: true }),
+      checkIn: t.arg({ type: "String", required: true }),
+      checkOut: t.arg({ type: "String", required: true }),
+      ac: t.arg({ type: "Boolean", required: true }),
     },
     errors: {
       types: [Error],
@@ -34,8 +35,9 @@ builder.mutationField("addAccommodationRequest", (t) =>
             },
           },
           gender: args.gender as Gender,
-          checkIn: args.checkIn,
-          checkOut: args.checkOut,
+          checkIn: new Date(args.checkIn),
+          checkOut: new Date(args.checkOut),
+		  AC:args.ac
         },
         ...query,
       });
@@ -91,8 +93,8 @@ builder.mutationField("updateStatus", (t) =>
   t.prismaField({
     type: "UserInHotel",
     args: {
-      status: t.arg({ type: "String", required: true }),
       bookingId: t.arg({ type: "Int", required: true }),
+      status: t.arg({ type: "String", required: true }),
     },
     errors: {
       types: [Error],
