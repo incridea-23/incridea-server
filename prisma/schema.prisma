@@ -50,6 +50,7 @@ model User {
     collegeId           Int?                  @default(1)
     College             College?              @relation(fields: [collegeId], references: [id], onDelete: SetNull)
     phoneNumber         String?
+    totalXp             Int                   @default(0)
     VerificationToken   VerificationToken[]
     RefreshTokens       RefreshToken[]
     PaymentOrders       PaymentOrder[]
@@ -60,6 +61,7 @@ model User {
     Submissions         Submission[]
     ProniteRegistration ProniteRegistration[]
     CertificateIssue    CertificateIssue[]
+    XP                  XP[]
 
     @@index([collegeId])
 }
@@ -129,8 +131,8 @@ model Team {
     Score             Scores[]
     Winner            Winners?
     Comments          Comments[]
-	mcqSubmissions      MCQSubmission[]
-	fitbSubmissions     FITBSubmission[]
+    mcqSubmissions    MCQSubmission[]
+    fitbSubmissions   FITBSubmission[]
 
     @@unique([name, eventId])
     @@index([eventId, roundNo])
@@ -359,34 +361,34 @@ model Question {
 }
 
 model Options {
-    id         String   @id @default(cuid())
-    questionId String
-    Question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-    value      String
-    isAnswer   Boolean  @default(false)
-	MCQSubmissions MCQSubmission[]
-	FITBSubmissions FITBSubmission[]
+    id              String           @id @default(cuid())
+    questionId      String
+    Question        Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    value           String
+    isAnswer        Boolean          @default(false)
+    MCQSubmissions  MCQSubmission[]
+    FITBSubmissions FITBSubmission[]
 
     @@index([questionId])
 }
 
 model MCQSubmission {
     id        String   @id @default(cuid())
-    teamId Int
-    Team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    teamId    Int
+    Team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
     optionId  String
     Options   Options  @relation(fields: [optionId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@index([teamId])
-	@@index([optionId])
+    @@index([optionId])
 }
 
 model FITBSubmission {
     id        String   @id @default(cuid())
-    teamId Int
-    Team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    teamId    Int
+    Team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
     optionId  String
     Options   Options  @relation(fields: [optionId], references: [id], onDelete: Cascade)
     value     String
@@ -394,7 +396,27 @@ model FITBSubmission {
     updatedAt DateTime @updatedAt
 
     @@index([teamId])
-	@@index([optionId])
+    @@index([optionId])
+}
+
+model Level {
+    id        Int      @id @default(autoincrement())
+    point     Int      @default(0)
+    createdAt DateTime @default(now())
+    XP        XP[]
+}
+
+model XP {
+    id        Int      @id @default(autoincrement())
+    userId    Int
+    User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    Level     Level    @relation(fields: [levelId], references: [id], onDelete: Cascade)
+    levelId   Int
+    createdAt DateTime @default(now())
+
+    @@unique([userId, levelId])
+    @@index([userId])
+    @@index([levelId])
 }
 
 enum ProniteDay {
