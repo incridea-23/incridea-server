@@ -447,7 +447,6 @@ model UserInHotel {
     createdAt DateTime                   @default(now())
     updatedAt DateTime                   @updatedAt
 
-    @@unique([userId, hotelId])
     @@index([userId])
     @@index([hotelId])
 }
