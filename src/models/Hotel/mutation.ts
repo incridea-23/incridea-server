@@ -24,11 +24,12 @@ builder.mutationField("createHotel", (t) =>
       if(!isAllowed) throw new Error("Not allowed to perform this action")
 
       //check if hotel already exists
-      const isHotel = await ctx.prisma.hotel.findMany({
+      const isHotel = await ctx.prisma.hotel.findUnique({
         where: {
           name: args.name,
         },
       });
+      console.log(isHotel);
       if (isHotel) {
         throw new Error("Hotel already exists");
       }
@@ -56,7 +57,7 @@ builder.mutationField("deleteHotel",(t)=>
   t.prismaField({
     type:"Hotel",
     args:{
-      id:t.arg({type:"Int",required:true})
+      id:t.arg({type:"String",required:true})
     },
     errors:{
       types:[Error]
@@ -72,7 +73,7 @@ builder.mutationField("deleteHotel",(t)=>
       try{
         const data = await ctx.prisma.hotel.delete({
           where:{
-            id:args.id
+            id:Number(args.id)
           }
         })
         return data
