@@ -440,7 +440,8 @@ model UserInHotel {
     Hotel     Hotel                      @relation(fields: [hotelId], references: [id], onDelete: Cascade)
     gender    Gender
     room      String?
-    AC          Boolean       @default(false) 
+	IdCard	  String
+    AC        Boolean       @default(false) 
     status    AccommodationBookingStatus @default(PENDING)
     checkIn   DateTime?
     checkOut  DateTime?

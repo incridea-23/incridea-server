@@ -8,6 +8,7 @@ builder.mutationField("addAccommodationRequest", (t) =>
     args: {
       gender: t.arg({ type: "String", required: true }),
       hotelId: t.arg({ type: "Int", required: true }),
+      IdCard: t.arg({ type: "String", required: true }),
       checkIn: t.arg({ type: "String", required: true }),
       checkOut: t.arg({ type: "String", required: true }),
       ac: t.arg({ type: "Boolean", required: true }),
