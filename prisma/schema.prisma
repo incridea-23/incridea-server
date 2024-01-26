@@ -364,15 +364,17 @@ model MCQSubmission {
 }
 
 model Quiz {
-    id          String     @id @default(cuid())
-    roundId     Int        @unique
-    eventId     Int
-    Round       Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
-    name        String
-    description String?
-    startTime   DateTime
-    endTime     DateTime
-    Questions   Question[]
+    id            String     @id @default(cuid())
+    roundId       Int        @unique
+    eventId       Int
+    Round         Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
+    name          String
+    description   String?
+    startTime     DateTime
+    endTime       DateTime
+    allowAttempts Boolean    @default(false)
+    password      String?
+    Questions     Question[]
 
     @@unique([eventId, roundId])
     @@index([roundId])
