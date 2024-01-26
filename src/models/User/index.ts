@@ -19,6 +19,10 @@ builder.prismaObject("User", {
     }),
     xp: t.relation("XP",{
       nullable: true,
+    }),
+    hotel:t.relation("UserInHotel",{
+      nullable:true
     })
   }),
+
 });
