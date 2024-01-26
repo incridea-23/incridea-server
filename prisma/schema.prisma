@@ -50,6 +50,8 @@ model User {
     collegeId           Int?                  @default(1)
     College             College?              @relation(fields: [collegeId], references: [id], onDelete: SetNull)
     phoneNumber         String?
+    totalXp             Int                   @default(0)
+    UserInHotel         UserInHotel[]
     VerificationToken   VerificationToken[]
     RefreshTokens       RefreshToken[]
     PaymentOrders       PaymentOrder[]
@@ -439,6 +441,48 @@ model XP {
     @@unique([userId, levelId])
     @@index([userId])
     @@index([levelId])
+}
+
+model Hotel {
+    id          Int           @id @default(autoincrement())
+    name        String        @unique
+    details     String?
+    price       Int
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+    UserInHotel UserInHotel[]
+}
+
+model UserInHotel {
+    id        Int                        @id @default(autoincrement())
+    userId    Int
+    User      User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    hotelId   Int
+    Hotel     Hotel                      @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+    gender    Gender
+    room      String?
+    AC        Boolean                    @default(false)
+    status    AccommodationBookingStatus @default(PENDING)
+    checkIn   DateTime?
+    checkOut  DateTime?
+    createdAt DateTime                   @default(now())
+    updatedAt DateTime                   @updatedAt
+
+    @@unique([userId, hotelId])
+    @@index([userId])
+    @@index([hotelId])
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    OTHER
+}
+
+enum AccommodationBookingStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED
 }
 
 enum ProniteDay {
