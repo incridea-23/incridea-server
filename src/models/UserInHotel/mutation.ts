@@ -39,6 +39,7 @@ builder.mutationField("addAccommodationRequest", (t) =>
           checkIn: new Date(args.checkIn),
           checkOut: new Date(args.checkOut),
           AC: args.ac,
+          IdCard:args.IdCard
         },
         ...query,
       });
@@ -82,9 +83,6 @@ builder.mutationField("updateStatus", (t) =>
             },
           },
         },
-		include:{
-			user:true
-		},
         ...query,
       });
 
