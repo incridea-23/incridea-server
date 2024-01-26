@@ -1,6 +1,8 @@
 import checkIfAccommodationMember from "../../accommodationMembers/checkIfAccommodationMembers";
 import { builder } from "../../builder";
 
+
+//mutation to create hotel
 builder.mutationField("createHotel", (t) =>
   t.prismaField({
     type: "Hotel",
@@ -22,11 +24,12 @@ builder.mutationField("createHotel", (t) =>
       if(!isAllowed) throw new Error("Not allowed to perform this action")
 
       //check if hotel already exists
-      const isHotel = await ctx.prisma.hotel.findMany({
+      const isHotel = await ctx.prisma.hotel.findUnique({
         where: {
           name: args.name,
         },
       });
+      console.log(isHotel);
       if (isHotel) {
         throw new Error("Hotel already exists");
       }
@@ -48,3 +51,35 @@ builder.mutationField("createHotel", (t) =>
     },
   }),
 );
+
+//mutation to delete Hotels
+builder.mutationField("deleteHotel",(t)=>
+  t.prismaField({
+    type:"Hotel",
+    args:{
+      id:t.arg({type:"String",required:true})
+    },
+    errors:{
+      types:[Error]
+    },
+    resolve:async(query,root,args,ctx,info)=>{
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      const isAllowed = checkIfAccommodationMember(user.id)
+      if(!isAllowed) throw new Error("Not allowed to perform this action")
+      //delete hotel
+      try{
+        const data = await ctx.prisma.hotel.delete({
+          where:{
+            id:Number(args.id)
+          }
+        })
+        return data
+      }catch(err){
+        throw new Error("Something went wrong")
+      }
+    }
+  })
+)
