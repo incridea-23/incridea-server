@@ -344,6 +344,8 @@ model Quiz {
     Round       Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
     name        String
     description String?
+    startTime DateTime
+    endTime DateTime
     Questions   Question[]
 
     @@unique([eventId, roundId])

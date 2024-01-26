@@ -1,4 +1,5 @@
 import { builder } from "../../builder";
+import "./query"
 
 
 builder.prismaObject("Quiz",{
@@ -13,6 +14,14 @@ builder.prismaObject("Quiz",{
         description: t.expose("description",{
             type:"String",
             nullable: true
+        }),
+        startTime: t.expose("startTime",{
+            type:"DateTime",
+            nullable:false
+        }),
+        endTime: t.expose("endTime",{
+            type:"DateTime",
+            nullable:false
         }),
         round:t.relation("Round"),
         questions: t.relation("Questions")
