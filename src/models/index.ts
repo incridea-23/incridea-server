@@ -17,3 +17,9 @@ import "./Card";
 import "./ProniteRegistration";
 import "./XP"
 import "./Level"
+import "./Quiz"
+import "./Question"
+import "./Options"
+import "./MCQSubmission"
+import "./FITBSubmission"
+import "./LASubmission"

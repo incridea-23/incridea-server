@@ -130,6 +130,9 @@ model Team {
   Score             Scores[]
   Winner            Winners?
   Comments          Comments[]
+  mcqSubmissions      MCQSubmission[]
+	fitbSubmissions     FITBSubmission[]
+  laSubmissions       LASubmission[]
 
   @@unique([name, eventId])
   @@index([eventId, roundNo])
@@ -144,10 +147,13 @@ model Round {
   date         DateTime?
   Criteria     Criteria[]
   Comments     Comments[]
+  quizId       String?
+  Quiz         Quiz?
   selectStatus Boolean    @default(false)
 
   @@id([eventId, roundNo])
   @@unique([eventId, roundNo])
+  @@index([quizId])
 }
 
 model PaymentOrder {
@@ -330,6 +336,93 @@ model CertificateIssue {
   @@index([EventId])
 }
 
+model Quiz {
+    id          String     @id @default(cuid())
+    roundId     Int        @unique
+    eventId     Int
+    Round       Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
+    name        String
+    description String?
+    startTime DateTime
+    endTime DateTime
+    Questions   Question[]
+
+    @@unique([eventId, roundId])
+    @@index([roundId])
+}
+
+model Question {
+    id       String    @id @default(cuid())
+    quizId   String
+    Quiz     Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+    question String
+    options  Options[] 
+    LASubmissions LASubmission[]
+    points   Int
+    negativePoints Int @default(0)
+    questionType QuestionType
+    image    String?
+
+    @@index([quizId])
+}
+
+model Options {
+    id         String   @id @default(cuid())
+    questionId String
+    Question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    value      String
+    isAnswer   Boolean  @default(false)
+	MCQSubmissions MCQSubmission[]
+	FITBSubmissions FITBSubmission[]
+
+    @@index([questionId])
+}
+
+model MCQSubmission {
+    id        String   @id @default(cuid())
+    teamId Int
+    Team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    optionId  String
+    Options   Options  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([teamId])
+	@@index([optionId])
+}
+
+model FITBSubmission {
+    id        String   @id @default(cuid())
+    teamId Int
+    Team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    optionId  String
+    Options   Options  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+    value     String
+    isRight   Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([teamId])
+	@@index([optionId])
+}
+
+
+model LASubmission {
+    id        String   @id @default(cuid())
+    teamId Int
+    Team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    questionId String
+    Question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    value     String
+    isRight   LAAnswerStatus @default(PENDING)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([teamId])
+    @@index([questionId])
+	
+}
+
 model Level {
   id        Int      @id @default(autoincrement())
   point     Int      @default(0)
@@ -360,6 +453,7 @@ enum PaymentType {
   EVENT_REGISTRATION
 }
 
+
 enum Role {
   USER
   PARTICIPANT
@@ -374,6 +468,12 @@ enum Status {
   PENDING
   SUCCESS
   FAILED
+}
+
+enum LAAnswerStatus {
+  PENDING
+  TRUE
+  FALSE
 }
 
 enum VerificationType {
@@ -417,4 +517,10 @@ enum DayType {
   Day2
   Day3
   Day4
+}
+
+enum QuestionType {
+  MCQ
+  FITB
+  LA
 }
