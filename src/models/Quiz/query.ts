@@ -49,8 +49,6 @@ const sub = builder.objectRef<{
 })
 
 
-
-
 builder.queryField("getAllQuizSubmissions", (t) =>
     t.field({
         type: [sub],

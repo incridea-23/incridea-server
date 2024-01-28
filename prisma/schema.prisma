@@ -50,7 +50,6 @@ model User {
   collegeId           Int?                  @default(1)
   College             College?              @relation(fields: [collegeId], references: [id], onDelete: SetNull)
   phoneNumber         String?
-  totalXp             Int                   @default(0)
   VerificationToken   VerificationToken[]
   RefreshTokens       RefreshToken[]
   PaymentOrders       PaymentOrder[]
@@ -399,7 +398,7 @@ model FITBSubmission {
     optionId  String
     Options   Options  @relation(fields: [optionId], references: [id], onDelete: Cascade)
     value     String
-    isAnswer  Boolean @default(false)
+    isRight   Boolean  @default(false)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 

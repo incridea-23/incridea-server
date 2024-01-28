@@ -15,6 +15,15 @@ builder.mutationField("addXP", (t) =>
             if (!user) {
                 throw new Error("Not authenticated");
             }
+            //get level point value
+            const level = await ctx.prisma.level.findUnique({
+                where: {
+                    id: Number(args.levelId),
+                },
+            });
+            if (!level) {
+                throw new Error("Level not found");
+            }
             //check if user already has xp for level if they do dont add xp
             const xp = await ctx.prisma.xP.findUnique({
                 where: {
@@ -27,24 +36,6 @@ builder.mutationField("addXP", (t) =>
             if (xp) {
                 throw new Error("User already has xp for this level");
             }
-            //get level point value
-            const level = await ctx.prisma.level.findUnique({
-                where: {
-                    id: Number(args.levelId),
-                },
-            });
-            if (!level) {
-                throw new Error("Level not found");
-            }
-            //add xp to user
-            await ctx.prisma.user.update({
-                where: {
-                    id: Number(user.id),
-                },
-                data: {
-                    totalXp: user.totalXp + level.point,
-                },
-            });
             //create xp
             const data = await ctx.prisma.xP.create({
                 data: {

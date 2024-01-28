@@ -61,17 +61,23 @@ builder.queryField("getUserLevelScore", (t) =>
 //get all users xp for leaderboard
 builder.queryField("getXpLeaderboard", (t) =>
     t.prismaField({
-        type: ["User"],
+        type: ["XP"],
         errors: {
             types: [Error],
         },
         resolve: async (query, root, args, ctx, info) => {
-            const data = await ctx.prisma.user.findMany({
-                orderBy: {
-                    totalXp: "desc",
+            const leaderboard = await ctx.prisma.xP.findMany({
+                include: {
+                  User: true,
+                  Level: true
                 },
-            });
-            return data;
+                orderBy: {
+                  Level: {
+                    point: 'desc'
+                  }
+                }
+              });
+            return leaderboard;
         },
     })
 );
