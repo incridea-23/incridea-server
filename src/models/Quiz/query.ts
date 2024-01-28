@@ -1,13 +1,12 @@
-import { resolve } from "path";
+import { Options } from "@prisma/client";
 import { builder } from "../../builder";
-import { query } from "express";
-import { LAAnswerStatus, MCQSubmission, QuestionType } from "@prisma/client";
 
 const sub = builder.objectRef<{
     userId: string
     qtype: string
     question: string
     qid: string
+    // options:Options
     mcqans: string | null
     isright: boolean | null
     fitbans: string | null
@@ -29,6 +28,7 @@ const sub = builder.objectRef<{
             type: "String",
             nullable: true
         }),
+        
         isright: t.exposeBoolean("isright",{
             nullable:true
         }),
@@ -153,7 +153,7 @@ builder.queryField("getAllQuizSubmissions", (t) =>
                         question: item?.Options?.Question?.question,
                         qid: item?.Options?.questionId,
                         mcqans: null,
-                        isright: item?.isAnswer,
+                        isright: item?.isRight,
                         fitbans: item?.value,
                         laAns: null,
                         laIsRight: null
@@ -199,6 +199,8 @@ builder.queryField("getAllQuizSubmissions", (t) =>
                 })
 
                 quizSubmissions.push(...la);
+
+                quizSubmissions.sort((a,b)=> Number(a.userId)-Number(b.userId))
 
                 return quizSubmissions
             } catch (error) {
@@ -265,5 +267,175 @@ builder.queryField("getQuizByEvent", (t) =>
             }
         }
 
+    })
+)
+
+
+builder.queryField("getSubmissionByUser", (t) =>
+    t.field({
+        type: [sub],
+        args: {
+            teamId: t.arg({
+                type: "String",
+                required: true
+            }),
+            quizId: t.arg({
+                type: "String",
+                required: true
+            })
+        },
+        resolve: async (root, args, ctx, info) => {
+            try {
+                let quizSubmissions: {
+                    userId: string
+                    qtype: string
+                    question: string
+                    qid: string
+                    mcqans: string | null
+                    isright: boolean | null
+                    fitbans: string | null
+                    laAns: string | null
+                    laIsRight: string | null
+
+                }[] = [];
+                const mcqsubmissions = await ctx.prisma.mCQSubmission.findMany({
+                    where: {
+                        teamId:Number(args.teamId),
+                        Options: {
+                            Question: {
+                                quizId: args.quizId,
+                                
+                            }
+                        }
+                    },
+                    include: {
+                        Options: {
+                            select: {
+                                value: true,
+                                questionId: true,
+                                isAnswer: true,
+                                Question: {
+                                    select: {
+                                        points: true,
+                                        negativePoints: true,
+                                        questionType: true,
+                                        question: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                })
+
+                
+                let mcq = mcqsubmissions.map((item) => {
+                    return {
+                        userId: item?.teamId?.toString(),
+                        qtype: item?.Options?.Question?.questionType.toString(),
+                        question: item?.Options?.Question?.question,
+                        qid: item?.Options?.questionId,
+                        mcqans: item?.Options?.value,
+                        isright: item?.Options?.isAnswer,
+                        fitbans: null,
+                        laAns: null,
+                        laIsRight: null
+                        
+                    }
+                })
+                
+                quizSubmissions.push(...mcq);
+
+                const fitbsubmissions = await ctx.prisma.fITBSubmission.findMany({
+                    where: {
+                        teamId:Number(args.teamId),
+                        Options: {
+                            Question: {
+                                quizId: args.quizId
+                            }
+                        }
+                    },
+                    include: {
+                        Options: {
+                            select: {
+                                isAnswer: true,
+                                questionId: true,
+                                Question: {
+                                    select: {
+                                        question: true,
+                                        questionType: true,
+                                        negativePoints: true,
+                                        points: true
+
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                })
+
+                let fitb = fitbsubmissions.map((item) => {
+                    return {
+                        userId: item?.teamId?.toString(),
+                        qtype: item?.Options?.Question?.questionType,
+                        question: item?.Options?.Question?.question,
+                        qid: item?.Options?.questionId,
+                        mcqans: null,
+                        isright: item?.isRight,
+                        fitbans: item?.value,
+                        laAns: null,
+                        laIsRight: null
+
+                    }
+                })
+
+                quizSubmissions.push(...fitb);
+
+                const lasubmissions = await ctx.prisma.lASubmission.findMany({
+                    where: {
+                        teamId:Number(args.teamId),
+                        Question: {
+                            quizId: args.quizId
+                        }
+                    },
+                    include: {
+
+                        Question: {
+
+                            select: {
+                                negativePoints: true,
+                                questionType: true,
+                                question: true,
+
+                            }
+                        }
+                    }
+                })
+
+                let la = lasubmissions.map((item) => {
+                    return {
+                        userId: item?.teamId?.toString(),
+                        qtype: item?.Question?.questionType,
+                        question: item?.Question?.question,
+                        qid: item?.questionId,
+                        mcqans: null,
+                        isright: null,
+                        fitbans: null,
+                        laAns: item?.value,
+                        laIsRight: item?.isRight?.toString()
+
+                    }
+                })
+
+                quizSubmissions.push(...la);
+
+                quizSubmissions.sort((a,b)=> Number(a.userId)-Number(b.userId))
+
+                return quizSubmissions
+            } catch (error) {
+                throw new Error("Something went wrong");
+            }
+        }
     })
 )
