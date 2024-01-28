@@ -38,7 +38,7 @@ builder.mutationField("addAccommodationRequest", (t) =>
           gender: args.gender as Gender,
           checkIn: new Date(args.checkIn),
           checkOut: new Date(args.checkOut),
-          idCard: args.IdCard,
+          IdCard: args.IdCard,
           AC: args.ac,
         },
         ...query,
