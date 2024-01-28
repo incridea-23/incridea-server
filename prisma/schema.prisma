@@ -134,6 +134,7 @@ model Team {
     Comments          Comments[]
     mcqSubmissions    MCQSubmission[]
     fitbSubmissions   FITBSubmission[]
+    laSubmissions     LASubmission[]
 
     @@unique([name, eventId])
     @@index([eventId, roundNo])
@@ -337,32 +338,6 @@ model CertificateIssue {
     @@index([EventId])
 }
 
-model Quiz {
-    id          String     @id @default(cuid())
-    roundId     Int        @unique
-    eventId     Int
-    Round       Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
-    name        String
-    description String?
-    Questions   Question[]
-
-    @@unique([eventId, roundId])
-    @@index([roundId])
-}
-
-model Question {
-    id       String    @id @default(cuid())
-    quizId   String
-    Quiz     Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
-    question String
-    options  Options[] 
-    image    String?
-    points  Float
-    negativePoints Float @default(0)
-
-    @@index([quizId])
-}
-
 model Options {
     id              String           @id @default(cuid())
     questionId      String
@@ -388,6 +363,38 @@ model MCQSubmission {
     @@index([optionId])
 }
 
+model Quiz {
+    id            String     @id @default(cuid())
+    roundId       Int        @unique
+    eventId       Int
+    Round         Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
+    name          String
+    description   String?
+    startTime     DateTime
+    endTime       DateTime
+    allowAttempts Boolean    @default(false)
+    password      String?
+    Questions     Question[]
+
+    @@unique([eventId, roundId])
+    @@index([roundId])
+}
+
+model Question {
+    id             String         @id @default(cuid())
+    quizId         String
+    Quiz           Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+    question       String
+    options        Options[]
+    LASubmissions  LASubmission[]
+    points         Int
+    negativePoints Int            @default(0)
+    questionType   QuestionType
+    image          String?
+
+    @@index([quizId])
+}
+
 model FITBSubmission {
     id        String   @id @default(cuid())
     teamId    Int
@@ -395,11 +402,27 @@ model FITBSubmission {
     optionId  String
     Options   Options  @relation(fields: [optionId], references: [id], onDelete: Cascade)
     value     String
+    isRight   Boolean  @default(false)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     @@index([teamId])
     @@index([optionId])
+}
+
+model LASubmission {
+    id         String         @id @default(cuid())
+    teamId     Int
+    Team       Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    questionId String
+    Question   Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    value      String
+    isRight    LAAnswerStatus @default(PENDING)
+    createdAt  DateTime       @default(now())
+    updatedAt  DateTime       @updatedAt
+
+    @@index([teamId])
+    @@index([questionId])
 }
 
 model Level {
@@ -428,7 +451,7 @@ model Hotel {
     details     String?
     price       Int
     createdAt   DateTime      @default(now())
-    updatedAt   DateTime      @updatedAt 
+    updatedAt   DateTime      @updatedAt
     UserInHotel UserInHotel[]
 }
 
@@ -440,7 +463,7 @@ model UserInHotel {
     Hotel     Hotel                      @relation(fields: [hotelId], references: [id], onDelete: Cascade)
     gender    Gender
     room      String?
-    AC          Boolean       @default(false) 
+    AC        Boolean                    @default(false)
     status    AccommodationBookingStatus @default(PENDING)
     checkIn   DateTime?
     checkOut  DateTime?
@@ -490,6 +513,12 @@ enum Status {
     FAILED
 }
 
+enum LAAnswerStatus {
+    PENDING
+    TRUE
+    FALSE
+}
+
 enum VerificationType {
     RESET_PASSWORD
     EMAIL_VERIFICATION
@@ -531,4 +560,10 @@ enum DayType {
     Day2
     Day3
     Day4
+}
+
+enum QuestionType {
+    MCQ
+    FITB
+    LA
 }
