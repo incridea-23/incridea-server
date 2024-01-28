@@ -46,3 +46,4 @@ builder.objectType(Error, {
     message: t.exposeString("message"),
   }),
 });
+
