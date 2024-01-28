@@ -1,3 +1,4 @@
+import { QuestionType } from "@prisma/client";
 import { builder } from "../../builder";
 
 builder.mutationField("createQuestion", (t) =>
@@ -9,42 +10,50 @@ builder.mutationField("createQuestion", (t) =>
       points: t.arg({ type: "Int", required: true }),
       negativePoint: t.arg({ type: "Int", required: true }),
       type: t.arg({ type: "String", required: true }),
-      image: t.arg({ type: "String", required: false}),
-      options: t.arg({ type: "String", required: false}),
+      image: t.arg({ type: "String", required: false }),
+      options: t.arg({ type: "String", required: false }),
     },
     errors: {
       types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
-    //Get user from context
+      //Get user from context
       const user = await ctx.user;
       if (!user) {
         throw new Error("Not authenticated");
       }
 
-      if (user.role !== "ORGANIZER") throw new Error("Not allowed to perform this action");
+      if (user.role !== "ORGANIZER")
+        throw new Error("Not allowed to perform this action");
 
       //create accommodation request
-      const data = await ctx.prisma.quiz.create({
+      let temp = [{ id: "" }];
+      if (args.options) {
+        temp = args.options?.split(",").map((option) => ({
+          id: option,
+        }));
+      }
+      const data = await ctx.prisma.question.create({
         data: {
-            name:args.name,
-            description:args.description,
-            startTime:new Date(args.startTime),
-            endTime:new Date(args.endTime),
-            Round:{
-                connect:{
-                    eventId_roundNo:{
-                        eventId:Number(args.eventId),
-                        roundNo:Number(args.roundId)
-                    }
-                }
-            }
+          question: args.question,
+          Quiz: {
+            connect: {
+              id: args.quizId,
+            },
+          },
+          points: args.points,
+          image: args.image,
+          negativePoints: args.negativePoint,
+          options: {
+            connect: temp,
+          },
+          questionType: args.type as QuestionType,
         },
         ...query,
       });
       return data;
     },
-  }),
+  })
 );
 
 builder.mutationField("updateQuizStatus", (t) =>
@@ -59,26 +68,27 @@ builder.mutationField("updateQuizStatus", (t) =>
       types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
-    //Get user from context
+      //Get user from context
       const user = await ctx.user;
       if (!user) {
         throw new Error("Not authenticated");
       }
 
-      if (user.role !== "ORGANIZER") throw new Error("Not allowed to perform this action");
+      if (user.role !== "ORGANIZER")
+        throw new Error("Not allowed to perform this action");
 
       //create accommodation request
       const data = await ctx.prisma.quiz.update({
-        where:{
-            id:args.quizId
+        where: {
+          id: args.quizId,
         },
         data: {
-            allowAttempts:args.allowAttempts,
-            password:args.password
+          allowAttempts: args.allowAttempts,
+          password: args.password,
         },
         ...query,
       });
       return data;
     },
-  }),
+  })
 );
