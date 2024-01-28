@@ -10,12 +10,21 @@ class Option {
   }
 }
 
+let optionType = builder.objectType(Option,{
+    name:"Option",
+    fields:(t)=>({
+        id: t.exposeString("id"),
+        answer:t.exposeString("answer")
+    })
+
+})
+
 class AllSubmissions {
   userId: string;
   qtype: string;
   question: string;
   qid: string;
-  options?: Option;
+  options?: Option[];
   mcqans: string | null;
   isright: boolean | null;
   fitbans: string | null;
@@ -23,8 +32,11 @@ class AllSubmissions {
   laIsRight: string | null;
 
   constructor(
-    id: string,
-    answer: string,
+    options:{
+        id:string,
+        answer:string
+
+    }[],
     mcqans: string | null,
     isright: boolean | null,
     fitbans: string | null,
@@ -35,10 +47,7 @@ class AllSubmissions {
     question: string,
     qid: string
   ) {
-    this.options = {
-      id,
-      answer,
-    };
+    this.options =options;
     this.mcqans = mcqans;
     this.isright = isright;
     this.fitbans = fitbans;
@@ -53,7 +62,7 @@ class AllSubmissions {
 const AllSubmissionsType = builder.objectType(AllSubmissions, {
   name: "AllSubmissions",
   fields: (t) => ({
-    option: t.expose("options", { nullable: true, type: Option }),
+    option: t.expose("options", { nullable: true, type: [Option] }),
     mcqans: t.exposeString("mcqans", { nullable: true }),
     isRight: t.exposeBoolean("isright", { nullable: true }),
     fitbans: t.exposeString("fitbans", { nullable: true }),
@@ -78,6 +87,10 @@ builder.queryField("getAllQuizSubmissions", (t) =>
     resolve: async (root, args, ctx, info) => {
       try {
         let quizSubmissions: {
+          option:{
+            id:string,
+            answer:string
+          }[] | null,
           userId: string;
           qtype: string;
           question: string;
@@ -111,15 +124,32 @@ builder.queryField("getAllQuizSubmissions", (t) =>
               //        }
               //    }
               //}
+                
               include: {
-                Question: true,
+                Question: {
+                    include:{
+                        options:true
+                    }
+                },
               },
             },
           },
         });
 
         let mcq = mcqsubmissions.map((item) => {
+            let optionsArr = item?.Options?.Question?.options?.map((item)=>{
+                return {
+                    
+                        id:item?.id,
+                        answer:item?.value
+                    
+                }
+            })
+
+           {}[]
+            
           return {
+            option: optionsArr,
             userId: item?.teamId?.toString(),
             qtype: item?.Options?.Question?.questionType.toString(),
             question: item?.Options?.Question?.question,
@@ -129,9 +159,10 @@ builder.queryField("getAllQuizSubmissions", (t) =>
             fitbans: null,
             laAns: null,
             laIsRight: null,
+            
           };
         });
-
+        console.log(mcq)
         quizSubmissions.push(...mcq);
 
         const fitbsubmissions = await ctx.prisma.fITBSubmission.findMany({
@@ -162,6 +193,7 @@ builder.queryField("getAllQuizSubmissions", (t) =>
 
         let fitb = fitbsubmissions.map((item) => {
           return {
+            option:null,
             userId: item?.teamId?.toString(),
             qtype: item?.Options?.Question?.questionType,
             question: item?.Options?.Question?.question,
@@ -195,6 +227,7 @@ builder.queryField("getAllQuizSubmissions", (t) =>
 
         let la = lasubmissions.map((item) => {
           return {
+            option:null,
             userId: item?.teamId?.toString(),
             qtype: item?.Question?.questionType,
             question: item?.Question?.question,
@@ -210,12 +243,12 @@ builder.queryField("getAllQuizSubmissions", (t) =>
         quizSubmissions.push(...la);
 
         quizSubmissions.sort((a, b) => Number(a.userId) - Number(b.userId));
-
-        const result = {
-          mcq: mcqsubmissions,
-          fitb: fitbsubmissions,
-          laSubmissions: lasubmissions,
-        };
+// console.log(quizSubmissions)
+        // const result = {
+        //   mcq: mcqsubmissions,
+        //   fitb: fitbsubmissions,
+        //   laSubmissions: lasubmissions,
+        // };
         return quizSubmissions;
       } catch (error) {
         throw new Error("Something went wrong");
