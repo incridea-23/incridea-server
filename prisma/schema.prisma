@@ -51,7 +51,7 @@ model User {
     College             College?              @relation(fields: [collegeId], references: [id], onDelete: SetNull)
     phoneNumber         String?
     totalXp             Int                   @default(0)
-    UserInHotel         UserInHotel[]
+    UserInHotel         UserInHotel?
     VerificationToken   VerificationToken[]
     RefreshTokens       RefreshToken[]
     PaymentOrders       PaymentOrder[]
@@ -65,6 +65,7 @@ model User {
     XP                  XP[]
 
     @@index([collegeId])
+    @@index([id])
 }
 
 model College {
@@ -457,7 +458,7 @@ model Hotel {
 
 model UserInHotel {
     id        Int                        @id @default(autoincrement())
-    userId    Int
+    userId    Int                        @unique
     IdCard    String?
     User      User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
     hotelId   Int
