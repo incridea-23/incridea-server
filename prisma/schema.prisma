@@ -458,6 +458,7 @@ model Hotel {
 model UserInHotel {
     id        Int                        @id @default(autoincrement())
     userId    Int
+    idCard    String
     User      User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
     hotelId   Int
     Hotel     Hotel                      @relation(fields: [hotelId], references: [id], onDelete: Cascade)

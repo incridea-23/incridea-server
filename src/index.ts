@@ -8,8 +8,10 @@ import { handler as razorpayCapture } from "./webhook/capture";
 import { uploader as imageUpload } from "./cloudinary/upload";
 import { config } from "./cloudinary/config";
 import { config as easterConfig } from "./cloudinary/easterConfig";
+import { config as idUploadConfig } from "./cloudinary/idUpload";
 const { upload } = config;
 const { upload: easterUpload } = easterConfig;
+const { upload: idUpload } = idUploadConfig;
 // import "./certificate.ts";
 import { useDepthLimit } from "@envelop/depth-limit";
 const port = Number(process.env.API_PORT) || 4000;
@@ -34,6 +36,7 @@ app.use("/graphql", yoga);
 app.post("/webhook/capture", razorpayCapture);
 app.post("/cloudinary/upload/:eventName", upload.single("image"), imageUpload);
 app.post("/easter-egg/upload", easterUpload.single("image"), imageUpload);
+app.post("/id/upload", idUpload.single("image"), imageUpload);
 
 app.listen(port, () => {
   console.log(`🚀 Server ready at: http://localhost:4000/graphql`);
