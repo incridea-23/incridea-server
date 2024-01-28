@@ -399,6 +399,7 @@ model FITBSubmission {
     optionId  String
     Options   Options  @relation(fields: [optionId], references: [id], onDelete: Cascade)
     value     String
+    isAnswer  Boolean @default(false)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
@@ -414,7 +415,7 @@ model LASubmission {
     questionId String
     Question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
     value     String
-    isRight   Status @default(PENDING)
+    isRight   LAAnswerStatus @default(PENDING)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
@@ -468,6 +469,12 @@ enum Status {
   PENDING
   SUCCESS
   FAILED
+}
+
+enum LAAnswerStatus {
+  PENDING
+  TRUE
+  FALSE
 }
 
 enum VerificationType {

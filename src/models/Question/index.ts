@@ -1,5 +1,5 @@
 import { builder } from "../../builder";
-
+import "./query"
 
 builder.prismaObject("Question",{
     fields:(t)=>({
@@ -15,7 +15,11 @@ builder.prismaObject("Question",{
         image: t.expose("image",{
             type:"String",
             nullable:true
-        })
+        }),
+        questionType: t.exposeString("questionType"),
+        options: t.relation("options"),
+        LASubmissions: t.relation("LASubmissions")
+
 
     })
 })
