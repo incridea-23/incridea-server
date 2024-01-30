@@ -10,7 +10,7 @@ class Option {
   }
 }
 
-let optionType = builder.objectType(Option,{
+builder.objectType(Option,{
     name:"Option",
     fields:(t)=>({
         id: t.exposeString("id"),
@@ -21,15 +21,15 @@ let optionType = builder.objectType(Option,{
 
 class AllSubmissions {
   userId: string;
-  qtype: string;
+  qType: string;
   question: string;
-  qid: string;
-  options?: Option[];
-  mcqans: string | null;
-  isright: boolean | null;
-  fitbans: string | null;
+  qId: string;
+  options: Option[] | null;
+  mcqAns: string | null;
+  isRight: boolean | null;
+  fitbAns: string | null;
   laAns: string | null;
-  laIsRight: string | null;
+  longAnsIsRight: string | null;
 
   constructor(
     options:{
@@ -37,41 +37,42 @@ class AllSubmissions {
         answer:string
 
     }[],
-    mcqans: string | null,
-    isright: boolean | null,
-    fitbans: string | null,
+    mcqAns: string | null,
+    isRight: boolean | null,
+    fitbAns: string | null,
     laAns: string | null,
-    laIsRight: string | null,
+    longAnsIsRight: string | null,
     userId: string,
-    qtype: string,
+    qType: string,
     question: string,
-    qid: string
+    qId: string
   ) {
     this.options =options;
-    this.mcqans = mcqans;
-    this.isright = isright;
-    this.fitbans = fitbans;
+    this.mcqAns = mcqAns;
+    this.isRight = isRight;
+    this.fitbAns = fitbAns;
     this.laAns = laAns;
-    this.laIsRight = laIsRight;
+    this.longAnsIsRight = longAnsIsRight;
     this.userId = userId;
-    this.qtype = qtype;
+    this.qType = qType;
     this.question = question;
-    this.qid = qid;
+    this.qId = qId;
   }
 }
+
 const AllSubmissionsType = builder.objectType(AllSubmissions, {
   name: "AllSubmissions",
   fields: (t) => ({
-    option: t.expose("options", { nullable: true, type: [Option] }),
-    mcqans: t.exposeString("mcqans", { nullable: true }),
-    isRight: t.exposeBoolean("isright", { nullable: true }),
-    fitbans: t.exposeString("fitbans", { nullable: true }),
+    options: t.expose("options", { nullable: true, type: [Option] }),
+    mcqAns: t.exposeString("mcqAns", { nullable: true }),
+    isRight: t.exposeBoolean("isRight", { nullable: true }),
+    fitbAns: t.exposeString("fitbAns", { nullable: true }),
     laAns: t.exposeString("laAns", { nullable: true }),
-    laIsRight: t.exposeString("laIsRight", { nullable: true }),
+    longAnsIsRight: t.exposeString("longAnsIsRight", { nullable: true }),
     userId: t.exposeString("userId"),
-    qtype: t.exposeString("qtype"),
+    qType: t.exposeString("qType"),
     question: t.exposeString("question"),
-    qid: t.exposeString("qid"),
+    qId: t.exposeString("qId"),
   }),
 });
 
@@ -87,21 +88,19 @@ builder.queryField("getAllQuizSubmissions", (t) =>
     resolve: async (root, args, ctx, info) => {
       try {
         let quizSubmissions: {
-          option:{
-            id:string,
-            answer:string
-          }[] | null,
+          options:Option[] | null,
           userId: string;
-          qtype: string;
+          qType: string;
           question: string;
-          qid: string;
-          mcqans: string | null;
-          isright: boolean | null;
-          fitbans: string | null;
+          qId: string;
+          mcqAns: string | null;
+          isRight: boolean | null;
+          fitbAns: string | null;
           laAns: string | null;
-          laIsRight: string | null;
+          longAnsIsRight: string | null;
         }[] = [];
-        const mcqsubmissions = await ctx.prisma.mCQSubmission.findMany({
+
+        const mcqSubmissions = await ctx.prisma.mCQSubmission.findMany({
           where: {
             Options: {
               Question: {
@@ -111,20 +110,7 @@ builder.queryField("getAllQuizSubmissions", (t) =>
           },
           include: {
             Options: {
-              //select: {
-              //    value: true,
-              //    questionId: true,
-              //    isAnswer: true,
-              //    Question: {
-              //        select: {
-              //            points: true,
-              //            negativePoints: true,
-              //            questionType: true,
-              //            question: true
-              //        }
-              //    }
-              //}
-                
+   
               include: {
                 Question: {
                     include:{
@@ -136,7 +122,7 @@ builder.queryField("getAllQuizSubmissions", (t) =>
           },
         });
 
-        let mcq = mcqsubmissions.map((item) => {
+        let mcq = mcqSubmissions.map((item) => {
             let optionsArr = item?.Options?.Question?.options?.map((item)=>{
                 return {
                     
@@ -149,23 +135,23 @@ builder.queryField("getAllQuizSubmissions", (t) =>
            {}[]
             
           return {
-            option: optionsArr,
+            options: optionsArr,
             userId: item?.teamId?.toString(),
-            qtype: item?.Options?.Question?.questionType.toString(),
+            qType: item?.Options?.Question?.questionType.toString(),
             question: item?.Options?.Question?.question,
-            qid: item?.Options?.questionId,
-            mcqans: item?.Options?.value,
-            isright: item?.Options?.isAnswer,
-            fitbans: null,
+            qId: item?.Options?.questionId,
+            mcqAns: item?.Options?.value,
+            isRight: item?.Options?.isAnswer,
+            fitbAns: null,
             laAns: null,
-            laIsRight: null,
+            longAnsIsRight: null,
             
           };
         });
-        console.log(mcq)
+        console.log(mcq[0].options)
         quizSubmissions.push(...mcq);
 
-        const fitbsubmissions = await ctx.prisma.fITBSubmission.findMany({
+        const fitbSubmissions = await ctx.prisma.fITBSubmission.findMany({
           where: {
             Options: {
               Question: {
@@ -187,22 +173,29 @@ builder.queryField("getAllQuizSubmissions", (t) =>
                   },
                 },
               },
+              // include:{
+              //   Question:{
+              //     include:{
+              //       options:true
+              //     }
+              //   }
+              // }
             },
           },
         });
 
-        let fitb = fitbsubmissions.map((item) => {
+        let fitb = fitbSubmissions.map((item) => {
           return {
-            option:null,
+            options:null,
             userId: item?.teamId?.toString(),
-            qtype: item?.Options?.Question?.questionType,
+            qType: item?.Options?.Question?.questionType.toString(),
             question: item?.Options?.Question?.question,
-            qid: item?.Options?.questionId,
-            mcqans: null,
-            isright: item?.isRight,
-            fitbans: item?.value,
+            qId: item?.Options?.questionId,
+            mcqAns: null,
+            isRight: item?.isRight,
+            fitbAns: item?.value,
             laAns: null,
-            laIsRight: null,
+            longAnsIsRight: null,
           };
         });
 
@@ -227,28 +220,23 @@ builder.queryField("getAllQuizSubmissions", (t) =>
 
         let la = lasubmissions.map((item) => {
           return {
-            option:null,
+            options:null,
             userId: item?.teamId?.toString(),
-            qtype: item?.Question?.questionType,
+            qType: item?.Question?.questionType,
             question: item?.Question?.question,
-            qid: item?.questionId,
-            mcqans: null,
-            isright: null,
-            fitbans: null,
+            qId: item?.questionId,
+            mcqAns: null,
+            isRight: null,
+            fitbAns: null,
             laAns: item?.value,
-            laIsRight: item?.isRight?.toString(),
+            longAnsIsRight: item?.isRight?.toString(),
           };
         });
 
         quizSubmissions.push(...la);
 
         quizSubmissions.sort((a, b) => Number(a.userId) - Number(b.userId));
-// console.log(quizSubmissions)
-        // const result = {
-        //   mcq: mcqsubmissions,
-        //   fitb: fitbsubmissions,
-        //   laSubmissions: lasubmissions,
-        // };
+        
         return quizSubmissions;
       } catch (error) {
         throw new Error("Something went wrong");
@@ -256,6 +244,18 @@ builder.queryField("getAllQuizSubmissions", (t) =>
     },
   })
 );
+
+
+
+
+
+
+
+
+
+
+
+
 
 builder.queryField("getQuizByEvent", (t) =>
   t.prismaField({
@@ -314,6 +314,9 @@ builder.queryField("getQuizByEvent", (t) =>
   })
 );
 
+
+
+
 builder.queryField("getSubmissionByUser", (t) =>
   t.field({
     type: [AllSubmissionsType],
@@ -330,19 +333,20 @@ builder.queryField("getSubmissionByUser", (t) =>
     resolve: async (root, args, ctx, info) => {
       try {
         let quizSubmissions: {
+          options:Option[] | null,
           userId: string;
-          qtype: string;
+          qType: string;
           question: string;
-          qid: string;
-          mcqans: string | null;
-          isright: boolean | null;
-          fitbans: string | null;
+          qId: string;
+          mcqAns: string | null;
+          isRight: boolean | null;
+          fitbAns: string | null;
           laAns: string | null;
-          laIsRight: string | null;
+          longAnsIsRight: string | null;
         }[] = [];
-        const mcqsubmissions = await ctx.prisma.mCQSubmission.findMany({
+        const mcqSubmissions = await ctx.prisma.mCQSubmission.findMany({
           where: {
-            teamId: Number(args.teamId),
+            teamId:Number(args.teamId),
             Options: {
               Question: {
                 quizId: args.quizId,
@@ -351,42 +355,50 @@ builder.queryField("getSubmissionByUser", (t) =>
           },
           include: {
             Options: {
-              select: {
-                value: true,
-                questionId: true,
-                isAnswer: true,
+                
+              include: {
                 Question: {
-                  select: {
-                    points: true,
-                    negativePoints: true,
-                    questionType: true,
-                    question: true,
-                  },
+                    include:{
+                        options:true
+                    }
                 },
               },
             },
           },
         });
 
-        let mcq = mcqsubmissions.map((item) => {
+        let mcq = mcqSubmissions.map((item) => {
+            let optionsArr = item?.Options?.Question?.options?.map((item)=>{
+                return {
+                    
+                        id:item?.id,
+                        answer:item?.value
+                    
+                }
+            })
+
+           {}[]
+            
           return {
+            options: optionsArr,
             userId: item?.teamId?.toString(),
-            qtype: item?.Options?.Question?.questionType.toString(),
+            qType: item?.Options?.Question?.questionType.toString(),
             question: item?.Options?.Question?.question,
-            qid: item?.Options?.questionId,
-            mcqans: item?.Options?.value,
-            isright: item?.Options?.isAnswer,
-            fitbans: null,
+            qId: item?.Options?.questionId,
+            mcqAns: item?.Options?.value,
+            isRight: item?.Options?.isAnswer,
+            fitbAns: null,
             laAns: null,
-            laIsRight: null,
+            longAnsIsRight: null,
+            
           };
         });
-
+        console.log(mcq[0].options)
         quizSubmissions.push(...mcq);
 
-        const fitbsubmissions = await ctx.prisma.fITBSubmission.findMany({
+        const fitbSubmissions = await ctx.prisma.fITBSubmission.findMany({
           where: {
-            teamId: Number(args.teamId),
+            teamId:Number(args.teamId),
             Options: {
               Question: {
                 quizId: args.quizId,
@@ -411,17 +423,18 @@ builder.queryField("getSubmissionByUser", (t) =>
           },
         });
 
-        let fitb = fitbsubmissions.map((item) => {
+        let fitb = fitbSubmissions.map((item) => {
           return {
+            options:null,
             userId: item?.teamId?.toString(),
-            qtype: item?.Options?.Question?.questionType,
+            qType: item?.Options?.Question?.questionType,
             question: item?.Options?.Question?.question,
-            qid: item?.Options?.questionId,
-            mcqans: null,
-            isright: item?.isRight,
-            fitbans: item?.value,
+            qId: item?.Options?.questionId,
+            mcqAns: null,
+            isRight: item?.isRight,
+            fitbAns: item?.value,
             laAns: null,
-            laIsRight: null,
+            longAnsIsRight: null,
           };
         });
 
@@ -429,7 +442,7 @@ builder.queryField("getSubmissionByUser", (t) =>
 
         const lasubmissions = await ctx.prisma.lASubmission.findMany({
           where: {
-            teamId: Number(args.teamId),
+            teamId:Number(args.teamId),
             Question: {
               quizId: args.quizId,
             },
@@ -447,22 +460,23 @@ builder.queryField("getSubmissionByUser", (t) =>
 
         let la = lasubmissions.map((item) => {
           return {
+            options:null,
             userId: item?.teamId?.toString(),
-            qtype: item?.Question?.questionType,
+            qType: item?.Question?.questionType,
             question: item?.Question?.question,
-            qid: item?.questionId,
-            mcqans: null,
-            isright: null,
-            fitbans: null,
+            qId: item?.questionId,
+            mcqAns: null,
+            isRight: null,
+            fitbAns: null,
             laAns: item?.value,
-            laIsRight: item?.isRight?.toString(),
+            longAnsIsRight: item?.isRight?.toString(),
           };
         });
 
         quizSubmissions.push(...la);
 
         quizSubmissions.sort((a, b) => Number(a.userId) - Number(b.userId));
-
+        
         return quizSubmissions;
       } catch (error) {
         throw new Error("Something went wrong");
