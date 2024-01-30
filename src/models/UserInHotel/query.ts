@@ -17,7 +17,7 @@ builder.queryField("accommodationRequests", (t) =>
         ...query,
       });
     },
-  }),
+  })
 );
 
 //Accommodation requests by user
@@ -34,7 +34,7 @@ builder.queryField("accommodationRequestsByUser", (t) =>
         ...query,
       });
     },
-  }),
+  })
 );
 
 builder.queryField("accommodationRequestsByUserId", (t) =>
@@ -56,7 +56,7 @@ builder.queryField("accommodationRequestsByUserId", (t) =>
         ...query,
       });
     },
-  }),
+  })
 );
 
 //Accommodation requests by Day
@@ -81,7 +81,7 @@ builder.queryField("accommodationRequestByDay", (t) =>
         ...query,
       });
     },
-  }),
+  })
 );
 
 //Accommodation requests by Hotel
@@ -117,5 +117,25 @@ builder.queryField("accommodationRequestByHotel", (t) =>
         ...query,
       });
     },
-  }),
+  })
+);
+
+builder.queryField("getUserAccommodation", (t) =>
+  t.prismaField({
+    type: "UserInHotel",
+    nullable: true,
+    args: {},
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) throw new Error("Not authenticated");
+      if (!checkIfAccommodationMember(user.id))
+        throw new Error("Not authorized");
+      return await ctx.prisma.userInHotel.findUnique({
+        where: {
+          userId: user.id,
+        },
+        ...query,
+      });
+    },
+  })
 );
