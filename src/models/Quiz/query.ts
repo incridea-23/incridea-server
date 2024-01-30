@@ -80,13 +80,42 @@ builder.queryField("getAllQuizSubmissions", (t) =>
   t.field({
     type: [AllSubmissionsType],
     args: {
-      id: t.arg({
+      quizId: t.arg({
         type: "String",
         required: true,
       }),
+      eventId:t.arg({
+        type: "String",
+        required: true,
+      })
+    },
+    errors: {
+      types: [Error],
     },
     resolve: async (root, args, ctx, info) => {
-      try {
+    
+        const user = await ctx.user;
+        if (!user) {
+          throw new Error("Not authenticated");
+        }
+        if (user.role !== "ORGANIZER") {
+          throw new Error("Not authorized");
+        }
+        const event = await ctx.prisma.event.findUnique({
+          where: {
+            id: Number(args.eventId),
+          },
+          include: {
+            Organizers: true,
+          },
+        });
+        if (!event) {
+          throw new Error("Event not found");
+        }
+        if (!event.Organizers.find((o) => o.userId === user.id)) {
+          throw new Error("Not authorized");
+        }
+
         let quizSubmissions: {
           options:Option[] | null,
           userId: string;
@@ -104,7 +133,7 @@ builder.queryField("getAllQuizSubmissions", (t) =>
           where: {
             Options: {
               Question: {
-                quizId: args.id,
+                quizId: args.quizId,
               },
             },
           },
@@ -155,31 +184,19 @@ builder.queryField("getAllQuizSubmissions", (t) =>
           where: {
             Options: {
               Question: {
-                quizId: args.id,
+                quizId: args.quizId,
               },
             },
           },
           include: {
             Options: {
-              select: {
-                isAnswer: true,
-                questionId: true,
-                Question: {
-                  select: {
-                    question: true,
-                    questionType: true,
-                    negativePoints: true,
-                    points: true,
-                  },
-                },
-              },
-              // include:{
-              //   Question:{
-              //     include:{
-              //       options:true
-              //     }
-              //   }
-              // }
+              include:{
+                Question:{
+                  include:{
+                    options:true
+                  }
+                }
+              }
             },
           },
         });
@@ -201,10 +218,10 @@ builder.queryField("getAllQuizSubmissions", (t) =>
 
         quizSubmissions.push(...fitb);
 
-        const lasubmissions = await ctx.prisma.lASubmission.findMany({
+        const laSubmissions = await ctx.prisma.lASubmission.findMany({
           where: {
             Question: {
-              quizId: args.id,
+              quizId: args.quizId,
             },
           },
           include: {
@@ -218,7 +235,7 @@ builder.queryField("getAllQuizSubmissions", (t) =>
           },
         });
 
-        let la = lasubmissions.map((item) => {
+        let la = laSubmissions.map((item) => {
           return {
             options:null,
             userId: item?.teamId?.toString(),
@@ -238,9 +255,7 @@ builder.queryField("getAllQuizSubmissions", (t) =>
         quizSubmissions.sort((a, b) => Number(a.userId) - Number(b.userId));
         
         return quizSubmissions;
-      } catch (error) {
-        throw new Error("Something went wrong");
-      }
+      
     },
   })
 );
@@ -440,7 +455,7 @@ builder.queryField("getSubmissionByUser", (t) =>
 
         quizSubmissions.push(...fitb);
 
-        const lasubmissions = await ctx.prisma.lASubmission.findMany({
+        const laSubmissions = await ctx.prisma.lASubmission.findMany({
           where: {
             teamId:Number(args.teamId),
             Question: {
@@ -458,7 +473,7 @@ builder.queryField("getSubmissionByUser", (t) =>
           },
         });
 
-        let la = lasubmissions.map((item) => {
+        let la = laSubmissions.map((item) => {
           return {
             options:null,
             userId: item?.teamId?.toString(),
