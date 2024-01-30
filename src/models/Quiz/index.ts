@@ -2,6 +2,7 @@ import { builder } from "../../builder";
 import "./query"
 
 
+
 builder.prismaObject("Quiz",{
     fields: (t)=>({
         id: t.exposeID("id"),

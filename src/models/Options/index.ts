@@ -11,7 +11,9 @@ builder.prismaObject("Options",{
             type:"String",
             nullable:false
         }),
-        isAnswer: t.exposeBoolean("isAnswer")
+        isAnswer: t.exposeBoolean("isAnswer"),
+        MCQSubmissions: t.relation("MCQSubmissions"),
+        FITBSubmissions: t.relation("FITBSubmissions")
 
     })
 })

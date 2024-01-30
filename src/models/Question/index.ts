@@ -1,5 +1,9 @@
 import { builder } from "../../builder";
+
 import "./mutation"
+
+
+import "./query"
 
 
 builder.prismaObject("Question",{
@@ -16,7 +20,11 @@ builder.prismaObject("Question",{
         image: t.expose("image",{
             type:"String",
             nullable:true
-        })
+        }),
+        questionType: t.exposeString("questionType"),
+        options: t.relation("options"),
+        LASubmissions: t.relation("LASubmissions")
+
 
     })
 })
