@@ -1,6 +1,7 @@
 import checkIfAccommodationMember from "../../accommodationMembers/checkIfAccommodationMembers";
 import { builder } from "../../builder";
 
+//mutation to create hotel
 builder.mutationField("createHotel", (t) =>
   t.prismaField({
     type: "Hotel",
@@ -18,15 +19,16 @@ builder.mutationField("createHotel", (t) =>
         throw new Error("Not authenticated");
       }
 
-      const isAllowed = checkIfAccommodationMember(user.id)
-      if(!isAllowed) throw new Error("Not allowed to perform this action")
+      const isAllowed = checkIfAccommodationMember(user.id);
+      if (!isAllowed) throw new Error("Not allowed to perform this action");
 
       //check if hotel already exists
-      const isHotel = await ctx.prisma.hotel.findMany({
+      const isHotel = await ctx.prisma.hotel.findUnique({
         where: {
           name: args.name,
         },
       });
+      console.log(isHotel);
       if (isHotel) {
         throw new Error("Hotel already exists");
       }
@@ -42,11 +44,11 @@ builder.mutationField("createHotel", (t) =>
         });
         return data;
       } catch (err) {
-		  console.log(err)
+        console.log(err);
         throw new Error("Something went wrong");
       }
     },
-  }),
+  })
 );
 
 builder.mutationField("deleteHotel", (t) =>
@@ -64,8 +66,8 @@ builder.mutationField("deleteHotel", (t) =>
         throw new Error("Not authenticated");
       }
 
-      const isAllowed = checkIfAccommodationMember(user.id)
-      if(!isAllowed) throw new Error("Not allowed to perform this action")
+      const isAllowed = checkIfAccommodationMember(user.id);
+      if (!isAllowed) throw new Error("Not allowed to perform this action");
 
       //check if hotel already exists
       const isHotel = await ctx.prisma.hotel.findUnique({
@@ -86,9 +88,11 @@ builder.mutationField("deleteHotel", (t) =>
         });
         return data;
       } catch (err) {
-		  console.log(err)
+        console.log(err);
         throw new Error("Something went wrong");
       }
     },
-  }),
+  })
 );
+
+//mutation to delete Hotels

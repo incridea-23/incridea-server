@@ -17,12 +17,23 @@ builder.mutationField("addAccommodationRequest", (t) =>
       types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
+      console.log(args);
       const user = await ctx.user;
       if (!user) {
         throw new Error("Not authenticated");
       }
 
+      const previouseRequest = await ctx.prisma.userInHotel.findFirst({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      if (previouseRequest) {
+        throw new Error("You already have an accommodation request");
+      }
       //create accommodation request
+
       const data = await ctx.prisma.userInHotel.create({
         data: {
           User: {
@@ -38,6 +49,7 @@ builder.mutationField("addAccommodationRequest", (t) =>
           gender: args.gender as Gender,
           checkIn: new Date(args.checkIn),
           checkOut: new Date(args.checkOut),
+          IdCard: args.IdCard,
           AC: args.ac,
           IdCard:args.IdCard
         },
@@ -45,7 +57,7 @@ builder.mutationField("addAccommodationRequest", (t) =>
       });
       return data;
     },
-  }),
+  })
 );
 
 builder.mutationField("updateStatus", (t) =>
@@ -88,5 +100,5 @@ builder.mutationField("updateStatus", (t) =>
 
       return data;
     },
-  }),
+  })
 );
