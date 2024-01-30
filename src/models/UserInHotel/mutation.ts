@@ -51,7 +51,6 @@ builder.mutationField("addAccommodationRequest", (t) =>
           checkOut: new Date(args.checkOut),
           IdCard: args.IdCard,
           AC: args.ac,
-          IdCard:args.IdCard
         },
         ...query,
       });
