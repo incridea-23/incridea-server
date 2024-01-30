@@ -372,8 +372,8 @@ model Options {
     Question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
     value      String
     isAnswer   Boolean  @default(false)
-	MCQSubmissions MCQSubmission[]
-	FITBSubmissions FITBSubmission[]
+	  MCQSubmissions MCQSubmission[]
+	  FITBSubmissions FITBSubmission[]
 
     @@index([questionId])
 }
