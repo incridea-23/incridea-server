@@ -6,12 +6,13 @@ export async function sendEmail(
   subject: string
 ) {
   const count = await getCount();
+  const user = getUser(count);
   const provider = {
     server: {
       host: process.env.EMAIL_SERVER_HOST as string,
       port: Number(process.env.EMAIL_EMAIL_SERVER_PORT),
       auth: {
-        user: getUser(count),
+        user,
         pass: process.env.EMAIL_SERVER_PASSWORD as string,
       },
     },
@@ -32,8 +33,9 @@ export const getUser = (count: number) => {
   const user2 = process.env.EMAIL_SERVER_USER2 as string;
   const user3 = process.env.EMAIL_SERVER_USER3 as string;
   const user4 = process.env.EMAIL_SERVER_USER4 as string;
-  const queue = [user1, user2, user3, user4];
-  return queue[count % 4];
+  const user5 = process.env.EMAIL_SERVER_USER5 as string;
+  const queue = [user1,user2,user3,user4,user5];
+  return queue[count % 5];
 };
 
 export const getCount = async () => {
