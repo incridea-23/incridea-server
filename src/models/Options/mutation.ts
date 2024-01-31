@@ -24,7 +24,7 @@ builder.mutationField("createOption", (t) =>
 
       // Create the option for the question
 
-        const createdOption = await prisma.options.create({
+        const createdOption = await ctx.prisma.options.create({
           data: {
             questionId: args.questionId,
             value: args.value,
@@ -69,7 +69,7 @@ builder.mutationField("updateOption", (t) =>
       if (args.value) updateData.value = args.value;
       if (args.isAnswer) updateData.isAnswer = args.isAnswer;
 
-      const updatedOption = await prisma.options.update({
+      const updatedOption = await ctx.prisma.options.update({
         where: {
           id: args.id,
         },
