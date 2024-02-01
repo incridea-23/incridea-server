@@ -11,7 +11,7 @@ builder.mutationField("addAccommodationRequest", (t) =>
       IdCard: t.arg({ type: "String", required: true }),
       checkIn: t.arg({ type: "String", required: true }),
       checkOut: t.arg({ type: "String", required: true }),
-      ac: t.arg({ type: "Boolean", required: true }),
+      // ac: t.arg({ type: "Boolean", required: true }),
     },
     errors: {
       types: [Error],
