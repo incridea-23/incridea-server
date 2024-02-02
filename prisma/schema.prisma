@@ -538,6 +538,7 @@ enum EventCategory {
     TECHNICAL
     NON_TECHNICAL
     CORE
+    SPECIAL
 }
 
 enum CollegeType {

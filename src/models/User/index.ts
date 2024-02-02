@@ -35,6 +35,9 @@ builder.prismaObject("User", {
     phoneNumber: t.exposeString("phoneNumber", {
       nullable: true,
     }),
+    profileImage: t.exposeString("profileImage", {
+      nullable: true,
+    }),
     college: t.relation("College", {
       nullable: true,
     }),
