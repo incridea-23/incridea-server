@@ -36,7 +36,7 @@ import {
 } from "../../services/auth.service";
 import { hashToken } from "../../utils/auth/hashToken";
 import { sendEmail } from "../../utils/email";
-import { avatarList } from "../Quiz";
+import { avatarList } from "../User";
 
 // register user
 const UserCreateInput = builder.inputType("UserCreateInput", {

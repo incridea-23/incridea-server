@@ -1,5 +1,5 @@
 import { builder } from "../../builder";
-import { avatarList } from "../Quiz";
+import { avatarList } from "../User";
 
 builder.queryField("users", (t) =>
   t.prismaConnection({
