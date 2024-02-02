@@ -43,6 +43,7 @@ model User {
     name                String
     email               String                @unique
     role                Role                  @default(USER)
+    profileImage        String?
     isVerified          Boolean               @default(false)
     password            String                @db.Text
     createdAt           DateTime              @default(now())
@@ -62,6 +63,7 @@ model User {
     Submissions         Submission[]
     ProniteRegistration ProniteRegistration[]
     CertificateIssue    CertificateIssue[]
+    notificationObj     Json?
     XP                  XP[]
 
     @@index([collegeId])
