@@ -11,10 +11,7 @@ builder.mutationField("addAccommodationRequest", (t) =>
       IdCard: t.arg({ type: "String", required: true }),
       checkIn: t.arg({ type: "String", required: true }),
       checkOut: t.arg({ type: "String", required: true }),
-<<<<<<< HEAD
-=======
       // ac: t.arg({ type: "Boolean", required: true }),
->>>>>>> ea94801796d7e8c943778624fb7d8152627c4f75
     },
     errors: {
       types: [Error],
@@ -53,11 +50,7 @@ builder.mutationField("addAccommodationRequest", (t) =>
           checkIn: new Date(args.checkIn),
           checkOut: new Date(args.checkOut),
           IdCard: args.IdCard,
-<<<<<<< HEAD
-          AC: false,
-=======
           // AC: args.ac,
->>>>>>> ea94801796d7e8c943778624fb7d8152627c4f75
         },
         ...query,
       });

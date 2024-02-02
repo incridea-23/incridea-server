@@ -36,6 +36,7 @@ import {
 } from "../../services/auth.service";
 import { hashToken } from "../../utils/auth/hashToken";
 import { sendEmail } from "../../utils/email";
+import { avatarList } from "../Quiz";
 
 // register user
 const UserCreateInput = builder.inputType("UserCreateInput", {
@@ -45,6 +46,7 @@ const UserCreateInput = builder.inputType("UserCreateInput", {
     password: t.string({ required: true }),
     phoneNumber: t.string({ required: true }),
     collegeId: t.int({ required: true }),
+    profileImage: t.string({ required: true }),
   }),
 });
 
@@ -69,6 +71,9 @@ builder.mutationField("signUp", (t) =>
       if (existingUser) {
         throw new Error("User already exists please login");
       }
+
+      args.data.profileImage =
+        avatarList[Math.floor(Math.random() * avatarList.length)].url;
       const user = await createUserByEmailAndPassword(args.data);
       return user;
     },
@@ -343,6 +348,28 @@ builder.mutationField("resetPassword", (t) =>
       await revokePasswordResetToken(savedToken.id);
 
       return updated_user;
+    },
+  })
+);
+
+builder.mutationField("updateProfileImage", (t) =>
+  t.prismaField({
+    type: "User",
+    errors: {
+      types: [Error],
+    },
+    args: {
+      imageURL: t.arg.string({ required: true }),
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      return await ctx.prisma.user.update({
+        where: { id: user.id },
+        data: { profileImage: args.imageURL },
+      });
     },
   })
 );

@@ -16,12 +16,11 @@ builder.prismaObject("User", {
     college: t.relation("College", {
       nullable: true,
     }),
-    xp: t.relation("XP",{
+    xp: t.relation("XP", {
       nullable: true,
     }),
-    hotel:t.relation("UserInHotel",{
-      nullable:true
-    })
+    hotel: t.relation("UserInHotel", {
+      nullable: true,
+    }),
   }),
-
 });
