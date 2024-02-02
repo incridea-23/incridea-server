@@ -63,6 +63,7 @@ model User {
     Submissions         Submission[]
     ProniteRegistration ProniteRegistration[]
     CertificateIssue    CertificateIssue[]
+    notificationObj     Json?
     XP                  XP[]
 
     @@index([collegeId])
