@@ -43,6 +43,7 @@ model User {
     name                String
     email               String                @unique
     role                Role                  @default(USER)
+    profileImage        String?
     isVerified          Boolean               @default(false)
     password            String                @db.Text
     createdAt           DateTime              @default(now())
