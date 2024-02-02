@@ -126,9 +126,7 @@ builder.queryField("totalRegistrations", (t) =>
 builder.queryField("getAvatars", (t) =>
   t.field({
     type: "String",
-    args: {
-      avatars: t.arg({ type: "String", required: false }),
-    },
+   
     resolve: async (root, args, ctx) => {
       const user = await ctx.user;
       if (!user) {
