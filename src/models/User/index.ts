@@ -2,6 +2,28 @@ import { builder } from "../../builder";
 import "./query";
 import "./mutation";
 
+export const avatarList = [
+  {
+    id: "1",
+    name: "avatar1",
+    url: "https://res.cloudinary.com/dh1bowbbe/image/upload/v1706813980/mario-removebg-preview_t2hziu.png",
+  },
+  {
+    id: "1",
+    name: "avatar2",
+    url: "https://res.cloudinary.com/dh1bowbbe/image/upload/v1706813980/avatar2-removebg-preview_qw3yvu.png",
+  },
+  {
+    id: "1",
+    name: "avatar3",
+    url: "https://res.cloudinary.com/dh1bowbbe/image/upload/v1706813980/avatar1-removebg-preview_t9nfqo.png",
+  },
+  {
+    id: "1",
+    name: "avatar4",
+    url: "https://res.cloudinary.com/dh1bowbbe/image/upload/v1706813980/mario-removebg-preview_t2hziu.png",
+  },
+];
 builder.prismaObject("User", {
   fields: (t) => ({
     id: t.exposeID("id"),
