@@ -9,6 +9,7 @@ import { context } from "./context";
 import SmartSubscriptionsPlugin, {
   subscribeOptionsFromIterator,
 } from "@pothos/plugin-smart-subscriptions";
+import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from "@prisma/client/runtime";
 export const builder = new SchemaBuilder<{
   Scalars: {
     Date: { Input: Date; Output: Date };
@@ -17,7 +18,7 @@ export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
   Context: ReturnType<typeof context>;
 }>({
-  plugins: [PrismaPlugin, ErrorsPlugin, RelayPlugin, SmartSubscriptionsPlugin],
+  plugins: [ErrorsPlugin, PrismaPlugin, RelayPlugin, SmartSubscriptionsPlugin],
   relayOptions: {
     clientMutationId: "omit",
     cursorType: "String",
@@ -40,10 +41,18 @@ builder.addScalarType("DateTime", DateTimeResolver, {});
 builder.queryType({});
 builder.mutationType({});
 builder.subscriptionType({});
-builder.objectType(Error, {
+
+builder.objectType(Error , {
   name: "Error",
   fields: (t) => ({
-    message: t.exposeString("message"),
+    message: t.string({
+      resolve: (root) => {
+        if(root instanceof Error){
+          return root.message
+        }
+          return "Something went wrong"
+      }
+    }),
   }),
 });
 
