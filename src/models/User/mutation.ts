@@ -294,7 +294,7 @@ builder.mutationField("sendPasswordResetEmail", (t) =>
     resolve: async (root, args, ctx) => {
       const existingUser = await findUserByEmail(args.email);
       if (!existingUser) {
-        throw new Error("You do not have an account here. Please sign Up");
+        throw new Error("You do not have an account here. Please sign up");
       }
       const { id: token } = await addPasswordResetTokenToWhitelist({
         userId: existingUser.id,
