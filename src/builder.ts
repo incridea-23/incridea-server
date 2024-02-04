@@ -47,7 +47,7 @@ builder.objectType(Error , {
   fields: (t) => ({
     message: t.string({
       resolve: (root) => {
-        if(root instanceof Error){
+        if(root.name === 'Error'){
           return root.message
         }
           return "Something went wrong"
@@ -56,3 +56,9 @@ builder.objectType(Error , {
   }),
 });
 
+// builder.objectType(Error, {
+//   name: "Error",
+//   fields: (t) => ({
+//     message: t.exposeString("message"),
+//   })
+// })
