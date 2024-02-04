@@ -178,7 +178,7 @@ async function generateCertificate(
     return imagePaths[0]; // Returning the first image path for simplicity
   } catch (error) {
     console.error("Error generating certificate:", error);
-    throw error;
+    throw new Error("Error generating certificate");
   }
 }
 
@@ -214,7 +214,7 @@ async function sendEmailWithAttachment(
     console.log("Email sent successfully!");
   } catch (error) {
     console.error("Error sending email:", error);
-    throw error;
+    throw new Error("Could not send Email: Internal server error");
   }
 }
 
