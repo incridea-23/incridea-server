@@ -72,9 +72,7 @@ builder.queryField("getXpLeaderboard", (t) =>
                   Level: true
                 },
                 orderBy: {
-                  Level: {
-                    point: 'desc'
-                  }
+                  createdAt: "asc"
                 }
               });
             return leaderboard;
