@@ -65,9 +65,9 @@ builder.mutationField("createPaymentOrder", (t) =>
           },
         });
       }
-      let amount = 300;
+      let amount = 350;
       if (user.email.endsWith("nmamit.in")) {
-        amount = 1;
+        amount = 250;
       } else {
         const userData = await ctx.prisma.user.findUnique({
           where: {
