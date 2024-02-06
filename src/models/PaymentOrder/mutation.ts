@@ -67,7 +67,7 @@ builder.mutationField("createPaymentOrder", (t) =>
       }
       let amount = 300;
       if (user.email.endsWith("nmamit.in")) {
-        amount = 200;
+        amount = 1;
       } else {
         const userData = await ctx.prisma.user.findUnique({
           where: {
