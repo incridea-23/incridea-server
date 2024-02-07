@@ -9,7 +9,10 @@ import { context } from "./context";
 import SmartSubscriptionsPlugin, {
   subscribeOptionsFromIterator,
 } from "@pothos/plugin-smart-subscriptions";
-import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from "@prisma/client/runtime";
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+} from "@prisma/client/runtime";
 export const builder = new SchemaBuilder<{
   Scalars: {
     Date: { Input: Date; Output: Date };
@@ -42,16 +45,17 @@ builder.queryType({});
 builder.mutationType({});
 builder.subscriptionType({});
 
-builder.objectType(Error , {
+builder.objectType(Error, {
   name: "Error",
   fields: (t) => ({
     message: t.string({
       resolve: (root) => {
-        if(root.name === 'Error'){
-          return root.message
+        if (root.name === "Error") {
+          return root.message;
         }
-          return "Something went wrong"
-      }
+        console.log(root);
+        return "Something went wrong";
+      },
     }),
   }),
 });

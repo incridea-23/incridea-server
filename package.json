@@ -63,5 +63,9 @@
     "npm": "^9.6.4",
     "razorpay": "^2.8.4",
     "uuid": "^9.0.0"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
+  
 }
