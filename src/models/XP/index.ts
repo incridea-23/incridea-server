@@ -7,5 +7,6 @@ builder.prismaObject("XP", {
         id: t.exposeID("id"),
         user: t.relation("User"),
         level: t.relation("Level"),
+        createdAt: t.expose("createdAt", { type: "DateTime" }),
     }),
 });

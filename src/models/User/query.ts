@@ -1,4 +1,5 @@
 import { builder } from "../../builder";
+import { avatarList } from "../User";
 
 builder.queryField("users", (t) =>
   t.prismaConnection({
@@ -118,6 +119,20 @@ builder.queryField("totalRegistrations", (t) =>
           },
         },
       });
+    },
+  })
+);
+
+builder.queryField("getAvatars", (t) =>
+  t.field({
+    type: "String",
+   
+    resolve: async (root, args, ctx) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      return JSON.stringify(avatarList);
     },
   })
 );

@@ -28,7 +28,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.send("Hello Incridea");
 });
 
