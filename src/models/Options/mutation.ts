@@ -63,17 +63,14 @@ builder.mutationField("updateOption", (t) =>
         throw new Error("Not allowed to perform this action");
       }
 
-    
-
-      const updateData: any = {};
-      if (args.value) updateData.value = args.value;
-      if (args.isAnswer) updateData.isAnswer = args.isAnswer;
-
       const updatedOption = await ctx.prisma.options.update({
         where: {
           id: args.id,
         },
-        data: updateData,
+        data: {
+          value:args.value,
+          isAnswer: args.isAnswer
+        }
         ...query,
       });
 
