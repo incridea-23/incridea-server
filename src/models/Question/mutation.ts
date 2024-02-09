@@ -3,7 +3,7 @@ import { builder } from "../../builder";
 
 builder.mutationField("createQuestion", (t) =>
   t.prismaField({
-    type: "Question", 
+    type: "Question",
     args: {
       quizId: t.arg({ type: "String", required: true }),
       question: t.arg({ type: "String", required: true }),
@@ -16,7 +16,6 @@ builder.mutationField("createQuestion", (t) =>
       types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
-      
       const user = await ctx.user;
       if (!user) {
         throw new Error("Not authenticated");
@@ -29,7 +28,11 @@ builder.mutationField("createQuestion", (t) =>
       // Create question without  options
       const createdQuestion = await ctx.prisma.question.create({
         data: {
-          quizId: args.quizId,
+          Quiz: {
+            connect: {
+              eventId_roundId: { eventId: Number(args.quizId), roundId: 1 },
+            },
+          },
           question: args.question,
           points: args.points,
           negativePoints: args.negativePoint,
@@ -44,14 +47,11 @@ builder.mutationField("createQuestion", (t) =>
   })
 );
 
-
-
 /// update ///
-
 
 builder.mutationField("updateQuestion", (t) =>
   t.prismaField({
-   //Allowing the organizer to edit the required field in the Question Model
+    //Allowing the organizer to edit the required field in the Question Model
     type: "Question",
     args: {
       id: t.arg({ type: "String", required: true }),
@@ -94,17 +94,16 @@ builder.mutationField("updateQuestion", (t) =>
 
       return updatedQuestion;
     },
-  }),
+  })
 );
-
 
 /// Delete ///
 
 builder.mutationField("deleteQuestion", (t) =>
   t.prismaField({
-    type: "Question", 
+    type: "Question",
     args: {
-      id: t.arg({ type: "String", required: true }), 
+      id: t.arg({ type: "String", required: true }),
     },
     errors: {
       types: [Error],
@@ -130,5 +129,5 @@ builder.mutationField("deleteQuestion", (t) =>
 
       return deletedQuestion;
     },
-  }),
+  })
 );

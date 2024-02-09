@@ -49,11 +49,15 @@ async function main() {
   console.log(eventData.reduce((acc, event) => acc + event.participation, 0));
   console.log(eventData);
 }
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// main()
+//   .catch((e) => {
+//     console.error(e);
+//     process.exit(1);
+//   })
+//   .finally(async () => {
+//     await prisma.$disconnect();
+//   });
+
+(async () => {
+  await prisma.question.deleteMany();
+})();

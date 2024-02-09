@@ -12,8 +12,7 @@ builder.mutationField("createOption", (t) =>
       types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
-      
-        const user = await ctx.user;
+      const user = await ctx.user;
       if (!user) {
         throw new Error("Not authenticated");
       }
@@ -24,17 +23,16 @@ builder.mutationField("createOption", (t) =>
 
       // Create the option for the question
 
-        const createdOption = await ctx.prisma.options.create({
-          data: {
-            questionId: args.questionId,
-            value: args.value,
-            isAnswer: args.isAnswer,
-          },
-          ...query,
-        });
+      const createdOption = await ctx.prisma.options.create({
+        data: {
+          questionId: args.questionId,
+          value: args.value,
+          isAnswer: args.isAnswer,
+        },
+        ...query,
+      });
 
-        return createdOption;
-      
+      return createdOption;
     },
   })
 );
@@ -46,14 +44,14 @@ builder.mutationField("updateOption", (t) =>
     type: "Options",
     args: {
       id: t.arg({ type: "String", required: true }),
-      value: t.arg({ type: "String", required: false }), 
-      isAnswer: t.arg({ type: "Boolean", required: false }), 
+      value: t.arg({ type: "String", required: false }),
+      isAnswer: t.arg({ type: "Boolean", required: false }),
     },
     errors: {
       types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
-        const user = await ctx.user;
+      const user = await ctx.user;
 
       if (!user) {
         throw new Error("Not authenticated");
@@ -68,9 +66,9 @@ builder.mutationField("updateOption", (t) =>
           id: args.id,
         },
         data: {
-          value:args.value,
-          isAnswer: args.isAnswer
-        }
+          value: args.value ? args.value : undefined,
+          isAnswer: args.isAnswer ? args.isAnswer : undefined,
+        },
         ...query,
       });
 
@@ -84,7 +82,7 @@ builder.mutationField("deleteOption", (t) =>
   t.prismaField({
     type: "Options",
     args: {
-      id: t.arg({ type: "String", required: true }), 
+      id: t.arg({ type: "String", required: true }),
     },
     errors: {
       types: [Error],
@@ -101,7 +99,7 @@ builder.mutationField("deleteOption", (t) =>
       }
 
       // Deleting the question based on the specific question id
-      const deleteOption= await ctx.prisma.options.delete({
+      const deleteOption = await ctx.prisma.options.delete({
         where: {
           id: args.id,
         },
@@ -110,7 +108,5 @@ builder.mutationField("deleteOption", (t) =>
 
       return deleteOption;
     },
-  }),
+  })
 );
-
-
