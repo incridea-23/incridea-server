@@ -733,6 +733,14 @@ builder.mutationField("organizerAddTeamMember", (t) =>
           throw new Error("Already registered");
         }
       }
+      const leader = await ctx.prisma.user.findUnique({
+        where: {
+          id: Number(team.leaderId),
+        },
+      });
+      if (user.collegeId !== leader?.collegeId) {
+        throw new Error("Team members should belong to same college");
+      }
       return await ctx.prisma.teamMember.create({
         data: {
           userId: participant.id,
