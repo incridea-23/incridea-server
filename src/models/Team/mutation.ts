@@ -733,14 +733,27 @@ builder.mutationField("organizerAddTeamMember", (t) =>
           throw new Error("Already registered");
         }
       }
+      if(teamMembers.length !== 0) {
       const leader = await ctx.prisma.user.findUnique({
         where: {
           id: Number(team.leaderId),
         },
+        include:{
+          College:true
+        }
       });
-      if (user.collegeId !== leader?.collegeId) {
+      if (participant.College?.id !== leader?.College?.id) {
         throw new Error("Team members should belong to same college");
       }
+      await ctx.prisma.team.update({
+        where:{
+          id: Number(args.teamId)
+        },
+        data:{
+        leaderId: participant.id  
+        }})
+    }
+    
       return await ctx.prisma.teamMember.create({
         data: {
           userId: participant.id,
