@@ -1,6 +1,6 @@
 import { builder } from "../../builder";
 import "./query"
-import './mutations'
+import "./mutations"
 
 
 

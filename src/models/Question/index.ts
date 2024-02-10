@@ -1,5 +1,10 @@
 import { builder } from "../../builder";
+
+import "./mutation"
+
+
 import "./query"
+
 
 builder.prismaObject("Question",{
     fields:(t)=>({

@@ -1,5 +1,4 @@
 import { builder } from "../../builder";
-
 builder.mutationField("createQuiz", (t) =>
   t.prismaField({
     type: "Quiz",
