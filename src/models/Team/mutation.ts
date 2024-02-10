@@ -136,6 +136,21 @@ builder.mutationField("joinTeam", (t) =>
         where: {
           id: Number(args.teamId),
         },
+        include: {
+          TeamMembers: {
+            select: {
+              User: {
+                select: {
+                  College: {
+                    select: {
+                      id: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
       if (!team) {
         throw new Error("Team not found");
@@ -190,6 +205,14 @@ builder.mutationField("joinTeam", (t) =>
       });
       if (teamMembers.length >= event.maxTeamSize) {
         throw new Error("Team is full");
+      }
+      const leader = await ctx.prisma.user.findUnique({
+        where: {
+          id: Number(team.leaderId),
+        },
+      });
+      if (user.collegeId !== leader?.collegeId) {
+        throw new Error("Team members should belong to same college");
       }
       return await ctx.prisma.teamMember.create({
         data: {
@@ -710,6 +733,30 @@ builder.mutationField("organizerAddTeamMember", (t) =>
           throw new Error("Already registered");
         }
       }
+      if (teamMembers.length !== 0) {
+        const leader = await ctx.prisma.user.findUnique({
+          where: {
+            id: Number(team.leaderId),
+          },
+          include: {
+            College: true,
+          },
+        });
+        console.log(leader?.College?.id, participant.College?.id);
+        if (participant.College?.id !== leader?.College?.id) {
+          throw new Error("Team members should belong to same college");
+        }
+      }
+      if (teamMembers.length === 0)
+        await ctx.prisma.team.update({
+          where: {
+            id: Number(args.teamId),
+          },
+          data: {
+            leaderId: participant.id,
+          },
+        });
+
       return await ctx.prisma.teamMember.create({
         data: {
           userId: participant.id,
