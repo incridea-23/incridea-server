@@ -1,4 +1,5 @@
 import { builder } from "../../builder";
+import './mutations'
 
 builder.prismaObject("FITBSubmission",{
     fields:(t)=>({
