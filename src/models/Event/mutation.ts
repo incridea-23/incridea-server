@@ -9,6 +9,7 @@ enum EventCategoryEnum {
   TECHNICAL = "TECHNICAL",
   NON_TECHNICAL = "NON_TECHNICAL",
   CORE = "CORE",
+  SPECIAL = "SPECIAL",
 }
 const EventType = builder.enumType(EventTypeEnum, {
   name: "EventType",
