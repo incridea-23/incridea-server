@@ -271,9 +271,9 @@ builder.queryField("getQuizByEvent", (t) =>
       if (!user) {
         throw new Error("Not authenticated");
       }
-      if (user.role !== "ORGANIZER") {
-        throw new Error("Not authorized");
-      }
+      // if (user.role !== "ORGANIZER") {
+      //   throw new Error("Not authorized");
+      // }
       const event = await ctx.prisma.event.findUnique({
         where: {
           id: Number(args.eventId),

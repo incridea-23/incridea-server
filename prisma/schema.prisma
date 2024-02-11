@@ -354,16 +354,14 @@ model Options {
 }
 
 model MCQSubmission {
-    id         String   @id @default(cuid())
-    teamId     Int
-    Team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-    optionId   String
-    Options    Options  @relation(fields: [optionId], references: [id], onDelete: Cascade)
-    questionId String
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
+    id        String   @id @default(cuid())
+    teamId    Int
+    Team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    optionId  String
+    Options   Options  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-    @@unique([teamId, optionId, questionId])
     @@index([teamId])
     @@index([optionId])
 }

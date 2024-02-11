@@ -59,5 +59,5 @@ async function main() {
 //   });
 
 (async () => {
-  await prisma.question.deleteMany();
+  await prisma.mCQSubmission.deleteMany();
 })();
