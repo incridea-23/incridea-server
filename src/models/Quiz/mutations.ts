@@ -9,6 +9,7 @@ builder.mutationField("createQuiz", (t) =>
       eventId: t.arg({ type: "String", required: true }),
       startTime: t.arg({ type: "String", required: true }),
       endTime: t.arg({ type: "String", required: true }),
+      password: t.arg({ type: "String", required: true }),
     },
     errors: {
       types: [Error],

@@ -7,6 +7,10 @@ builder.prismaObject("Quiz", {
     id: t.exposeID("id"),
     roundNo: t.exposeInt("roundId"),
     eventId: t.exposeID("eventId"),
+    password: t.expose("password", {
+      type: "String",
+      nullable: true,
+    }),
     name: t.expose("name", {
       type: "String",
       nullable: false,
