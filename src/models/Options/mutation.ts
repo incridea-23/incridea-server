@@ -53,7 +53,7 @@ builder.mutationField("updateOption", (t) =>
       types: [Error],
     },
     resolve: async (query, root, args, ctx, info) => {
-        const user = await ctx.user;
+      const user = await ctx.user;
 
       if (!user) {
         throw new Error("Not authenticated");
@@ -63,14 +63,23 @@ builder.mutationField("updateOption", (t) =>
         throw new Error("Not allowed to perform this action");
       }
 
+      // Define update data object
+      const dataToUpdate: { value?: string; isAnswer?: boolean } = {};
+
+      // Update data object with non-null, non-undefined values
+      if (args.value !== undefined && args.value !== null) {
+        dataToUpdate.value = args.value;
+      }
+      if (args.isAnswer !== undefined && args.isAnswer !== null) {
+        dataToUpdate.isAnswer = args.isAnswer;
+      }
+
+      // Update the option
       const updatedOption = await ctx.prisma.options.update({
         where: {
           id: args.id,
         },
-        data: {
-          value:args.value,
-          isAnswer: args.isAnswer
-        }
+        data: dataToUpdate,
         ...query,
       });
 
@@ -78,6 +87,7 @@ builder.mutationField("updateOption", (t) =>
     },
   })
 );
+
 
 //Delete the Option
 builder.mutationField("deleteOption", (t) =>
