@@ -1,6 +1,7 @@
 import { builder } from "../../builder";
-import "./query"
-import "./mutations"
+import "./query";
+import "./mutations";
+import "./subscription";
 
 builder.prismaObject("Quiz", {
   fields: (t) => ({

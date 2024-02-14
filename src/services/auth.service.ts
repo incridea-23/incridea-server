@@ -1,7 +1,20 @@
+import { pubsub } from "../pubsub";
 import { hashToken } from "../utils/auth/hashToken";
 import { prisma } from "../utils/db/prisma";
 import * as cron from "node-cron";
 // used when we create a refresh token.
+interface TimerData {
+  remainingTime: number;
+  started: boolean;
+  eventId: number;
+}
+export let QuizTimer = new Map<string, TimerData>();
+QuizTimer.set("clsc0uscc0000ildomyo9x69a", {
+  started: true,
+  remainingTime: 30,
+  eventId: 3,
+});
+
 export function addRefreshTokenToWhitelist({
   jti,
   refreshToken,
@@ -35,9 +48,9 @@ export function revokeRefreshToken(id: string) {
     where: {
       id,
     },
-    data:{
+    data: {
       revoked: true,
-    }
+    },
   });
 }
 
@@ -45,7 +58,7 @@ export function revokeTokens(userId: number) {
   return prisma.refreshToken.deleteMany({
     where: {
       userId,
-    }
+    },
   });
 }
 
@@ -74,9 +87,9 @@ export function revokeVerificationToken(id: string) {
     where: {
       id,
     },
-    data:{
+    data: {
       revoked: true,
-    }
+    },
   });
 }
 
@@ -106,24 +119,40 @@ export function revokePasswordResetToken(id: string) {
     where: {
       id,
     },
-    data:{
+    data: {
       revoked: true,
-    }
+    },
   });
 }
 
-
 //node-cron setup to delete revoked token every 12 hours
 cron.schedule("0 */12 * * *", async () => {
-    await prisma.refreshToken.deleteMany({
-      where: {
-        revoked: true,
-      },
-    });
-    await prisma.verificationToken.deleteMany({
-      where: {
-        revoked: true,
-      },
-    });
-    console.log("cron job running: deleted revoked tokens");
+  await prisma.refreshToken.deleteMany({
+    where: {
+      revoked: true,
+    },
+  });
+  await prisma.verificationToken.deleteMany({
+    where: {
+      revoked: true,
+    },
+  });
+  console.log("cron job running: deleted revoked tokens");
+});
+
+cron.schedule("*/1 * * * *", async () => {
+  QuizTimer.forEach((value, key) => {
+    if (value.started && value.remainingTime >= 0) {
+      QuizTimer.set(key, {
+        remainingTime: value.remainingTime - 1,
+        started: true,
+        eventId: 3,
+      });
+    } else if (value.remainingTime < 0) {
+      QuizTimer.delete(key);
+    }
+    pubsub.publish(`QUIZ_TIME_UPDATE/${value.eventId}`, value);
+  });
+  console.log(QuizTimer);
+  console.log("updating quiz time left");
 });

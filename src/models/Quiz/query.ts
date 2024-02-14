@@ -285,9 +285,9 @@ builder.queryField("getQuizByEvent", (t) =>
       if (!event) {
         throw new Error("Event not found");
       }
-      if (!event.Organizers.find((o) => o.userId === user.id)) {
-        throw new Error("Not authorized");
-      }
+      // if (!event.Organizers.find((o) => o.userId === user.id)) {
+      //   throw new Error("Not authorized");
+      // }
 
       const data = await ctx.prisma.quiz.findMany({
         where: {

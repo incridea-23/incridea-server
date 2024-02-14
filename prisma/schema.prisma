@@ -373,6 +373,7 @@ model Quiz {
     Round         Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
     name          String
     description   String?
+    duration      Int?
     startTime     DateTime
     endTime       DateTime
     allowAttempts Boolean    @default(false)
@@ -569,5 +570,5 @@ enum DayType {
 enum QuestionType {
     MCQ
     FITB
-    LA
+    MMCQ
 }

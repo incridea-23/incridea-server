@@ -2,7 +2,7 @@ import { builder } from "../../builder";
 
 builder.queryField("getMCQSubmissionByTeamId", (t) =>
   t.prismaField({
-    type: "MCQSubmission",
+    type: ["MCQSubmission"],
     args: {
       questionId: t.arg({
         type: "String",
@@ -46,7 +46,7 @@ builder.queryField("getMCQSubmissionByTeamId", (t) =>
       //   throw new Error("No permission");
       // }
 
-      const mcqSubmission = await ctx.prisma.mCQSubmission.findFirst({
+      const mcqSubmission = await ctx.prisma.mCQSubmission.findMany({
         where: {
           teamId: Number(args.teamId),
           Options: {
@@ -54,8 +54,9 @@ builder.queryField("getMCQSubmissionByTeamId", (t) =>
           },
         },
       });
+      console.log("test", mcqSubmission);
 
-      if (!mcqSubmission) {
+      if (mcqSubmission.length === 0) {
         throw new Error("No submissions by user");
       }
 

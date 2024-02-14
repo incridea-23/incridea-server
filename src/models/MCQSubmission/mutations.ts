@@ -2,7 +2,7 @@ import { builder } from "../../builder";
 
 builder.mutationField("createMCQSubmission", (t) =>
   t.prismaField({
-    type: "MCQSubmission",
+    type: ["MCQSubmission"],
     args: {
       teamId: t.arg({
         type: "String",
@@ -13,7 +13,7 @@ builder.mutationField("createMCQSubmission", (t) =>
         required: true,
       }),
       optionId: t.arg({
-        type: "String",
+        type: ["String"],
         required: true,
       }),
     },
@@ -49,42 +49,57 @@ builder.mutationField("createMCQSubmission", (t) =>
         console.log("Team not found");
         throw new Error("No permission");
       }
-      const mcqSubmissionExists = await ctx.prisma.mCQSubmission.findFirst({
+
+      // Delete all previous submissions and create new ones if MMCQ
+      await ctx.prisma.mCQSubmission.deleteMany({
         where: {
           teamId: Number(args.teamId),
-          optionId: args.optionId,
+          Options: {
+            questionId: args.questionId,
+          },
         },
       });
+      return await Promise.all(
+        args.optionId.map(async (option) => {
+          const mcqSubmissionExists = await ctx.prisma.mCQSubmission.findFirst({
+            where: {
+              teamId: Number(args.teamId),
+              optionId: option,
+            },
+          });
 
-      if (mcqSubmissionExists) {
-        return await ctx.prisma.mCQSubmission.update({
-          where: {
-            id: mcqSubmissionExists.id,
-          },
-          data: {
-            Options: {
-              connect: {
-                id: args.optionId,
+          if (mcqSubmissionExists) {
+            const removed = mcqSubmissionExists;
+            return await ctx.prisma.mCQSubmission.update({
+              where: {
+                id: mcqSubmissionExists.id,
+              },
+              data: {
+                Options: {
+                  connect: {
+                    id: option,
+                  },
+                },
+              },
+            });
+          }
+
+          return await ctx.prisma.mCQSubmission.create({
+            data: {
+              Options: {
+                connect: {
+                  id: option,
+                },
+              },
+              Team: {
+                connect: {
+                  id: Number(args.teamId),
+                },
               },
             },
-          },
-        });
-      }
-
-      return await ctx.prisma.mCQSubmission.create({
-        data: {
-          Options: {
-            connect: {
-              id: args.optionId,
-            },
-          },
-          Team: {
-            connect: {
-              id: Number(args.teamId),
-            },
-          },
-        },
-      });
+          });
+        })
+      );
     },
   })
 );
