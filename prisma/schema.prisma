@@ -368,8 +368,8 @@ model MCQSubmission {
 
 model Quiz {
     id            String     @id @default(cuid())
-    roundId       Int        @unique
-    eventId       Int
+    roundId       Int        
+    eventId       Int        
     Round         Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
     name          String
     description   String?

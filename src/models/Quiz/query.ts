@@ -304,6 +304,61 @@ builder.queryField("getQuizByEvent", (t) =>
   })
 );
 
+
+builder.queryField("getQuizByRoundEvent", (t) =>
+  t.prismaField({
+    type: ["Quiz"],
+    args: {
+      eventId: t.arg({
+        type: "Int",
+        required: true,
+      }),
+      roundNo: t.arg({
+        type: "Int",
+        required: true,
+      }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+      // if (user.role !== "ORGANIZER") {
+      //   throw new Error("Not authorized");
+      // }
+      const event = await ctx.prisma.event.findUnique({
+        where: {
+          id: Number(args.eventId),
+        },
+        include: {
+          Organizers: true,
+        },
+      });
+      if (!event) {
+        throw new Error("Event not found");
+      }
+      // if (!event.Organizers.find((o) => o.userId === user.id)) {
+      //   throw new Error("Not authorized");
+      // }
+
+      const data = await ctx.prisma.quiz.findMany({
+        where: {
+          eventId: Number(args.eventId),
+        },
+        ...query,
+      });
+      console.log(data);
+      if (!data) {
+        throw new Error("There is no quiz in this event");
+      }
+      return data;
+    },
+  })
+);
+
 builder.queryField("getSubmissionByUser", (t) =>
   t.field({
     type: [AllSubmissionsType],
