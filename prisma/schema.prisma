@@ -114,6 +114,7 @@ model Event {
     category         EventCategory      @default(TECHNICAL)
     Winner           Winners[]
     CertificateIssue CertificateIssue[]
+    Level            Level[]
 
     @@index([branchId])
 }
@@ -432,7 +433,11 @@ model Level {
     id        Int      @id @default(autoincrement())
     point     Int      @default(0)
     createdAt DateTime @default(now())
+    EventId   Int?
+    Event     Event?   @relation(fields: [EventId], references: [id], onDelete: Cascade)
     XP        XP[]
+
+    @@index([EventId])
 }
 
 model XP {
