@@ -1,5 +1,6 @@
 import { builder } from "../../builder";
 import { QuizTimer } from "../../services/auth.service";
+import { QuizTimerClass, QuizTimerObj } from "./subscription";
 builder.mutationField("createQuiz", (t) =>
   t.prismaField({
     type: "Quiz",
@@ -92,10 +93,9 @@ builder.mutationField("updateQuizStatus", (t) =>
       return data;
     },
   })
-
 );
 
- //delete the quiz
+//delete the quiz
 builder.mutationField("deleteQuiz", (t) =>
   t.prismaField({
     type: "Quiz",
@@ -115,7 +115,6 @@ builder.mutationField("deleteQuiz", (t) =>
       if (user.role !== "ORGANIZER")
         throw new Error("Not allowed to perform this action");
 
-     
       const data = await ctx.prisma.quiz.delete({
         where: {
           id: args.quizId,
@@ -127,7 +126,7 @@ builder.mutationField("deleteQuiz", (t) =>
   })
 );
 
-builder.mutationField("updateQuizDuration",(t)=>
+builder.mutationField("updateQuizDuration", (t) =>
   t.prismaField({
     type: "Quiz",
     args: {
@@ -160,4 +159,78 @@ builder.mutationField("updateQuizDuration",(t)=>
       return data;
     },
   })
-)
+);
+
+builder.mutationField("addTime", (t) =>
+  t.field({
+    type: QuizTimerObj,
+    args: {
+      eventId: t.arg({ type: "Int", required: true }),
+      incrementValue: t.arg({ type: "Int", required: true }),
+    },
+    nullable: true,
+    errors: {
+      types: [Error],
+    },
+    resolve: async (root, args, ctx, info) => {
+      const quiz = await ctx.prisma.quiz.findFirst({
+        where: {
+          eventId: args.eventId,
+        },
+      });
+      const data = quiz ? QuizTimer.get(quiz?.id) : null;
+      if (data && quiz) {
+        if (QuizTimer.get(quiz.id))
+          QuizTimer.set(quiz?.id, {
+            eventId: args.eventId,
+            started: true,
+            remainingTime: data.remainingTime + args.incrementValue,
+          });
+        else {
+          console.log("Quiz not ongoing");
+          return new QuizTimerClass(false, -1, "Error");
+        }
+        return new QuizTimerClass(data?.started, data?.remainingTime, "Ok");
+      }
+      return new QuizTimerClass(false, -1, "Error");
+    },
+  })
+);
+
+builder.mutationField("pauseOrResumeQuiz", (t) =>
+  t.field({
+    type: QuizTimerObj,
+    args: {
+      eventId: t.arg({ type: "Int", required: true }),
+      action: t.arg({ type: "String", required: true }),
+    },
+    nullable: true,
+    errors: {
+      types: [Error],
+    },
+    resolve: async (root, args, ctx, info) => {
+      const quiz = await ctx.prisma.quiz.findFirst({
+        where: {
+          eventId: args.eventId,
+        },
+      });
+      const data = quiz ? QuizTimer.get(quiz?.id) : null;
+      if (data && quiz) {
+        if (args.action === "pause")
+          QuizTimer.set(quiz?.id, {
+            eventId: data.eventId,
+            started: false,
+            remainingTime: data.remainingTime,
+          });
+        else if (args.action === "resume")
+          QuizTimer.set(quiz?.id, {
+            eventId: data.eventId,
+            started: true,
+            remainingTime: data.remainingTime,
+          });
+        return new QuizTimerClass(data?.started, data?.remainingTime, "Ok");
+      }
+      return new QuizTimerClass(false, -1, "Error");
+    },
+  })
+);
