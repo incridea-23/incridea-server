@@ -77,7 +77,6 @@ builder.mutationField("updateQuizStatus", (t) =>
         },
         data: {
           allowAttempts: args.allowAttempts,
-          password: args.password,
         },
         ...query,
       });
@@ -93,4 +92,72 @@ builder.mutationField("updateQuizStatus", (t) =>
       return data;
     },
   })
+
 );
+
+ //delete the quiz
+builder.mutationField("deleteQuiz", (t) =>
+  t.prismaField({
+    type: "Quiz",
+    args: {
+      quizId: t.arg({ type: "String", required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      //Get user from context
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+
+      if (user.role !== "ORGANIZER")
+        throw new Error("Not allowed to perform this action");
+
+     
+      const data = await ctx.prisma.quiz.delete({
+        where: {
+          id: args.quizId,
+        },
+        ...query,
+      });
+      return data;
+    },
+  })
+);
+
+builder.mutationField("updateQuizDuration",(t)=>
+  t.prismaField({
+    type: "Quiz",
+    args: {
+      quizId: t.arg({ type: "String", required: true }),
+      duration: t.arg({ type: "Int", required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      //Get user from context
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+
+      if (user.role !== "ORGANIZER")
+        throw new Error("Not allowed to perform this action");
+
+      //create accommodation request
+      const data = await ctx.prisma.quiz.update({
+        where: {
+          id: args.quizId,
+        },
+        data: {
+          duration: args.duration,
+        },
+        ...query,
+      });
+      return data;
+    },
+  })
+)

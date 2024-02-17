@@ -11,7 +11,10 @@ builder.prismaObject("Quiz", {
     password:t.exposeString("password", { nullable: true }),
     name: t.expose("name", {
       type: "String",
-      nullable: false,
+      nullable: true,
+    }),
+    allowAttempts: t.exposeBoolean("allowAttempts", {
+      nullable: true,
     }),
     description: t.expose("description", {
       type: "String",
