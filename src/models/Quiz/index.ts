@@ -8,6 +8,7 @@ builder.prismaObject("Quiz", {
     id: t.exposeID("id"),
     roundNo: t.exposeInt("roundId"),
     eventId: t.exposeID("eventId"),
+    password:t.exposeString("password", { nullable: true }),
     name: t.expose("name", {
       type: "String",
       nullable: false,
@@ -16,6 +17,7 @@ builder.prismaObject("Quiz", {
       type: "String",
       nullable: true,
     }),
+    duration:t.exposeInt("duration",{nullable:true}),
     startTime: t.expose("startTime", {
       type: "DateTime",
       nullable: false,
