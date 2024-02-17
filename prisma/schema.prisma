@@ -289,6 +289,7 @@ model Winners {
     eventId Int
     Event   Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
     type    WinnerType
+    Level   Level[]
 
     @@unique([eventId, type])
     @@index([teamId])
@@ -436,8 +437,11 @@ model Level {
     EventId   Int?
     Event     Event?   @relation(fields: [EventId], references: [id], onDelete: Cascade)
     XP        XP[]
+    winnerId  Int?
+    Winner    Winners? @relation(fields: [winnerId], references: [id], onDelete: SetNull)
 
     @@index([EventId])
+    @@index([winnerId])
 }
 
 model XP {
