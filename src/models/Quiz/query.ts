@@ -254,12 +254,24 @@ builder.queryField("getAllQuizSubmissions", (t) =>
   })
 );
 
-builder.queryField("getQuizByEvent", (t) =>
+builder.queryField("getQuizDataByEventRound", (t) =>
   t.prismaField({
-    type: ["Quiz"],
+    type: "Quiz",
     args: {
       eventId: t.arg({
         type: "Int",
+        required: true,
+      }),
+      roundId: t.arg({
+        type: "Int",
+        required: true,
+      }),
+      type: t.arg({
+        type: "String",
+        required: true,
+      }),
+      password: t.arg({
+        type: "String",
         required: true,
       }),
     },
@@ -285,25 +297,32 @@ builder.queryField("getQuizByEvent", (t) =>
       if (!event) {
         throw new Error("Event not found");
       }
-      // if (!event.Organizers.find((o) => o.userId === user.id)) {
-      //   throw new Error("Not authorized");
-      // }
+      if (!event.Organizers.find((o) => o.userId === user.id)) {
+        throw new Error("Not authorized");
+      }
 
-      const data = await ctx.prisma.quiz.findMany({
+      const data = await ctx.prisma.quiz.findUnique({
         where: {
-          eventId: Number(args.eventId),
+          eventId_roundId: {
+            eventId: Number(args.eventId),
+            roundId: Number(args.roundId),
+          },
         },
         ...query,
       });
       console.log(data);
+
       if (!data) {
         throw new Error("There is no quiz in this event");
       }
+      if (args.type === "participant" && data.password !== args.password) {
+        throw new Error("Invalid password");
+      }
+
       return data;
     },
   })
 );
-
 
 builder.queryField("getQuizByRoundEvent", (t) =>
   t.prismaField({
@@ -344,9 +363,12 @@ builder.queryField("getQuizByRoundEvent", (t) =>
       //   throw new Error("Not authorized");
       // }
 
-      const data = await ctx.prisma.quiz.findMany({
+      const data = await ctx.prisma.quiz.findUnique({
         where: {
-          eventId: Number(args.eventId),
+          eventId_roundId: {
+            eventId: Number(args.eventId),
+            roundId: Number(args.roundNo),
+          },
         },
         ...query,
       });
@@ -354,7 +376,7 @@ builder.queryField("getQuizByRoundEvent", (t) =>
       if (!data) {
         throw new Error("There is no quiz in this event");
       }
-      return data;
+      return [data];
     },
   })
 );
