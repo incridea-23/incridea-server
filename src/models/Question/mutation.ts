@@ -30,7 +30,7 @@ builder.mutationField("createQuestion", (t) =>
         data: {
           Quiz: {
             connect: {
-              eventId_roundId: { eventId: Number(args.quizId), roundId: 1 },
+              id: args.quizId,
             },
           },
           question: args.question,

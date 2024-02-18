@@ -1,4 +1,5 @@
 import { builder } from "../../builder";
+import { secrets } from "../../utils/auth/jwt";
 
 builder.mutationField("createMCQSubmission", (t) =>
   t.prismaField({
@@ -66,11 +67,19 @@ builder.mutationField("createMCQSubmission", (t) =>
               teamId: Number(args.teamId),
               optionId: option,
             },
+            include: {
+              Options: true,
+            },
           });
 
           if (mcqSubmissionExists) {
-            const removed = mcqSubmissionExists;
-            return await ctx.prisma.mCQSubmission.update({
+            // If previous and current submission are same
+            if (mcqSubmissionExists.optionId === option) {
+              return mcqSubmissionExists;
+            }
+
+            // If previous and current submission are different
+            const newSubmission = await ctx.prisma.mCQSubmission.update({
               where: {
                 id: mcqSubmissionExists.id,
               },
@@ -81,7 +90,83 @@ builder.mutationField("createMCQSubmission", (t) =>
                   },
                 },
               },
+              include: {
+                Options: {
+                  include: {
+                    Question: true,
+                  },
+                },
+              },
             });
+
+            // If the previous submission was incorrect and the new submission is correct
+            if (
+              !mcqSubmissionExists.Options.isAnswer &&
+              newSubmission.Options.isAnswer
+            ) {
+              const currentScore = await ctx.prisma.scores.findUnique({
+                where: {
+                  teamId_criteriaId_judgeId: {
+                    teamId: Number(args.teamId),
+                    criteriaId: Number(secrets.QUIZ_CRITERIA_ID),
+                    judgeId: Number(secrets.QUIZ_JUDGE_ID),
+                  },
+                },
+              });
+
+              const newScore =
+                Number(currentScore?.score) +
+                newSubmission.Options.Question.points;
+
+              await ctx.prisma.scores.update({
+                where: {
+                  teamId_criteriaId_judgeId: {
+                    teamId: Number(args.teamId),
+                    criteriaId: Number(secrets.QUIZ_CRITERIA_ID),
+                    judgeId: Number(secrets.QUIZ_JUDGE_ID),
+                  },
+                },
+                data: {
+                  score: newScore.toString(),
+                },
+              });
+              return newSubmission;
+            }
+
+            // If the previous submission was correct and the new submission is incorrect
+            else if (
+              mcqSubmissionExists.Options.isAnswer &&
+              !newSubmission.Options.isAnswer
+            ) {
+              const currentScore = await ctx.prisma.scores.findUnique({
+                where: {
+                  teamId_criteriaId_judgeId: {
+                    teamId: Number(args.teamId),
+                    criteriaId: Number(secrets.QUIZ_CRITERIA_ID),
+                    judgeId: Number(secrets.QUIZ_JUDGE_ID),
+                  },
+                },
+              });
+
+              const newScore =
+                Number(currentScore?.score) -
+                newSubmission.Options.Question.points +
+                newSubmission.Options.Question.negativePoints;
+
+              await ctx.prisma.scores.update({
+                where: {
+                  teamId_criteriaId_judgeId: {
+                    teamId: Number(args.teamId),
+                    criteriaId: Number(secrets.QUIZ_CRITERIA_ID),
+                    judgeId: Number(secrets.QUIZ_JUDGE_ID),
+                  },
+                },
+                data: {
+                  score: newScore.toString(),
+                },
+              });
+              return newSubmission;
+            }
           }
 
           return await ctx.prisma.mCQSubmission.create({

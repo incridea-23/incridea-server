@@ -1,4 +1,5 @@
 import { builder } from "../../builder";
+import { pubsub } from "../../pubsub";
 import { QuizTimer } from "../../services/auth.service";
 import { QuizTimerClass, QuizTimerObj } from "./subscription";
 builder.mutationField("createQuiz", (t) =>
@@ -78,6 +79,7 @@ builder.mutationField("updateQuizStatus", (t) =>
         },
         data: {
           allowAttempts: args.allowAttempts,
+          password: args.password ? args.password : undefined,
         },
         ...query,
       });
@@ -228,6 +230,10 @@ builder.mutationField("pauseOrResumeQuiz", (t) =>
             started: true,
             remainingTime: data.remainingTime,
           });
+        pubsub.publish(
+          `QUIZ_TIME_UPDATE/${args.eventId}`,
+          QuizTimer.get(quiz?.id)
+        );
         return new QuizTimerClass(data?.started, data?.remainingTime, "Ok");
       }
       return new QuizTimerClass(false, -1, "Error");

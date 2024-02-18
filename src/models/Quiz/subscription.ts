@@ -17,7 +17,7 @@ export class QuizTimerClass {
 export const QuizTimerObj = builder.objectType(QuizTimerClass, {
   name: "QuizTimerObj",
   fields: (t) => ({
-    quizId: t.exposeBoolean("started"),
+    started: t.exposeBoolean("started"),
     remainingTime: t.exposeInt("remainingTime"),
   }),
 });
@@ -34,6 +34,7 @@ builder.queryField("getTimer", (t) =>
     },
     smartSubscription: true,
     subscribe: (subscriptions, parent, args, info) => {
+      console.log("Subscribed to getTimer");
       subscriptions.register(`QUIZ_TIME_UPDATE/${args.eventId}`);
     },
     resolve: async (root, args, ctx, info) => {

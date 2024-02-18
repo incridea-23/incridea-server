@@ -152,13 +152,11 @@ model Round {
     date         DateTime?
     Criteria     Criteria[]
     Comments     Comments[]
-    quizId       String?
     Quiz         Quiz?
     selectStatus Boolean    @default(false)
 
     @@id([eventId, roundNo])
     @@unique([eventId, roundNo])
-    @@index([quizId])
 }
 
 model PaymentOrder {
@@ -368,8 +366,8 @@ model MCQSubmission {
 
 model Quiz {
     id            String     @id @default(cuid())
-    roundId       Int        
-    eventId       Int        
+    roundId       Int
+    eventId       Int
     Round         Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
     name          String
     description   String?
