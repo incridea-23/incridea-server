@@ -45,10 +45,26 @@ builder.mutationField("createFTIBSubmission", (t) =>
         },
       });
 
-      if (!team) {
-        throw new Error("No permission");
-      }
+      // if (!team) {
+      //   throw new Error("No permission");
+      // }
 
+      const userInTeam = await ctx.prisma.user.findUnique({
+        where: {
+          id: user?.id,
+        },
+        include: {
+          TeamMembers: {
+            where: {
+              teamId: Number(args.teamId),
+            },
+          },
+        },
+      });
+
+      if (!userInTeam) {
+        throw new Error("User not in team");
+      }
       const options = await ctx.prisma.options.findFirst({
         where: {
           questionId: args.questionId,

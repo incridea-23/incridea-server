@@ -46,11 +46,27 @@ builder.mutationField("createMCQSubmission", (t) =>
         },
       });
 
-      if (!team) {
-        console.log("Team not found");
-        throw new Error("No permission");
-      }
+      // if (!team) {
+      //   console.log("Team not found");
+      //   throw new Error("No permission");
+      // }
 
+      const userInTeam = await ctx.prisma.user.findUnique({
+        where: {
+          id: user?.id,
+        },
+        include: {
+          TeamMembers: {
+            where: {
+              teamId: Number(args.teamId),
+            },
+          },
+        },
+      });
+
+      if (!userInTeam) {
+        throw new Error("User not in team");
+      }
       // Delete all previous submissions and create new ones if MMCQ
       await ctx.prisma.mCQSubmission.deleteMany({
         where: {

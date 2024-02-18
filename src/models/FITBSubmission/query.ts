@@ -41,10 +41,26 @@ builder.queryField("getFITBSubmissionByTeamId", (t) =>
         },
       });
 
-      if (!team) {
-        throw new Error("No permission");
-      }
+      // if (!team) {
+      //   throw new Error("No permission");
+      // }
 
+      const userInTeam = await ctx.prisma.user.findUnique({
+        where: {
+          id: user?.id,
+        },
+        include: {
+          TeamMembers: {
+            where: {
+              teamId: Number(args.teamId),
+            },
+          },
+        },
+      });
+
+      if (!userInTeam) {
+        throw new Error("User not in team");
+      }
       const fitbSubmission = await ctx.prisma.fITBSubmission.findFirst({
         where: {
           teamId: Number(args.teamId),

@@ -9,6 +9,13 @@ class Option {
     this.answer = answer;
   }
 }
+class CheckPassword {
+  status: boolean;
+
+  constructor(status: boolean) {
+    this.status = status;
+  }
+}
 
 builder.objectType(Option, {
   name: "Option",
@@ -297,7 +304,10 @@ builder.queryField("getQuizDataByEventRound", (t) =>
       if (!event) {
         throw new Error("Event not found");
       }
-      if (!event.Organizers.find((o) => o.userId === user.id)) {
+      if (
+        args.type === "organizer" &&
+        !event.Organizers.find((o) => o.userId === user.id)
+      ) {
         throw new Error("Not authorized");
       }
 
@@ -407,6 +417,25 @@ builder.queryField("getSubmissionByUser", (t) =>
         laAns: string | null;
         longAnsIsRight: string | null;
       }[] = [];
+
+      const user = await ctx.user;
+      const userInTeam = await ctx.prisma.user.findUnique({
+        where: {
+          id: user?.id,
+        },
+        include: {
+          TeamMembers: {
+            where: {
+              teamId: Number(args.teamId),
+            },
+          },
+        },
+      });
+
+      if (!userInTeam) {
+        throw new Error("User not in team");
+      }
+
       const mcqSubmissions = await ctx.prisma.mCQSubmission.findMany({
         where: {
           teamId: Number(args.teamId),
@@ -539,6 +568,50 @@ builder.queryField("getSubmissionByUser", (t) =>
       quizSubmissions.sort((a, b) => Number(a.userId) - Number(b.userId));
 
       return quizSubmissions;
+    },
+  })
+);
+
+const CheckPasswordObj = builder.objectType(CheckPassword, {
+  name: "CheckPassword",
+  fields: (t) => ({
+    status: t.exposeBoolean("status"),
+  }),
+});
+
+builder.queryField("checkPassword", (t) =>
+  t.field({
+    type: CheckPasswordObj,
+    args: {
+      eventId: t.arg({
+        type: "Int",
+        required: true,
+      }),
+      roundId: t.arg({
+        type: "Int",
+        required: true,
+      }),
+      password: t.arg({
+        type: "String",
+        required: true,
+      }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (root, args, ctx, info) => {
+      const quiz = await ctx.prisma.quiz.findUnique({
+        where: {
+          eventId_roundId: {
+            eventId: Number(args.eventId),
+            roundId: Number(args.roundId),
+          },
+        },
+      });
+      if (!quiz) {
+        throw new Error("Quiz not found");
+      }
+      return new CheckPassword(quiz.password === args.password);
     },
   })
 );

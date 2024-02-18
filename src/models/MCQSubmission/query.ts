@@ -46,6 +46,23 @@ builder.queryField("getMCQSubmissionByTeamId", (t) =>
       //   throw new Error("No permission");
       // }
 
+      const userInTeam = await ctx.prisma.user.findUnique({
+        where: {
+          id: user?.id,
+        },
+        include: {
+          TeamMembers: {
+            where: {
+              teamId: Number(args.teamId),
+            },
+          },
+        },
+      });
+
+      if (!userInTeam) {
+        throw new Error("User not in team");
+      }
+
       const mcqSubmission = await ctx.prisma.mCQSubmission.findMany({
         where: {
           teamId: Number(args.teamId),
