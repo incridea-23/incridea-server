@@ -88,8 +88,14 @@ builder.mutationField("updateQuestion", (t) =>
         where: {
           id: args.id,
         },
-        data: updateData,
-        ...query,
+        data: {
+          question: args.question ? args.question : undefined,
+          points: args.points ? args.points : undefined,
+          negativePoints: args.negativePoint ? args.negativePoint : undefined,
+          questionType: args.questionType as QuestionType,
+          image: args.image,
+          ...query,
+        },
       });
 
       return updatedQuestion;
