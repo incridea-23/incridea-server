@@ -359,7 +359,7 @@ builder.queryField("getQuizDataByEventRound", (t) =>
         throw new Error("Invalid password");
       }
 
-      if (!data.allowAttempts) throw new Error("Attempts not allowed");
+      if (!data.allowAttempts && args.type=='participant') throw new Error("Attempts not allowed");
 
       return data;
     },
