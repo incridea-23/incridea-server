@@ -281,6 +281,10 @@ builder.queryField("getQuizDataByEventRound", (t) =>
         type: "String",
         required: true,
       }),
+      teamId: t.arg({
+        type: "Int",
+        required: true,
+      }),
     },
     errors: {
       types: [Error],
@@ -311,6 +315,32 @@ builder.queryField("getQuizDataByEventRound", (t) =>
         throw new Error("Not authorized");
       }
 
+      if (args.type === "participant") {
+        const team = await ctx.prisma.team.findFirst({
+          where: {
+            Event: {
+              Rounds: {
+                some: {
+                  Quiz: {
+                    eventId: Number(args.eventId),
+                    roundId: Number(args.roundId),
+                  },
+                },
+              },
+            },
+            TeamMembers: {
+              some: {
+                userId: user.id,
+              },
+            },
+          },
+        });
+
+        if (team?.id !== args.teamId) {
+          throw new Error("Not authorized");
+        }
+      }
+
       const data = await ctx.prisma.quiz.findUnique({
         where: {
           eventId_roundId: {
@@ -320,14 +350,16 @@ builder.queryField("getQuizDataByEventRound", (t) =>
         },
         ...query,
       });
-      console.log(data);
 
       if (!data) {
         throw new Error("There is no quiz in this event");
       }
+
       if (args.type === "participant" && data.password !== args.password) {
         throw new Error("Invalid password");
       }
+
+      if (!data.allowAttempts) throw new Error("Attempts not allowed");
 
       return data;
     },

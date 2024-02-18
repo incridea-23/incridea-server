@@ -24,7 +24,6 @@ builder.queryField("getMCQSubmissionByTeamId", (t) =>
 
       const team = await ctx.prisma.team.findFirst({
         where: {
-          id: Number(args.teamId),
           Event: {
             Rounds: {
               some: {
@@ -38,8 +37,17 @@ builder.queryField("getMCQSubmissionByTeamId", (t) =>
               },
             },
           },
+          TeamMembers: {
+            some: {
+              userId: user.id,
+            },
+          },
         },
       });
+
+      if (team?.id !== Number(args.teamId)) {
+        throw new Error("Not authorized");
+      }
 
       // if (!team) {
       //   console.log("Team not found");

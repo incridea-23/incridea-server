@@ -28,7 +28,6 @@ builder.mutationField("createFTIBSubmission", (t) =>
 
       const team = await ctx.prisma.team.findFirst({
         where: {
-          id: Number(args.teamId),
           Event: {
             Rounds: {
               some: {
@@ -42,8 +41,17 @@ builder.mutationField("createFTIBSubmission", (t) =>
               },
             },
           },
+          TeamMembers: {
+            some: {
+              userId: user.id,
+            },
+          },
         },
       });
+
+      if (team?.id !== Number(args.teamId)) {
+        throw new Error("Not authorized");
+      }
 
       // if (!team) {
       //   throw new Error("No permission");
