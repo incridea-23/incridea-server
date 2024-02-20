@@ -135,76 +135,99 @@ builder.mutationField("createMCQSubmission", (t) =>
       }
 
       if (allSubmissionsForQuestion.length > 0) {
-		  console.log("runnign")
-        const toDelete = allSubmissionsForQuestion.map((submission) => {
+        let toDelete:string[] = []
+		allSubmissionsForQuestion.map((submission) => {
           if (
             args.optionId.findIndex(
               (option) => option === submission.optionId,
             ) === -1
           ) {
-            return submission.optionId;
+            toDelete.push(submission.optionId);
           }
         });
 
-        const toCreate = args.optionId.map((option) => {
+        let toCreate:string[] = [];
+			args.optionId.map((option) => {
           if (
             allSubmissionsForQuestion.findIndex(
               (submission) => option === submission.optionId,
             ) === -1
           ) {
-            return option;
+            toCreate.push(option);
           }
         });
 
+        console.log({ toCreate, toDelete });
         let newScore = currentScore?.score;
         // Create or update submissions
-        await Promise.all(
+        toCreate.length > 0 && await Promise.all(
           toCreate.map(async (optionId) => {
             const optionDetails = await ctx.prisma.options.findUnique({
               where: {
                 id: optionId,
               },
               include: {
-                Question: true,
+                Question: {
+                  include: {
+                    options: true,
+                  },
+                },
               },
             });
 
             if (optionDetails) {
+              const updated =
+                optionDetails?.Question.questionType === "MMCQ"
+                  ? optionDetails.Question.points /
+                    optionDetails.Question.options.filter((o) => o.isAnswer)
+                      .length
+                  : optionDetails?.Question.points;
+              const updatedNegative =
+                optionDetails?.Question.questionType === "MMCQ"
+                  ? optionDetails.Question.negativePoints /
+                    optionDetails.Question.options.filter((o) => !o.isAnswer)
+                      .length
+                  : optionDetails?.Question.negativePoints;
               if (optionDetails?.isAnswer) {
-                newScore = (
-                  Number(newScore) + optionDetails.Question.points
-                ).toString();
+                newScore = (Number(newScore) + updated).toString();
               } else {
-                newScore = (
-                  Number(newScore) -
-                  optionDetails?.Question?.negativePoints
-                ).toString();
+                newScore = (Number(newScore) - updatedNegative).toString();
               }
             }
           }),
         );
-        await Promise.all(
+        toDelete.length > 0 && await Promise.all(
           toDelete.map(async (optionId) => {
             const optionDetails = await ctx.prisma.options.findUnique({
               where: {
                 id: optionId,
               },
               include: {
-                Question: true,
+                Question: {
+                  include: {
+                    options: true,
+                  },
+                },
               },
             });
 
             if (optionDetails) {
+              const updated =
+                optionDetails?.Question.questionType === "MMCQ"
+                  ? optionDetails.Question.points /
+                    optionDetails.Question.options.filter((o) => o.isAnswer)
+                      .length
+                  : optionDetails?.Question.points;
+              const updatedNegative =
+                optionDetails?.Question.questionType === "MMCQ"
+                  ? optionDetails.Question.negativePoints /
+                    optionDetails.Question.options.filter((o) => !o.isAnswer)
+                      .length
+                  : optionDetails?.Question.negativePoints;
               if (optionDetails?.isAnswer) {
-                newScore = (
-                  Number(newScore) -
-                  optionDetails.Question.points 
-                ).toString();
+                newScore = (Number(newScore) - updated).toString();
               } else {
-                newScore = (
-                  Number(newScore) +
-                  optionDetails?.Question?.negativePoints
-                ).toString();
+                newScore = (Number(newScore) + updatedNegative).toString();
               }
             }
           }),
@@ -225,11 +248,7 @@ builder.mutationField("createMCQSubmission", (t) =>
           where: {
             Options: {
               Question: {
-                options: {
-                  some: {
-                    id: args.optionId[0],
-                  },
-                },
+                id: args.questionId,
               },
             },
           },
@@ -253,7 +272,7 @@ builder.mutationField("createMCQSubmission", (t) =>
           }),
         );
       } else {
-        let newScore = currentScore?.score
+        let newScore = currentScore?.score;
         const result = await Promise.all(
           args.optionId.map(async (option) => {
             const optionDetails = await ctx.prisma.options.findUnique({
@@ -261,20 +280,31 @@ builder.mutationField("createMCQSubmission", (t) =>
                 id: option,
               },
               include: {
-                Question: true,
+                Question: {
+                  include: {
+                    options: true,
+                  },
+                },
               },
             });
 
             if (optionDetails) {
+              const updated =
+                optionDetails?.Question.questionType === "MMCQ"
+                  ? optionDetails.Question.points /
+                    optionDetails.Question.options.filter((o) => o.isAnswer)
+                      .length
+                  : optionDetails?.Question.points;
+              const updatedNegative =
+                optionDetails?.Question.questionType === "MMCQ"
+                  ? optionDetails.Question.negativePoints /
+                    optionDetails.Question.options.filter((o) => !o.isAnswer)
+                      .length
+                  : optionDetails?.Question.negativePoints;
               if (optionDetails?.isAnswer) {
-                newScore = (
-                  Number(newScore) + optionDetails.Question.points
-                ).toString();
+                newScore = (Number(newScore) + updated).toString();
               } else {
-                newScore = (
-                  Number(newScore) -
-                  optionDetails?.Question?.negativePoints
-                ).toString();
+                newScore = (Number(newScore) - updatedNegative).toString();
               }
             }
             return await ctx.prisma.mCQSubmission.create({
