@@ -1,6 +1,9 @@
+import { randomInt } from "crypto";
+import bcrypt from "bcryptjs";
 import { builder } from "../../builder";
 import { pubsub } from "../../pubsub";
 import { QuizTimer } from "../../services/auth.service";
+import { secrets } from "../../utils/auth/jwt";
 import { QuizTimerClass, QuizTimerObj } from "./subscription";
 builder.mutationField("createQuiz", (t) =>
   t.prismaField({
@@ -46,9 +49,42 @@ builder.mutationField("createQuiz", (t) =>
         },
         ...query,
       });
+      await ctx.prisma.judge.create({
+        data: {
+          Round: {
+            connect: {
+              eventId_roundNo: {
+                eventId: data.eventId,
+                roundNo: data.roundId,
+              },
+            },
+          },
+          User: {
+            create: {
+              name: "quiz_" + data.id,
+              email: "quiz_" + data.id + "@incridea.in",
+              password: bcrypt.hashSync("quiz" + randomInt(100), 12),
+            },
+          },
+        },
+      });
+      await ctx.prisma.criteria.create({
+        data: {
+          Round: {
+            connect: {
+              eventId_roundNo: {
+                roundNo: Number(args.roundId),
+                eventId: Number(args.eventId),
+              },
+            },
+          },
+          name: "QuizScore",
+          type: "NUMBER",
+        },
+      });
       return data;
     },
-  })
+  }),
 );
 
 builder.mutationField("updateQuizStatus", (t) =>
@@ -94,7 +130,7 @@ builder.mutationField("updateQuizStatus", (t) =>
       }
       return data;
     },
-  })
+  }),
 );
 
 //delete the quiz
@@ -125,7 +161,7 @@ builder.mutationField("deleteQuiz", (t) =>
       });
       return data;
     },
-  })
+  }),
 );
 
 builder.mutationField("updateQuizDuration", (t) =>
@@ -160,7 +196,7 @@ builder.mutationField("updateQuizDuration", (t) =>
       });
       return data;
     },
-  })
+  }),
 );
 
 builder.mutationField("addTime", (t) =>
@@ -196,7 +232,7 @@ builder.mutationField("addTime", (t) =>
       }
       return new QuizTimerClass(false, -1, "Error");
     },
-  })
+  }),
 );
 
 builder.mutationField("pauseOrResumeQuiz", (t) =>
@@ -232,11 +268,11 @@ builder.mutationField("pauseOrResumeQuiz", (t) =>
           });
         pubsub.publish(
           `QUIZ_TIME_UPDATE/${args.eventId}`,
-          QuizTimer.get(quiz?.id)
+          QuizTimer.get(quiz?.id),
         );
         return new QuizTimerClass(data?.started, data?.remainingTime, "Ok");
       }
       return new QuizTimerClass(false, -1, "Error");
     },
-  })
+  }),
 );

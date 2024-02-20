@@ -18,9 +18,9 @@ builder.queryField("getMCQSubmissionByTeamId", (t) =>
     },
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;
-      if (user?.role !== "PARTICIPANT") {
-        throw new Error("No permission");
-      }
+      //if (user?.role !== "PARTICIPANT") {
+      //  throw new Error("No permission");
+      //}
 
       const team = await ctx.prisma.team.findFirst({
         where: {
