@@ -138,6 +138,7 @@ model Team {
     mcqSubmissions    MCQSubmission[]
     fitbSubmissions   FITBSubmission[]
     laSubmissions     LASubmission[]
+    quizSubmissions   QuizSubmissions?
 
     @@unique([name, eventId])
     @@index([eventId, roundNo])
@@ -365,18 +366,19 @@ model MCQSubmission {
 }
 
 model Quiz {
-    id            String     @id @default(cuid())
-    roundId       Int
-    eventId       Int
-    Round         Round      @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
-    name          String
-    description   String?
-    duration      Int?
-    startTime     DateTime
-    endTime       DateTime
-    allowAttempts Boolean    @default(false)
-    password      String?
-    Questions     Question[]
+    id              String           @id @default(cuid())
+    roundId         Int
+    eventId         Int
+    Round           Round            @relation(fields: [eventId, roundId], references: [eventId, roundNo], onDelete: Cascade)
+    name            String
+    description     String?
+    duration        Int?
+    startTime       DateTime
+    endTime         DateTime
+    allowAttempts   Boolean          @default(false)
+    password        String?
+    Questions       Question[]
+    quizSubmissions QuizSubmissions?
 
     @@unique([eventId, roundId])
     @@index([roundId])
@@ -475,6 +477,17 @@ model UserInHotel {
 
     @@index([userId])
     @@index([hotelId])
+}
+
+model QuizSubmissions {
+    id         Int     @id @default(autoincrement())
+    teamId     Int     @unique
+    Team       Team    @relation(fields: [teamId], references: [id])
+    quizId     String  @unique
+    Quiz       Quiz    @relation(fields: [quizId], references: [id])
+    iscomplete Boolean @default(true)
+
+    @@unique([teamId,quizId])
 }
 
 enum Gender {
