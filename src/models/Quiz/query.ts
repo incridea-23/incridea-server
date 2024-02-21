@@ -316,6 +316,17 @@ builder.queryField("getQuizDataByEventRound", (t) =>
       }
 
       if (args.type === "participant") {
+        const quizSubmissions = await ctx.prisma.quizSubmissions.findUnique({
+          where: {
+            teamId_quizId: {
+              teamId: args.teamId,
+              quizId: args.eventId + "_" + args.roundId,
+            },
+          },
+        });
+        if (quizSubmissions) {
+          throw new Error("Already submitted");
+        }
         const team = await ctx.prisma.team.findFirst({
           where: {
             Event: {

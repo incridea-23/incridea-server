@@ -59,10 +59,3 @@ builder.objectType(Error, {
     }),
   }),
 });
-
-// builder.objectType(Error, {
-//   name: "Error",
-//   fields: (t) => ({
-//     message: t.exposeString("message"),
-//   })
-// })
