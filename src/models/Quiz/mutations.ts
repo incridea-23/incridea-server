@@ -164,6 +164,44 @@ builder.mutationField("deleteQuiz", (t) =>
   }),
 );
 
+builder.mutationField("submitQuiz", (t) =>
+  t.prismaField({
+    type: "QuizSubmissions",
+    args: {
+      quizId: t.arg({ type: "String", required: true }),
+      teamId: t.arg({ type: "String", required: true }),
+    },
+    errors: {
+      types: [Error],
+    },
+    resolve: async (query, root, args, ctx, info) => {
+      const user = await ctx.user;
+      if (!user) {
+        throw new Error("Not authenticated");
+      }
+
+      if (user.role !== "ORGANIZER")
+        throw new Error("Not allowed to perform this action");
+
+      const data = await ctx.prisma.quizSubmissions.create({
+          data: {
+            Quiz: {
+              connect: { 
+                id: args.quizId 
+              }
+            },
+            Team: {
+              connect: {
+                id: Number(args.teamId) 
+              }
+            },
+          }, 
+        });
+      return data;
+    },
+  }),
+);
+
 builder.mutationField("updateQuizDuration", (t) =>
   t.prismaField({
     type: "Quiz",

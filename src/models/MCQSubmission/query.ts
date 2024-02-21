@@ -18,6 +18,7 @@ builder.queryField("getMCQSubmissionByTeamId", (t) =>
     },
     resolve: async (query, root, args, ctx, info) => {
       const user = await ctx.user;
+      if(!user) throw new Error("Not logged in");
       //if (user?.role !== "PARTICIPANT") {
       //  throw new Error("No permission");
       //}
