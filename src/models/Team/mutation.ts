@@ -72,6 +72,7 @@ builder.mutationField("createTeam", (t) =>
         const totalTeams = await ctx.prisma.team.count({
           where: {
             eventId: Number(args.eventId),
+			confirmed:true
           },
         });
         if (event.maxTeams && totalTeams >= event.maxTeams) {
