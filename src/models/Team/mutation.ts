@@ -322,6 +322,17 @@ builder.mutationField("confirmTeam", (t) =>
       if (event.eventType === "INDIVIDUAL") {
         throw new Error("Event is individual");
       }
+      if (event.maxTeams && event.maxTeams > 0) {
+        const totalTeams = await ctx.prisma.team.count({
+          where: {
+            eventId: event.id,
+			confirmed:true
+          },
+        });
+        if (event.maxTeams && totalTeams >= event.maxTeams) {
+          throw new Error("Event is full");
+        }
+      }
       const isPaidEvent = event.fees > 0;
       if (isPaidEvent) {
         throw new Error("Event is paid");
