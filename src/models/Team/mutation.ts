@@ -848,6 +848,7 @@ builder.mutationField("organizerMarkAttendance", (t) =>
               Organizers: true,
             },
           },
+          TeamMembers: true,
         },
       });
       if (!team) {
@@ -858,6 +859,74 @@ builder.mutationField("organizerMarkAttendance", (t) =>
         0
       ) {
         throw new Error("Not authorized");
+      }
+      // get all userIds from team
+      const teamMembers = team.TeamMembers.map((member) => member.userId);
+      if(args.attended){
+        // give xp for attedning event
+        const level = await ctx.prisma.level.findFirst({
+          where: {
+            EventId: team.eventId,
+          },
+        });
+        if (!level) {
+          const points = team.Event.category === "CORE" ? 50 : 30;
+          // create level if not exists
+          const newLevel = await ctx.prisma.level.create({
+            data: {
+              point: points,
+              Event: {
+                connect: {
+                  id: team.eventId,
+                },
+              },
+            },
+          });
+          // give xp to all team members
+          const xp = await ctx.prisma.xP.createMany({
+            data: teamMembers.map((userId) => ({
+              userId,
+              levelId: newLevel.id,
+            })),
+          });
+        }else{
+          //check if level points is given to all team members
+          const users = await ctx.prisma.xP.findMany({
+            where: {
+              userId: {
+                in: teamMembers,
+              },
+              levelId: level.id,
+            }
+          });
+          if(users.length == 0){
+            // give xp to all team members
+            const xp = await ctx.prisma.xP.createMany({
+              data: teamMembers.map((userId) => ({
+                userId,
+                levelId: level.id,
+              })),
+            });
+          }
+        }
+      }else{
+        // remove xp for attedning event
+        const level = await ctx.prisma.level.findFirst({
+          where: {
+            EventId: team.eventId,
+          },
+        });
+        if (level) {
+          // remove xp to all team members
+          const xp = await ctx.prisma.xP.deleteMany({
+            where: {
+              userId: {
+                in: teamMembers,
+              },
+              levelId: level.id,
+            },
+          });
+        }
       }
       return await ctx.prisma.team.update({
         where: {
@@ -937,6 +1006,68 @@ builder.mutationField("organizerMarkAttendanceSolo", (t) =>
       });
       if (updated.count === 0) {
         throw new Error("No team found");
+      }
+      if(args.attended){
+        // give xp for attedning event
+        const level = await ctx.prisma.level.findFirst({
+          where: {
+            EventId: Number(args.eventId),
+          },
+        });
+        if (!level) {
+          const points = event.category === "CORE" ? 50 : 30;
+          // create level if not exists
+          const newLevel = await ctx.prisma.level.create({
+            data: {
+              point: points,
+              Event: {
+                connect: {
+                  id: Number(args.eventId),
+                },
+              },
+            },
+          });
+          // give xp to all team members
+          const xp = await ctx.prisma.xP.create({
+            data: {
+              userId: Number(args.userId),
+              levelId: newLevel.id,
+            }
+          });
+        }else{
+          //check if level points is given to all team members
+          const users = await ctx.prisma.xP.findFirst({
+            where: {
+              userId: Number(args.userId),
+              levelId: level.id,
+            }
+          });
+          if(!users){
+            // give xp to all team members
+            const xp = await ctx.prisma.xP.create({
+              data: {
+                userId: Number(args.userId),
+                levelId: level.id,
+              }
+            });
+          }
+        }
+      }else{
+        // remove xp for attedning event
+        const level = await ctx.prisma.level.findFirst({
+          where: {
+            EventId: Number(args.eventId),
+          },
+        });
+        if (level) {
+          // remove xp to all team members
+          const xp = await ctx.prisma.xP.deleteMany({
+            where: {
+              userId: Number(args.userId),
+              levelId: level.id,
+            },
+          });
+        }
       }
       return updated.count;
     },
