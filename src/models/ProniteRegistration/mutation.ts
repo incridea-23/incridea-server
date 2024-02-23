@@ -38,12 +38,13 @@ builder.mutationField("registerPronite", (t) =>
           },
         },
       });
+
       if (pronite) {
-        throw new Error(
-          `User already registered for pronite at ${new Date(
-            pronite.createdAt
-          ).toLocaleTimeString()}`
-        );
+        // 2024-02-23T04:35:38.014Z convert to 10:03:59 AM
+        const date = new Date(pronite.createdAt).toLocaleString(undefined, {
+          timeZone: "Asia/Kolkata",
+        });
+        throw new Error(`User already registered for pronite at ${date}`);
       }
       const createdPronite = await ctx.prisma.proniteRegistration.create({
         data: {
