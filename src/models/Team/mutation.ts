@@ -756,7 +756,11 @@ builder.mutationField("organizerAddTeamMember", (t) =>
           },
         });
         console.log(leader?.College?.id, participant.College?.id);
-        if (participant.College?.id !== leader?.College?.id) {
+        let ignore = [65, 66, 67, 68, 69];
+        if (
+          participant.College?.id !== leader?.College?.id &&
+          !ignore.includes(team.Event.id)
+        ) {
           throw new Error("Team members should belong to same college");
         }
       }
