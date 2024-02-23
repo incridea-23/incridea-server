@@ -18,14 +18,11 @@ builder.mutationField("registerPronite", (t) =>
       if (!user) {
         throw new Error("No such user exists");
       }
+      if (user.id != 5181)
+        throw new Error("You are not allowed to register for pronite");
+
       const authUser = await ctx.user;
       if (!authUser) throw new Error("Not authenticated");
-      if (authUser.id != 4790) {
-        throw new Error("Not authorized to register for pronite");
-      }
-      if (user.collegeId === 1) {
-        throw new Error("User is not from a college");
-      }
       if (!["PARTICIPANT", "ORGANIZER", "BRANCH_REP"].includes(user.role)) {
         throw new Error("User did not register for the fest");
       }
@@ -33,17 +30,21 @@ builder.mutationField("registerPronite", (t) =>
         where: {
           userId_proniteDay: {
             userId: Number(args.userId),
-            proniteDay: "Day2",
+            proniteDay: "Day1",
           },
         },
       });
       if (pronite) {
-        throw new Error("User already registered for pronite");
+        throw new Error(
+          `User already registered for pronite at ${new Date(
+            pronite.createdAt
+          ).toLocaleTimeString()}`
+        );
       }
       const createdPronite = await ctx.prisma.proniteRegistration.create({
         data: {
           userId: Number(args.userId),
-          proniteDay: "Day2",
+          proniteDay: "Day1",
         },
         ...query,
       });

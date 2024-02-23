@@ -10,6 +10,9 @@
     "build": "npm i --legacy-peer-deps && npx prisma generate && tsc && cp -r src/templates dist/src/templates ",
     "type": "tsc --noEmit"
   },
+  "prisma": {
+    "seed": "ts-node-dev prisma\\seed.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/incridea-23/incridea-server.git"
