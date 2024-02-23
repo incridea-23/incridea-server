@@ -72,7 +72,7 @@ builder.mutationField("createTeam", (t) =>
         const totalTeams = await ctx.prisma.team.count({
           where: {
             eventId: Number(args.eventId),
-			confirmed:true
+            confirmed: true,
           },
         });
         if (event.maxTeams && totalTeams >= event.maxTeams) {
@@ -212,7 +212,8 @@ builder.mutationField("joinTeam", (t) =>
           id: Number(team.leaderId),
         },
       });
-      if (user.collegeId !== leader?.collegeId) {
+      let ignore = [65, 66, 67, 68, 69];
+      if (user.collegeId !== leader?.collegeId && !ignore.includes(event.id)) {
         throw new Error("Team members should belong to same college");
       }
       return await ctx.prisma.teamMember.create({
@@ -326,7 +327,7 @@ builder.mutationField("confirmTeam", (t) =>
         const totalTeams = await ctx.prisma.team.count({
           where: {
             eventId: event.id,
-			confirmed:true
+            confirmed: true,
           },
         });
         if (event.maxTeams && totalTeams >= event.maxTeams) {
@@ -874,7 +875,7 @@ builder.mutationField("organizerMarkAttendance", (t) =>
       }
       // get all userIds from team
       const teamMembers = team.TeamMembers.map((member) => member.userId);
-      if(args.attended){
+      if (args.attended) {
         // give xp for attedning event
         const level = await ctx.prisma.level.findFirst({
           where: {
@@ -901,7 +902,7 @@ builder.mutationField("organizerMarkAttendance", (t) =>
               levelId: newLevel.id,
             })),
           });
-        }else{
+        } else {
           //check if level points is given to all team members
           const users = await ctx.prisma.xP.findMany({
             where: {
@@ -909,9 +910,9 @@ builder.mutationField("organizerMarkAttendance", (t) =>
                 in: teamMembers,
               },
               levelId: level.id,
-            }
+            },
           });
-          if(users.length == 0){
+          if (users.length == 0) {
             // give xp to all team members
             const xp = await ctx.prisma.xP.createMany({
               data: teamMembers.map((userId) => ({
@@ -921,7 +922,7 @@ builder.mutationField("organizerMarkAttendance", (t) =>
             });
           }
         }
-      }else{
+      } else {
         // remove xp for attedning event
         const level = await ctx.prisma.level.findFirst({
           where: {
@@ -1019,7 +1020,7 @@ builder.mutationField("organizerMarkAttendanceSolo", (t) =>
       if (updated.count === 0) {
         throw new Error("No team found");
       }
-      if(args.attended){
+      if (args.attended) {
         // give xp for attedning event
         const level = await ctx.prisma.level.findFirst({
           where: {
@@ -1044,27 +1045,27 @@ builder.mutationField("organizerMarkAttendanceSolo", (t) =>
             data: {
               userId: Number(args.userId),
               levelId: newLevel.id,
-            }
+            },
           });
-        }else{
+        } else {
           //check if level points is given to all team members
           const users = await ctx.prisma.xP.findFirst({
             where: {
               userId: Number(args.userId),
               levelId: level.id,
-            }
+            },
           });
-          if(!users){
+          if (!users) {
             // give xp to all team members
             const xp = await ctx.prisma.xP.create({
               data: {
                 userId: Number(args.userId),
                 levelId: level.id,
-              }
+              },
             });
           }
         }
-      }else{
+      } else {
         // remove xp for attedning event
         const level = await ctx.prisma.level.findFirst({
           where: {
