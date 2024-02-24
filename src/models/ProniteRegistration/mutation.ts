@@ -27,7 +27,7 @@ builder.mutationField("registerPronite", (t) =>
       if (!authUser) throw new Error("Not authenticated");
       if (authUser.id != 5181)
         throw new Error("permission denied, wrong account");
-      if (!["PARTICIPANT", "ORGANIZER", "BRANCH_REP"].includes(user.role)) {
+      if (!["PARTICIPANT", "ORGANIZER", "BRANCH_REP","ADMIN","JURY"].includes(user.role)) {
         throw new Error("User did not register for the fest");
       }
       const pronite = await ctx.prisma.proniteRegistration.findUnique({
