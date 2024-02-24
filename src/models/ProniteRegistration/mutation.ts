@@ -34,7 +34,7 @@ builder.mutationField("registerPronite", (t) =>
         where: {
           userId_proniteDay: {
             userId: Number(args.userId),
-            proniteDay: "Day1",
+            proniteDay: "Day2",
           },
         },
       });
@@ -49,7 +49,7 @@ builder.mutationField("registerPronite", (t) =>
       const createdPronite = await ctx.prisma.proniteRegistration.create({
         data: {
           userId: Number(args.userId),
-          proniteDay: "Day1",
+          proniteDay: "Day2",
         },
         ...query,
       });
