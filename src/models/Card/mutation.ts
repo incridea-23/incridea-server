@@ -6,6 +6,7 @@ const DayTypeEnum = builder.enumType(DayType, {
   name: "DayType",
 });
 
+//for easter eggs scanned using QR codes around the college for Publcity Committee
 builder.mutationField("createCard",(t) => 
     t.prismaField({
         type:"Card",

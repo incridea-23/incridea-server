@@ -1,6 +1,7 @@
 import { builder } from "../../builder";
 
 //add level
+//Levels for custom easter eggs need to be added manually in the database
 builder.mutationField("addLevel", (t) =>
     t.prismaField({
         type: "Level",

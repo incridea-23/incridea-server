@@ -134,7 +134,7 @@ import * as nodemailer from "nodemailer";
 import htmlToImage from "node-html-to-image";
 import { getCount, getUser, updateCount } from "./utils/email";
 
-let certificateSentSuccess = 1094;
+let certificateSentSuccess = 0;
 let certificateSentError = 0;
 
 async function generateCertificate(
@@ -143,7 +143,7 @@ async function generateCertificate(
   eventName: string
 ): Promise<string> {
   try {
-    const templatePath = path.join(__dirname, "certificate.html");
+    const templatePath = path.join(__dirname, "templates/certificate.html");
     let html = fs.readFileSync(templatePath, "utf-8");
 
     // Replace {{name}} with participant name
@@ -165,7 +165,7 @@ async function generateCertificate(
     let imagePaths: string[] = [];
     if (Array.isArray(imageBuffer)) {
       imagePaths = imageBuffer.map((buffer, index) => {
-        const imagePath = path.join(__dirname, `certificate_${index}.png`);
+        const imagePath = path.join(__dirname, `src/certificate_${index}.png`);
         fs.writeFileSync(imagePath, buffer);
         return imagePath;
       });
@@ -193,8 +193,8 @@ async function sendEmailWithAttachment(
     const count = await getCount();
     const user = getUser(count);
     const transporter = nodemailer.createTransport({
-      port: 465,
       host: "smtp.gmail.com",
+      port: 465,
       auth: {
         user: user,
         pass: process.env.EMAIL_SERVER_PASSWORD as string,
@@ -203,7 +203,7 @@ async function sendEmailWithAttachment(
 
     // Compose the email
     const mailOptions = {
-      from: user,
+      from: process.env.EMAIL_FROM as string,
       to: participantEmail,
       subject: subject,
       text: text,
@@ -224,19 +224,19 @@ const sendCertificate = async (
   eventName: string,
   participantEmail: string
 ) => {
-  const emailText = `Hi  ${participantName},
+  const emailText = `Hi ${participantName},
 
-Thank you for your active participation in Incridea, held during April 26th-29th at NMAMIT, Nitte.
+Thank you for your active participation in Incridea, held from February 22nd-24th at NMAMIT, Nitte.
 
-Your captivating performance aligned perfectly with our theme: 'Tides Of Change', creating ripples of inspiration and change. Let's continue to ignite the creativity and imagination through Incridea in the years to come.❤️
+Your captivating performance perfectly aligned with our theme, 'Dice of Destiny', casting a spell of chance and fortune. Let's continue to embrace the unpredictable twists of creativity and imagination through Incridea in the years to come.❤️
   
-Please find your Participation Certificate attached herewith.
+Please find your participation certificate attached.
   
 Warm Regards,
 Team Incridea
   
-Check out the Official Aftermovie '23 down below 👇
-https://youtu.be/8Veb3u0xEoE
+Check out the Official Aftermovie '24 down below 👇
+https://youtu.be/YoWeuaSMytk
   
 Find more updates and highlights of the fest on our Instagram page @incridea 👇
 https://instagram.com/incridea
@@ -277,6 +277,7 @@ async function sendParticipationCertificate() {
       },
     },
   });
+
   //  participationData  ={
   //   name: "Participant Name";
   //   eventName: "Event Name";
@@ -300,7 +301,7 @@ async function sendParticipationCertificate() {
     (acc, val) => acc.concat(val),
     []
   );
-  for (let i = 1094; i < flattenedParticipationData.length; i++) {
+  for (let i = 0; i < flattenedParticipationData.length; i++) {
     const participant = flattenedParticipationData[i];
     try {
       await sendCertificate(
@@ -332,10 +333,10 @@ async function sendParticipationCertificate() {
     );
   }
 
-  // await fs.writeFileSync(
-  //   "./participation.json",
-  //   JSON.stringify(flattenedParticipationData)
-  // );
+  await fs.writeFileSync(
+    "./participation.json",
+    JSON.stringify(flattenedParticipationData)
+  );
 }
 
 sendParticipationCertificate()

@@ -25,11 +25,14 @@ builder.mutationField("registerPronite", (t) =>
       const authUser = await ctx.user;
 
       if (!authUser) throw new Error("Not authenticated");
+      // ID of pronite email used for scanning
       if (authUser.id != 5181)
         throw new Error("permission denied, wrong account");
       if (!["PARTICIPANT", "ORGANIZER", "BRANCH_REP","ADMIN","JURY"].includes(user.role)) {
         throw new Error("User did not register for the fest");
       }
+
+      //set day here for pronite
       const pronite = await ctx.prisma.proniteRegistration.findUnique({
         where: {
           userId_proniteDay: {
@@ -46,6 +49,7 @@ builder.mutationField("registerPronite", (t) =>
         });
         throw new Error(`User already registered for pronite at ${date}`);
       }
+      //set day here for pronite
       const createdPronite = await ctx.prisma.proniteRegistration.create({
         data: {
           userId: Number(args.userId),

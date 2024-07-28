@@ -65,7 +65,9 @@ builder.mutationField("createPaymentOrder", (t) =>
           },
         });
       }
+      //set amount for external colleges
       let amount = 350;
+      //set amount for nmamit.in email
       if (user.email.endsWith("nmamit.in")) {
         amount = 250;
       } else {
@@ -77,6 +79,7 @@ builder.mutationField("createPaymentOrder", (t) =>
             College: true,
           },
         });
+
         if (userData?.College?.type === "OTHER") {
           amount = 150;
         }
@@ -86,6 +89,7 @@ builder.mutationField("createPaymentOrder", (t) =>
 
       const currency = "INR";
       const options = {
+        //setting the commisison to 2% for the payment gateway
         amount: (Math.ceil(amount / 0.98) * 100).toString(),
         currency,
         payment_capture,

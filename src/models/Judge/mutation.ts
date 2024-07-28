@@ -31,7 +31,7 @@ builder.mutationField("createJudge", (t) =>
       }
       if (!args.email.endsWith("@incridea.in"))
         throw new Error("Email should end with @incridea.in");
-
+      //Creates a new judge credential
       const judge = await ctx.prisma.judge.create({
         data: {
           User: {
